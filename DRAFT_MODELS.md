@@ -55,14 +55,14 @@ Models
     - CorpID Integer (references CorpsAndPlayers/Id)
     - Owner Integer (-1 if bank owned)
 
-#Repopulate this table every phase change:
+Repopulate this table every phase change:
 
 - CorpsRemainingInPhase:
     - GameId Integer
     - CompanyId Integer
     - Passed Boolean
 
-#Clear offers after entering phase 7.
+Clear offers after entering phase 7.
 
 - Offers
     - GameId Integer
@@ -83,9 +83,10 @@ CreateGame()
 - CreateForeignInvestor(GameID Integer)
 
 UserID = AddUserToGame(GameId, UserName)
-# This can be done as an argument to CreateGame()
+ This can be done as an argument to CreateGame()
 
-RollingStock()
+
+#RollingStock()
 
 - If Phase == 1 then
     - ShowPhase1()
@@ -104,7 +105,7 @@ RollingStock()
 - else if Phase == 9
 - else if Phase == 10
 
-ShowPhase1()
+#ShowPhase1()
 
 - If CorpsHaveNotPassed() and  currentUserOwnsCurrentCorp()
     - ShowCorpToIssueShare
@@ -120,7 +121,7 @@ Void CorpPass(GameID Integer, CorpId Integer)
 
 - Increment CurrentCorpTurn
 
-ShowPhase2()
+#ShowPhase2()
 
 - If PlayerHasNotPassed(GameID integer, Playerid integer)
     - Foreach GetOwnedCompany()
@@ -130,7 +131,7 @@ CompanyIDs[] Integer GetOwnedCompanies(GameID Integer, UserID Integer)
 
 ConvertCompanyToCorp(GameID Integer, CompanyID Integer, UserID Integer)
 
-ShowPhase3()
+#ShowPhase3()
 
 - If AllPlayersNotPassed() and CurrentPlayersTurn()
     - If AuctionOccurring()
@@ -169,12 +170,12 @@ Void PlayerPass(GameId Integer, PlayerID Integer)
 
 - IncrementTurn()
 
-TODO:
+#TODO:
 
 - Player Bid
 - Handle end of auction without breaking Passing
 
-# Phase 5
+#Phase 5
 
 ProcessForeignInvestor()
 
@@ -188,11 +189,11 @@ Integer GetCheapestCompany(GameId Integer)
 Integer GetPriceOfCompany(GameId Integer, CompanyID Integer)
 Integer GetCashOnHandForUser(GameID Integer, UserID Integer)
 
-Phase6
+#Phase6
 ShowPhase6()
 
-# This should be done without turn order, I believe.
-# This needs to be shown for all users and for all corps.  So we would need to track both User and Corp passing before leaving this phase.
+This should be done without turn order, I believe.
+This needs to be shown for all users and for all corps.  So we would need to track both User and Corp passing before leaving this phase.
 
 - If CorpsHaveNotPassed() and UsersHaveNotPassed()
     - ShowOwnedCompanies(GameID)
