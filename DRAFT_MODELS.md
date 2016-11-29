@@ -1,4 +1,4 @@
-Models
+#Models
 
 - GameState
     - GameId Integer
@@ -76,7 +76,7 @@ Clear offers after entering phase 7.
 
 GameID = CreateGame()
 
-CreateGame()
+#CreateGame()
 
 - GameID = CreateNewGameID()
 - PopulateCompanies(GameID Integer)
