@@ -1,16 +1,20 @@
 class Share
-  attr_accessor :president, :user
+  attr_accessor :corporation
 
-  def self.president
-    new true
+  def self.president corporation
+    new corporation, true
   end
 
-  def self.normal
-    new false
+  def self.normal corporation
+    new corporation, false
   end
 
-  def initialize president, user = nil
+  def initialize corporation, president
+    @corporation = corporation
     @president = president
-    @user = user
+  end
+
+  def president?
+    @president
   end
 end

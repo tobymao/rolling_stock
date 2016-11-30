@@ -1,22 +1,25 @@
 require './spec/spec_helper'
 
-describe RollingStock do
-  subject { create :game }
+describe Game do
+  let(:user) { User.new }
+  let(:company)  { Company.new 'BME', 'Bergisch', :red, 1, 1, [] }
+  let(:share_price) { SharePrice.initial_market[6] }
+  let(:corporation)  {
+    Corporation.new 'Android', user, company, share_price, SharePrice.initial_market
+
+  }
+
   it 'should init' do
-    game = create :game
-    expect(game).not_to be_nil
+    expect(Game.new).not_to be_nil
   end
 
   describe '#issue_share' do
-    context 'with valid corportation' do
-      it 'should issue a share' do
-        subject.issue_share 'Android'
-      end
-    locations = e:locations_csv]nd
-
-    if locations
+    it 'should issue a share' do
+      expect {
+        subject.issue_share(user, corporation)
+      }.to change {
+        corporation.cash
+      }.by 9
     end
-
   end
-
 end

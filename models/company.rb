@@ -52,6 +52,8 @@ class Company
     ['TSI', 'Trans-Space Inc.', :purple, 1, []],
   ]
 
+  attr_reader :symbor, :name, :tier, :value, :income, :synergies
+
   def initialize symbol, name, tier, value, income, synergies
     @symbol    = symbol
     @name      = name
@@ -60,7 +62,6 @@ class Company
     @income    = income
     @synergies = synergies
     @name      = name
-    @price     = price
     @cash      = 0
   end
 

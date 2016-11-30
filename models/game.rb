@@ -9,7 +9,6 @@ class Game < Base
     @share_prices = SharePrice.initial_market
     @available_corportations = Corporation::CORPORATIONS.dup
     @corporations = []
-    @bank_shares = []
   end
 
   def load
@@ -20,25 +19,27 @@ class Game < Base
 
   def issue_share user, corporation
     return unless corporation.can_issue_share? user
-    corporation.issue_share @share_prices, @bank_shares
+    corporation.issue_share
   end
 
   def form_corporation user, company, share_price, name
-    return unless @user.companies.include? company
+    return unless user.companies.include? company
     return unless @available_corportations.include? name
     # check share price is legit
     @available_corportations.remove name
-    corportation = Corporation.new name, user, company, share_price
-    corportation.issue_initial_shares @bank_shares
-    @corporations << corporation
+    @corporations << Corporation.new(name, user, company, share_price)
   end
 
-  def buy_share user, company
+  def buy_share user, corporation
+    return unless corporation.can_buy_share?
+    corporation.buy_share user
   end
 
-  def sell_share user, company
+  def sell_share user, corporation
+    return unless corporation.can_sell_share? user
+    corporation.sell_share user
   end
 
-  def auction_share user, company
+  def auction_company user, company
   end
 end
