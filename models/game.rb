@@ -1,12 +1,15 @@
 require './models/base'
+require './models/share_price'
 
 class Game < Base
   many_to_one :user
 
   def initialize
     @loaded = false
-    @user_corporations = {}
-    @corportation_shares = {}
+    @share_prices = SharePrice.initial_market
+    @available_corportations = Corporation::CORPORATIONS.dup
+    @corporations = []
+    @bank_shares = []
   end
 
   def load
@@ -16,11 +19,18 @@ class Game < Base
   end
 
   def issue_share user, corporation
-    return false unless @user_corporations[user.id].include? corporation
-    @corportation_shares[corporation] -= 1
+    return unless corporation.can_issue_share? user
+    corporation.issue_share @share_prices, @bank_shares
   end
 
-  def form_corporation user, company, corporation
+  def form_corporation user, company, share_price, name
+    return unless @user.companies.include? company
+    return unless @available_corportations.include? name
+    # check share price is legit
+    @available_corportations.remove name
+    corportation = Corporation.new name, user, company, share_price
+    corportation.issue_initial_shares @bank_shares
+    @corporations << corporation
   end
 
   def buy_share user, company

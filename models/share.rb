@@ -1,19 +1,16 @@
 class Share
-  PRESIDENT = 0.2.freeze
-  NORMAL    = 0.1.freeze
-
-  attr_accessor :user
+  attr_accessor :president, :user
 
   def self.president
-    new PRESIDENT
+    new true
   end
 
   def self.normal
-    new NORMAL
+    new false
   end
 
-  def initialize value, user = nil
-    @value = value
+  def initialize president, user = nil
+    @president = president
     @user = user
   end
 end
