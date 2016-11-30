@@ -1,13 +1,13 @@
 class Company
   COMPANIES = [
     ['BME', 'Bergisch-Märkische Eisenbahn-Gesellschaft', :red, 1, 1, ['KME', 'BD', 'HE', 'PR']],
-    ['BSE', 'Berlin-Stettiner Eisenbahn-Gesellschaft', :red, 2, 1, []],
+    ['BSE', 'Berlin-Stettiner Eisenbahn-Gesellschaft', :red, 2, 1, ['BPM', 'SX', 'MS', 'PR']],
     ['KME', 'Köln-Mindener Eisenbahn-Gesellschaft', :red, 5, 2, ['BME', 'MHE', 'OL', 'HE', 'PR']],
-    ['AKE', 'Altona-Kieler Eisenbahn-Gesellschaft', :red, 6, 2, []],
-    ['BPM', 'Berlin-Potsdam-Magdeburger Eisenbahn', :red, 7, 2, []],
-    ['MHE', 'Magdeburg-Halberstädter Eisenbahngesellschaft', :red, 8, 2, []],
+    ['AKE', 'Altona-Kieler Eisenbahn-Gesellschaft', :red, 6, 2, ['BPM', 'MHE', 'OL', 'MS', 'PR']],
+    ['BPM', 'Berlin-Potsdam-Magdeburger Eisenbahn', :red, 7, 2, ['BPM', 'MHE', 'OL', 'MS', 'PR']],
+    ['MHE', 'Magdeburg-Halberstädter Eisenbahngesellschaft', :red, 8, 2, ['KME', 'AKE', 'BPM', 'OL', 'SX', 'MS', 'PR']],
 
-    ['WT', 'Königlich Württembergische Staats-Eisenbahnen', :orange, 11, 3, []],
+    ['WT', 'Königlich Württembergische Staats-Eisenbahnen', :orange, 11, 3, ['BD', 'BY', 'SBB', 'DR']],
     ['BD', 'Großherzoglich Badische Staatseisenbahnen', :orange, 12, 3, []],
     ['BY', 'Königlich Bayerische Staatseisenbahnen', :orange, 13, 3, []],
     ['OL', 'Großherzoglich Oldenburgische Staatseisenbahnen', :orange, 14, 3, []],
