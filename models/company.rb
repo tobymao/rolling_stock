@@ -1,8 +1,8 @@
 class Company
   COMPANIES = [
-    ['BME', 'Bergisch-Märkische Eisenbahn-Gesellschaft', :red, 1, 1, []],
+    ['BME', 'Bergisch-Märkische Eisenbahn-Gesellschaft', :red, 1, 1, ['KME', 'BD', 'HE', 'PR']],
     ['BSE', 'Berlin-Stettiner Eisenbahn-Gesellschaft', :red, 2, 1, []],
-    ['KME', 'Köln-Mindener Eisenbahn-Gesellschaft', :red, 5, 2, []],
+    ['KME', 'Köln-Mindener Eisenbahn-Gesellschaft', :red, 5, 2, ['BME', 'MHE', 'OL', 'HE', 'PR']],
     ['AKE', 'Altona-Kieler Eisenbahn-Gesellschaft', :red, 6, 2, []],
     ['BPM', 'Berlin-Potsdam-Magdeburger Eisenbahn', :red, 7, 2, []],
     ['MHE', 'Magdeburg-Halberstädter Eisenbahngesellschaft', :red, 8, 2, []],
@@ -26,7 +26,7 @@ class Company
     ['DR', 'Deutsche Reichsbahn', :yellow, 29, 6, []],
 
     ['SJ', 'Statens Järnvägar', :green, 30, 12, []],
-    ['SŽD', 'Советские железные дороги (Sovetskie železnye dorogi)', :green, 31, 12, []],
+    ['SZD', 'Советские железные дороги (Sovetskie železnye dorogi)', :green, 31, 12, []],
     ['RENFE', 'Red Nacional de los Ferrocarriles Españoles', :green, 32, 12, []],
     ['BR', 'British Rail', :green, 33, 12, []],
     ['FS', 'Ferrovie dello Stato', :green, 37, 10, []],
