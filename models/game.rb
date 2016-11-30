@@ -2,7 +2,8 @@ require './models/base'
 require './models/share_price'
 
 class Game < Base
-  many_to_one :user
+  #many_to_one :player
+  one_to_many :user
 
   def initialize
     @loaded = false
@@ -17,29 +18,29 @@ class Game < Base
   def command
   end
 
-  def issue_share user, corporation
-    return unless corporation.can_issue_share? user
+  def issue_share player, corporation
+    return unless corporation.can_issue_share? player
     corporation.issue_share
   end
 
-  def form_corporation user, company, share_price, name
-    return unless user.companies.include? company
+  def form_corporation player, company, share_price, name
+    return unless player.companies.include? company
     return unless @available_corportations.include? name
     # check share price is legit
     @available_corportations.remove name
-    @corporations << Corporation.new(name, user, company, share_price)
+    @corporations << Corporation.new(name, player, company, share_price)
   end
 
-  def buy_share user, corporation
+  def buy_share player, corporation
     return unless corporation.can_buy_share?
-    corporation.buy_share user
+    corporation.buy_share player
   end
 
-  def sell_share user, corporation
-    return unless corporation.can_sell_share? user
-    corporation.sell_share user
+  def sell_share player, corporation
+    return unless corporation.can_sell_share? player
+    corporation.sell_share player
   end
 
-  def auction_company user, company
+  def auction_company player, company
   end
 end

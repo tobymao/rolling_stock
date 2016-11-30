@@ -20,25 +20,25 @@ class Corporation
     !@bank_shares.empty?
   end
 
-  def buy_share user
+  def buy_share player
     swap_share_price next_share_price(@stock_market)
-    user.cash - @share_price.price
-    user.shares << @bank_shares.pop
+    player.cash - @share_price.price
+    player.shares << @bank_shares.pop
   end
 
-  def can_sell_share? user
-    share = user.shares.last
+  def can_sell_share? player
+    share = player.shares.last
     share && !share.president?
   end
 
-  def sell_share user
+  def sell_share player
     swap_share_price prev_share_price
-    user.cash + @share_price.price
-    @bank_shares << user.shares.pop
+    player.cash + @share_price.price
+    @bank_shares << player.shares.pop
   end
 
-  def can_issue_share? user
-    @president == user && @shares.size > 0
+  def can_issue_share? player
+    @president == player && @shares.size > 0
   end
 
   def issue_share
