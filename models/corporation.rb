@@ -3,12 +3,12 @@ class Corporation
 
   attr_reader :name, :president, :companies, :share_price, :cash, :shares, :bank_shares
 
-  def initialize name, president, company, share_price, share_prices
+  def initialize name, president, company, share_price, stock_market
     @name = name
     @president = president
     @companies = [company]
     @share_price = share_price
-    @share_prices = share_prices
+    @stock_market = stock_market
     @cash = 0
     @shares = [Share.president(self)].concat 9.times.map { Share.normal(self) }
     @bank_shares = []
@@ -21,7 +21,7 @@ class Corporation
   end
 
   def buy_share user
-    swap_share_price next_share_price(@share_prices)
+    swap_share_price next_share_price(@stock_market)
     user.cash - @share_price.price
     user.shares << @bank_shares.pop
   end
@@ -64,16 +64,16 @@ class Corporation
   end
 
   def prev_share_price
-    @share_prices.take(@share_price.index).reverse.compact.first
+    @stock_market.take(@share_price.index).reverse.compact.first
   end
 
   def next_share_price
-    @share_prices.drop(@share_price.index).compact.first
+    @stock_market.drop(@share_price.index).compact.first
   end
 
   def swap_share_price new_price
-    @share_prices[@share_price.index] = @share_price
-    @share_prices[new_price.index] = nil
+    @stock_market[@share_price.index] = @share_price
+    @stock_market[new_price.index] = nil
     @share_price = new_price
   end
 end

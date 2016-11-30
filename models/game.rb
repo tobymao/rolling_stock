@@ -6,7 +6,7 @@ class Game < Base
 
   def initialize
     @loaded = false
-    @share_prices = SharePrice.initial_market
+    @stock_market = SharePrice.initial_market
     @available_corportations = Corporation::CORPORATIONS.dup
     @corporations = []
   end
