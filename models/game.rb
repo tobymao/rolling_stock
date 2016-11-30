@@ -2,8 +2,7 @@ require './models/base'
 require './models/share_price'
 
 class Game < Base
-  #many_to_one :player
-  one_to_many :user
+  many_to_one :user
 
   def initialize
     @loaded = false

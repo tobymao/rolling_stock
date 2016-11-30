@@ -1,8 +1,4 @@
-#require './models/base'
-
-class Player 
-  #many_to_one :games
-
+class Player
   attr_reader :companies, :shares, :cash
 
   def initialize
