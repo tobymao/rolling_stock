@@ -6,10 +6,10 @@ module Passer
   end
 
   def pass
-    @pass = true
+    @passed = true
   end
 
   def unpass
-    @pass = false
+    @passed = false
   end
 end
