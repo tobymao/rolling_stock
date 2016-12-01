@@ -8,27 +8,55 @@ class Game < Base
     @loaded = false
     @stock_market = SharePrice.initial_market
     @available_corportations = Corporation::CORPORATIONS.dup
-    @corporations = []
+    @corporations = {}
     @available_companies = []
     @deck = []
     @current_bid = nil
     @foreign_investor = ForeignInvestor.new
-    @players = self.users.map { |id| Player.new id }
+    @players = self.users.map { |id| [id, Player.new(id)] }.to_h
+    @round = 0
+    @phase = 0
+  end
+
+  def process_action
+  end
+
+  def process_action_data phase, data
+    send "process_phase_#{phase}", data
   end
 
   # phase 1
-  def issue_share player, corporation
-    raise unless corporation.can_issue_share? player
+  def process_phase_1 data
+    corporation = @corporations[data[:corporation]]
+    corporation.pass
+    issue_share corporation unless data[:pass]
+    check_phase_change @corporations.values
+  end
+
+  def issue_share corporation
+    raise unless corporation.can_issue_share?
     corporation.issue_share
   end
 
   # phase 2
-  def form_corporation player, company, share_price, name
+  def process_phase_2 data
+    player = @players[data[:player]]
+    company = player.companies.find { |c| c.name == data[:company] }
+    company.pass
+
+    share_price = @share_prices.find { |sp| sp.price == data[:price] }
+    corporation = data[:corporation]
+    form_corporation player, company, share_price, corporation
+
+    check_phase_change @players.flat_map(&:companies)
+  end
+
+  def form_corporation player, company, share_price, corporation_name
     raise unless player.companies.include? company
-    raise unless @available_corportations.include? name
+    raise unless @available_corportations.include? corporation_name
     # check share price is legit
-    @available_corportations.remove name
-    @corporations << Corporation.new(name, player, company, share_price)
+    @available_corportations.remove corporation_name
+    @corporations[corporation_name] = Corporation.new corporation_name, player, company, share_price
   end
 
   # phase 3
@@ -60,15 +88,7 @@ class Game < Base
 
   # phase 5
   def foreign_investor_purchase
-    company = @available_companies.first
-
-    while @foreign_investor.cash >= company.price
-      @available_companies.remove company
-      @foreign_investor.companies << company
-      @foreign_investor.cash -= company.price
-      company = @available_compaies.first
-    end
-
+    foreign_investor.purchase_companies @available_compaies
     fill_companies
   end
 
@@ -85,14 +105,14 @@ class Game < Base
 
   # phase 8
   def collect_income
-    (@corporations + @players).each do |entity|
+    (@corporations.values + @players.values).each do |entity|
       entity.collect_income @cost_of_ownership
     end
   end
 
   # phase 9
   def pay_dividend corporation, amount
-    corporation.pay_dividend amount, players
+    corporation.pay_dividend amount, @players.values
   end
 
   # phase 10
@@ -100,8 +120,15 @@ class Game < Base
   end
 
   private
+
   def fill_companies
     @available_companies.concat @deck.pop(@players.size - @available_compaies.size)
     @available_companies.sort_by! &:price
+  end
+
+  def check_phase_change passers
+    return unless passers.all? &:passed?
+    passers.each &:unpass
+    @phase += 1
   end
 end

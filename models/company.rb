@@ -1,4 +1,8 @@
+require './models/passer'
+
 class Company
+  include Passer
+
   COMPANIES = [
     ['BME', 'Bergisch-Märkische Eisenbahn-Gesellschaft', :red, 1, 1, ['KME', 'BD', 'HE', 'PR']],
     ['BSE', 'Berlin-Stettiner Eisenbahn-Gesellschaft', :red, 2, 1, ['BPM', 'SX', 'MS', 'PR']],

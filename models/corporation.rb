@@ -1,4 +1,8 @@
+require './models/passer'
+
 class Corporation
+  include Passer
+
   CORPORATIONS = %w(Android Bear Eagle Horse Jupiter Orion Saturn Ship Star Wheel).freeze
 
   attr_reader :name, :president, :companies, :share_price, :cash, :shares, :bank_shares
@@ -37,8 +41,8 @@ class Corporation
     @bank_shares << player.shares.pop
   end
 
-  def can_issue_share? player
-    @president == player && @shares.size > 0
+  def can_issue_share?
+    @shares.size > 0
   end
 
   def issue_share

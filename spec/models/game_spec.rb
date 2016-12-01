@@ -19,7 +19,7 @@ describe Game do
   describe '#issue_share' do
     it 'increase corp cash by 9' do
       expect {
-        subject.issue_share(player, corporation)
+        subject.issue_share corporation
       }.to change {
         corporation.cash
       }.by 9

@@ -1,4 +1,8 @@
+require './models/passer'
+
 class Player
+  include Passer
+
   attr_reader :id, :companies, :shares, :cash
 
   def initialize id
