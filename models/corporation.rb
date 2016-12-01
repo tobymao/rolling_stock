@@ -21,7 +21,7 @@ class Corporation
   end
 
   def buy_share player
-    swap_share_price next_share_price(@stock_market)
+    swap_share_price next_share_price
     player.cash - @share_price.price
     player.shares << @bank_shares.pop
   end
@@ -47,6 +47,56 @@ class Corporation
     @bank_shares << @shares.shift
   end
 
+  def buy_company seller, company, price
+    @cash -= price
+    seller.cash += price
+    seller.companies.remove company
+    @companies << company
+  end
+
+  def close_company company
+    @companies.remove company
+  end
+
+  def collect_income cost_of_ownership
+    synergies = @companies.map { |c| [c.symbol, c.tier] }.to_h
+
+    @companies.each do |company|
+      @cash += company.income
+      @cash -= cost_of_ownership[company.tier]
+
+      company.synergies.each do |synergy|
+        @cash += calculate_synergy company.tier, synergies[synergy]
+      end
+
+      synergies.remove company.symbol
+    end
+  end
+
+  def pay_dividend amount, players
+    @cash -= amount * @bank_shares.size
+
+    players.each do |player|
+      total = amount * player.shares.count { |share| share.corporation == self }
+      @cash -= total
+      @player.cash += total
+    end
+
+    adjust_share_price
+  end
+
+  def book_value
+    @cash + @companies.reduce { |c, p| c.price + p }
+  end
+
+  def market_cap
+    shares_issued * @share_price.price
+  end
+
+  def shares_issued
+    10 - @shares.size
+  end
+
   private
   def issue_initial_shares
     company = @companies.first
@@ -64,16 +114,47 @@ class Corporation
   end
 
   def prev_share_price
-    @stock_market.take(@share_price.index).reverse.compact.first
+    @stock_market.take(@share_price.index).reverse.compact.first || @stock_market.first
   end
 
   def next_share_price
-    @stock_market.drop(@share_price.index).compact.first
+    @stock_market.drop(@share_price.index).compact.first || @stock_market.last
   end
 
   def swap_share_price new_price
     @stock_market[@share_price.index] = @share_price
     @stock_market[new_price.index] = nil
     @share_price = new_price
+  end
+
+  def calculate_synergy tier, other_tier
+    case tier
+    when :red
+      1
+    when :orange
+      other_tier == :red ? 1 : 2
+    when :yellow
+      other_tier == :orange ? 2 : 4
+    when :green
+      4
+    when :blue
+      [:green, :yellow].include? other_tier ? 4 : 8
+    when :purple
+      other_tier == :blue ? 8 : 16
+    end
+  end
+
+  def above_valuation?
+    book_value - market_cap >= SharePrice[@share_price.index]
+  end
+
+  def adjust_share_price
+    if above_valuation?
+      swap_share_price next_share_price
+      swap_share_price next_share_price if above_valuation?
+    else
+      swap_share_price prev_share_price
+      swap_share_price next_share_price unless above_valuation?
+    end
   end
 end
