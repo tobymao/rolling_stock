@@ -1,4 +1,4 @@
-class Player
+class Bid
   attr_accessor :player, :company, :price
 
   def initialize player, company, price
