@@ -30,6 +30,8 @@ GEM
     down (2.3.8)
     erubis (2.7.0)
     eventmachine (1.2.1)
+    factory_girl (4.7.0)
+      activesupport (>= 3.0.0)
     ffi (1.9.14)
     fortitude (0.9.6)
       activesupport (>= 3.0)
@@ -107,6 +109,7 @@ DEPENDENCIES
   better_errors
   capistrano
   capistrano-bundler
+  factory_girl
   fortitude
   rack-test
   rack_csrf

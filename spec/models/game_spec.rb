@@ -5,8 +5,12 @@ describe Game do
   let(:company)  { Company.new 'BME', 'Bergisch', :red, 1, 1, [] }
   let(:share_price) { SharePrice.initial_market[6] } # 10, 6
   let(:corporation) { Corporation.new 'Android', player, company, share_price, SharePrice.initial_market }
-  let(:user) { User.create email: 'test@.example.com' }
-  subject { Game.create user: user, version: '1.0', deck: [], settings:'', state: :new, users: [1,2,3] }
+  let(:user) { create :user }
+  subject { create :game }
+
+  before :each do
+    subject.load
+  end
 
   it 'should init' do
     expect(subject).not_to be_nil

@@ -18,6 +18,7 @@ group :development, :test do
 
   gem 'rspec'
   gem 'simplecov'
+  gem 'factory_girl'
   gem 'better_errors'
   gem 'rerun'
   gem 'rack-test'

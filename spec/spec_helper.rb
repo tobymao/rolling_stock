@@ -5,10 +5,13 @@ SimpleCov.start do
 end
 
 require './rolling_stock'
+require 'factory_girl'
+require 'factories'
 require 'rack/test'
 
 RSpec.configure do |config|
   config.include Rack::Test::Methods
+  config.include FactoryGirl::Syntax::Methods
 
   config.expect_with :rspec do |expectations|
     # This option will default to `true` in RSpec 4. It makes the `description`
