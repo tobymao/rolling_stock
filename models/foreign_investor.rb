@@ -12,6 +12,7 @@ class ForeignInvestor
 
     while @cash >= company.price
       companies.remove company
+      company.owner = self
       @companies << company
       @cash -= company.price
       company = companies.first

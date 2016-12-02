@@ -1,10 +1,14 @@
 require './spec/spec_helper'
 
 describe Game do
-  let(:player) { Player.new 1 }
-  let(:company)  { Company.new 'BME', 'Bergisch', :red, 1, 1, [] }
+  let(:player) { Player.new 1, 'Test' }
+  let(:company)  do
+    c = Company.new 'BME', 'Bergisch', :red, 1, 1, []
+    c.owner = player
+    c
+  end
   let(:share_price) { SharePrice.initial_market[6] } # 10, 6
-  let(:corporation) { Corporation.new 'Android', player, company, share_price, SharePrice.initial_market }
+  let(:corporation) { Corporation.new 'Android', company, share_price, SharePrice.initial_market }
   let(:user) { create :user }
   subject { create :game }
 

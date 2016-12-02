@@ -7,9 +7,9 @@ class Corporation
 
   attr_reader :name, :president, :companies, :share_price, :cash, :shares, :bank_shares
 
-  def initialize name, president, company, share_price, stock_market
+  def initialize name, company, share_price, stock_market
     @name = name
-    @president = president
+    @president = company.owner
     @companies = [company]
     @share_price = share_price
     @stock_market = stock_market
@@ -55,6 +55,7 @@ class Corporation
     @cash -= price
     seller.cash += price
     seller.companies.remove company
+    company.owner = self
     @companies << company
   end
 

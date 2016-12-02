@@ -21,7 +21,9 @@ class Game < Base
     @available_corportations = Corporation::CORPORATIONS.dup
     @corporations = {}
     @available_companies = []
-    @deck = []
+    @pending_companies = []
+    @companies = deck.map { |sym| Company.new *([sym].concat Company::COMPANIES[sym]) }
+    @company_deck = @companies.dup
     @current_bid = nil
     @foreign_investor = ForeignInvestor.new
     @round = 0
@@ -69,26 +71,45 @@ class Game < Base
 
   # phase 2
   def process_phase_2 data
-    player = @players[data[:player]]
-    company = player.companies.find { |c| c.name == data[:company] }
+    company = @companies[data[:company]]
     company.pass
 
     share_price = @share_prices.find { |sp| sp.price == data[:price] }
     corporation = data[:corporation]
-    form_corporation player, company, share_price, corporation
+    form_corporation company, share_price, corporation
 
     check_phase_change @players.flat_map(&:companies)
   end
 
-  def form_corporation player, company, share_price, corporation_name
-    raise unless player.companies.include? company
+  def form_corporation company, share_price, corporation_name
     raise unless @available_corportations.include? corporation_name
-    # check share price is legit
+    raise unless share_price.valid_range? company
     @available_corportations.remove corporation_name
-    @corporations[corporation_name] = Corporation.new corporation_name, player, company, share_price
+    @corporations[corporation_name] = Corporation.new corporation_name, company, share_price
   end
 
   # phase 3
+  def process_phase_3 data
+    player = @players[data[:player]]
+
+    case data[:action]
+    when 'pass'
+      player.pass
+    when 'auction'
+      company = @available_companies.find { |c| c.name == data[:company] }
+      auction_company player, company, data[:price]
+      player.unpass
+    when 'buy'
+      buy_share player, data[:corporation]
+      player.unpass
+    when 'sell'
+      sell_share player, data[:corporation]
+      player.unpass
+    end
+
+    check_phase_change @players
+  end
+
   def buy_share player, corporation
     raise unless corporation.can_buy_share?
     corporation.buy_share player
@@ -107,18 +128,22 @@ class Game < Base
     company = @current_bid.company
     @current_bid.player.buy_company company, @current_bid.price
     @available_companies.remove company
-    fill_companies
+    draw_companies
   end
 
   # phase 4
   def new_player_order
+    untap_pending_companies
     @players.sort_by(&:cash).reverse!
+    @phase += 1
   end
 
   # phase 5
   def foreign_investor_purchase
-    foreign_investor.purchase_companies @available_compaies
-    fill_companies
+    foreign_investor.purchase_companies @available_companies
+    draw_companies
+    untap_pending_companies
+    @phase += 1
   end
 
   # phase 6
@@ -150,9 +175,12 @@ class Game < Base
 
   private
 
-  def fill_companies
-    @available_companies.concat @deck.pop(@players.size - @available_compaies.size)
-    @available_companies.sort_by! &:price
+  def draw_companies
+    @pending_companies.concat @company_deck.pop(@players.size - @available_companies.size)
+  end
+
+  def untap_pending_companies
+    @available_companies.concat @pending_companies.slice!(0..-1)
   end
 
   def check_phase_change passers

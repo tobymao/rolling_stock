@@ -10,7 +10,7 @@ class Player
     @name = name
     @companies = []
     @shares = []
-    @cash = 0
+    @cash = 30
   end
 
   def value
@@ -19,6 +19,7 @@ class Player
 
   def buy_company company, price
     @cash -= price
+    company.owner = self
     @companies << company
   end
 

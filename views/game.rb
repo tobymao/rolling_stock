@@ -11,7 +11,7 @@ module Views
 
     def render_new
       div do
-        game.values.players.map do |player|
+        game.players.values.map do |player|
           div player.name
         end
 
@@ -27,15 +27,15 @@ module Views
     end
 
     def render_join_button
-      form action: "/game/#{game.id}/join", method: 'post' do
-        rawtext app.&csrf_tag
+      form action: app.path(game, 'join'), method: 'post' do
+        rawtext app.csrf_tag
         input type: 'submit', value: 'Join As Player'
       end
     end
 
     def render_start_button
-      form action: "/game/#{game.id}/start", method: 'post' do
-        rawtext app.&csrf_tag
+      form action: app.path(game, 'start'), method: 'post' do
+        rawtext app.csrf_tag
         input type: 'submit', value: 'Start Game'
       end
     end

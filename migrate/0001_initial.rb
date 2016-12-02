@@ -27,7 +27,7 @@ Sequel.migration do
       foreign_key :user_id, :users, null: false, index: true, on_delete: :cascade
       String :version, null: false
       column :users, 'integer[]', null: false
-      column :deck, 'integer[]', null: false
+      column :deck, 'text[]', null: false
       String :settings, null: false
       game_state :state, null: false
 

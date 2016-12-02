@@ -6,6 +6,15 @@ class SharePrice
     50, 55, 60, 66, 73, 81, 90, 100,
   ].freeze
 
+  RANGES = {
+    red:    [6, 10],
+    orange: [6, 14],
+    yellow: [6, 17],
+    green:  [11, 20],
+    blue:   [15, 23],
+    purple: [18, 23],
+  }.freeze
+
   attr_reader :price, :index
 
   def self.initial_market
@@ -15,5 +24,9 @@ class SharePrice
   def initialize price, index
     @price = price
     @index = index
+  end
+
+  def valid_range? company
+    @index.between? *RANGES[company.tier]
   end
 end
