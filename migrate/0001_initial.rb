@@ -2,19 +2,29 @@ Sequel.migration do
   change do
     create_table :users do
       primary_key :id
+
+      String :name, null: false
+      String :password, null: false
       String :email, null: false
 
       DateTime :created_at, null: false
       DateTime :updated_at, null: false
+    end
 
-      index :email, unique: true
+    create_table :sessions do
+      primary_key :id
+      String :token, null: false, index: true, unique: true
+      foreign_key :user_id, :users, null: false, index: true, on_delete: :cascade
+
+      DateTime :created_at, null: false
+      DateTime :updated_at, null: false
     end
 
     create_enum :game_state, %w[new active finished]
 
     create_table :games do
       primary_key :id
-      foreign_key :user_id, :users, null: false, on_delete: :cascade
+      foreign_key :user_id, :users, null: false, index: true, on_delete: :cascade
       String :version, null: false
       column :users, 'integer[]', null: false
       column :deck, 'integer[]', null: false
@@ -24,22 +34,18 @@ Sequel.migration do
       DateTime :created_at, null: false
       DateTime :updated_at, null: false
 
-      index :user_id
       index :users, type: 'gin'
     end
 
     create_table :actions do
       primary_key :id
-      foreign_key :game_id, :games, null: false, on_delete: :cascade
+      foreign_key :game_id, :games, null: false, index: true, on_delete: :cascade
       Integer :round, null: false
       Integer :phase, null: false
       String :data, null: false
 
       DateTime :created_at, null: false
       DateTime :updated_at, null: false
-
-      index :game_id
     end
-
   end
 end

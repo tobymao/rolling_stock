@@ -8,6 +8,7 @@ GEM
       tzinfo (~> 1.1)
     airbrussh (1.1.1)
       sshkit (>= 1.6.1, != 1.7.0)
+    bcrypt (3.1.11)
     better_errors (2.1.1)
       coderay (>= 1.0.0)
       erubis (>= 2.6.6)
@@ -106,6 +107,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  bcrypt
   better_errors
   capistrano
   capistrano-bundler

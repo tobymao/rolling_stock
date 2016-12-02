@@ -4,8 +4,7 @@ module Views
     MOBILE_W = '600px'
     MAX_W    = '950px'
 
-    needs csrf_tag: ''
-    needs request: nil
+    needs :app
 
     doctype :html5
 
@@ -24,18 +23,17 @@ module Views
     # override
     def widget w, hash = nil, &block
       hash ||= {}
-      hash[:csrf_tag] ||= csrf_tag
-      hash[:request] ||= request
+      hash[:app] ||= app
 
       super w, hash, &block
     end
 
     def params
-      request&.params || {}
+      app.request&.params || {}
     end
 
     def current_path
-      request&.path || ''
+      app.request&.path || ''
     end
   end
 end

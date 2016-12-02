@@ -4,6 +4,17 @@ require './models/share_price'
 class Game < Base
   many_to_one :user
 
+  def self.empty_game user
+    Game.create(
+      user: user,
+      users: [user.id],
+      version: '1.0',
+      settings: '',
+      state: 'new',
+      deck: [],
+    )
+  end
+
   def load
     @loaded = false
     @stock_market = SharePrice.initial_market
@@ -13,9 +24,27 @@ class Game < Base
     @deck = []
     @current_bid = nil
     @foreign_investor = ForeignInvestor.new
-    @players = self.users.map { |id| [id, Player.new(id)] }.to_h
     @round = 0
     @phase = 0
+  end
+
+  def players
+    @players ||= User
+      .where(id: users.to_a)
+      .map { |user| [user.id, Player.new(user.id, user.name)] }
+      .to_h
+  end
+
+  def new?
+    state == 'new'
+  end
+
+  def active?
+    state == 'active'
+  end
+
+  def finished?
+    state == 'finished'
   end
 
   def process_action

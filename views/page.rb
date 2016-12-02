@@ -4,13 +4,6 @@ module Views
   class Page < Base
     needs page_title: nil
 
-    DEFAULT_LINKS = [
-      ['Home', '/'],
-      ['Games', '/games'],
-      ['About Us', '/about'],
-      ['Contact', '/contact'],
-    ].freeze
-
     def content
       html do
         head do
@@ -27,7 +20,7 @@ module Views
         div style: inline(min_height: '95%') do
           render_nav
 
-          div class: 'bgb_container main' do
+          div class: 'container' do
             render_main
           end
         end
@@ -47,10 +40,18 @@ module Views
 
     def render_style
       style <<~CSS
-      body {
-        font-family: 'Open Sans';
-        width: 100%;
-      }
+        body {
+          font-family: 'Open Sans';
+          width: 100%;
+        }
+
+        .container {
+          position: relative;
+          padding: 0 5% 0 5%;
+          margin: 0 auto;
+          text-align: justify;
+          max-width: #{MAX_W};
+        }
       CSS
     end
     static :render_style
@@ -68,7 +69,20 @@ module Views
     static :render_analytics
 
     def render_nav
-      widget Nav, links: DEFAULT_LINKS
+      links = [
+        ['Home', '/'],
+        ['Games', '/games'],
+        ['About Us', '/about'],
+        ['Contact', '/contact'],
+      ]
+
+      if app.current_user
+        links << ['Logout', '/logout']
+      else
+        links.concat [['Login', '/login'], ['Sign Up', '/signup']]
+      end
+
+      widget Nav, links: links
     end
 
     def render_main

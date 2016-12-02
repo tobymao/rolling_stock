@@ -8,6 +8,7 @@ gem 'fortitude'
 gem 'rack_csrf'
 gem 'shrine'
 gem 'roda-basic-auth'
+gem 'bcrypt'
 gem 'rake'
 
 group :development, :test do
