@@ -1,7 +1,9 @@
 require './models/passer'
+require './models/purchaser'
 
 class Player
   include Passer
+  include Purchaser
 
   attr_reader :id, :name, :companies, :shares, :cash
 
@@ -17,11 +19,13 @@ class Player
     @cash + (@companies.map(&:value).reduce(&:+) || 0)
   end
 
+=begin
   def buy_company company, price
     @cash -= price
     company.owner = self
     @companies << company
   end
+=end
 
   def close_company company
     @companies.remove company

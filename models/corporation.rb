@@ -1,7 +1,9 @@
 require './models/passer'
+require './models/purchaser'
 
 class Corporation
   include Passer
+  include Purchaser
 
   CORPORATIONS = %w(Android Bear Eagle Horse Jupiter Orion Saturn Ship Star Wheel).freeze
 
@@ -51,6 +53,7 @@ class Corporation
     @bank_shares << @shares.shift
   end
 
+=begin
   def buy_company seller, company, price
     @cash -= price
     seller.cash += price
@@ -58,6 +61,7 @@ class Corporation
     company.owner = self
     @companies << company
   end
+=end
 
   def close_company company
     @companies.remove company
