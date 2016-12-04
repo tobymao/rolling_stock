@@ -2,16 +2,16 @@ FactoryGirl.define do
   to_create { |instance| instance.save }
 
   factory :user do
-    name 'name'
-    email 'test@example.com'
+    sequence(:name) { |n| "person#{n}" }
+    sequence(:email) { |n| "person#{n}@example.com" }
     password 'pass'
   end
 
   factory :game do
     sequence :id
     version '1.0'
-    users [1,2,3]
-    deck ['BME', 'BSE']
+    users []
+    deck []
     settings ''
     state :new
     association :user

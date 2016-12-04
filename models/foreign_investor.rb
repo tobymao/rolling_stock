@@ -1,4 +1,8 @@
+require './models/purchaser'
+
 class ForeignInvestor
+  include Purchaser
+
   attr_reader :companies
   attr_accessor :cash
 
@@ -11,10 +15,7 @@ class ForeignInvestor
     company = companies.first
 
     while @cash >= company.price
-      companies.remove company
-      company.owner = self
-      @companies << company
-      @cash -= company.price
+      buy_company company, company.price
       company = companies.first
     end
   end

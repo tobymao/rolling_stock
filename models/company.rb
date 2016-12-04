@@ -3,6 +3,8 @@ require './models/passer'
 class Company
   include Passer
 
+  TIERS = [:red, :orange, :yellow, :green, :blue, :purple].freeze
+
   COMPANIES = {
     'BME' => ['Bergisch-Märkische Eisenbahn-Gesellschaft', :red, 1, 1, ['KME', 'BD', 'HE', 'PR']],
     'BSE' => ['Berlin-Stettiner Eisenbahn-Gesellschaft', :red, 2, 1, ['BPM', 'SX', 'MS', 'PR']],
@@ -59,7 +61,7 @@ class Company
   attr_reader :symbor, :name, :tier, :value, :income, :synergies
   attr_accessor :owner
 
-  def initialize symbol, name, tier, value, income, synergies
+  def initialize owner, symbol, name, tier, value, income, synergies
     @symbol    = symbol
     @name      = name
     @tier      = tier
@@ -67,6 +69,7 @@ class Company
     @income    = income
     @synergies = synergies
     @name      = name
+    @owner     = owner
     @cash      = 0
   end
 

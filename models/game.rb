@@ -4,6 +4,8 @@ require './models/share_price'
 class Game < Base
   many_to_one :user
 
+  attr_reader :stock_market, :available_corportations, :corporations, :companies, :pending_companies, :company_deck
+
   def self.empty_game user
     Game.create(
       user: user,
@@ -20,14 +22,16 @@ class Game < Base
     @stock_market = SharePrice.initial_market
     @available_corportations = Corporation::CORPORATIONS.dup
     @corporations = {}
-    @available_companies = []
+    @companies = [] # available companies
     @pending_companies = []
-    @companies = deck.map { |sym| Company.new *([sym].concat Company::COMPANIES[sym]) }
-    @company_deck = @companies.dup
+    @company_deck = []
+    @all_companies = Company::COMPANIES.map { |sym, params| Company.new self, sym, *params }
     @current_bid = nil
     @foreign_investor = ForeignInvestor.new
     @round = 0
     @phase = 0
+    @cash = 0
+    setup_deck
   end
 
   def players
@@ -96,7 +100,7 @@ class Game < Base
     when 'pass'
       player.pass
     when 'auction'
-      company = @available_companies.find { |c| c.name == data[:company] }
+      company = @companies.find { |c| c.name == data[:company] }
       auction_company player, company, data[:price]
       player.unpass
     when 'buy'
@@ -127,7 +131,6 @@ class Game < Base
   def finalize_auction
     company = @current_bid.company
     @current_bid.player.buy_company company, @current_bid.price
-    @available_companies.remove company
     draw_companies
   end
 
@@ -140,7 +143,7 @@ class Game < Base
 
   # phase 5
   def foreign_investor_purchase
-    foreign_investor.purchase_companies @available_companies
+    foreign_investor.purchase_companies @companies
     draw_companies
     untap_pending_companies
     @phase += 1
@@ -176,16 +179,27 @@ class Game < Base
   private
 
   def draw_companies
-    @pending_companies.concat @company_deck.pop(@players.size - @available_companies.size)
+    @pending_companies.concat @company_deck.pop(@players.size - @companies.size)
   end
 
   def untap_pending_companies
-    @available_companies.concat @pending_companies.slice!(0..-1)
+    @companies.concat @pending_companies.slice!(0..-1)
   end
 
   def check_phase_change passers
     return unless passers.all? &:passed?
     passers.each &:unpass
     @phase += 1
+  end
+
+  def setup_deck
+    groups = @all_companies.group_by &:tier
+
+    Company::TIERS.each do |tier|
+      num_cards = players.size + 1
+      num_cards = 6 if tier == :orange && players.size == 4
+      num_cards = 8 if tier == :orange && players.size == 5
+      @company_deck.concat(groups[tier].shuffle.take num_cards)
+    end
   end
 end

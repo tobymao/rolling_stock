@@ -53,16 +53,6 @@ class Corporation
     @bank_shares << @shares.shift
   end
 
-=begin
-  def buy_company seller, company, price
-    @cash -= price
-    seller.cash += price
-    seller.companies.remove company
-    company.owner = self
-    @companies << company
-  end
-=end
-
   def close_company company
     @companies.remove company
   end

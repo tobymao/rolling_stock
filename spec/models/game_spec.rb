@@ -20,6 +20,32 @@ describe Game do
     expect(subject).not_to be_nil
   end
 
+  describe '#load' do
+    context 'with 3 players' do
+      subject { create :game, users: 3.times.map { create(:user).id } }
+
+      it 'should create deck' do
+        expect(subject.company_deck.size).to eq(24)
+      end
+    end
+
+    context 'with 4 players' do
+      subject { create :game, users: 4.times.map { create(:user).id } }
+
+      it 'should create deck' do
+        expect(subject.company_deck.size).to eq(31)
+      end
+    end
+
+    context 'with 5 players' do
+      subject { create :game, users: 5.times.map { create(:user).id } }
+
+      it 'should create deck' do
+        expect(subject.company_deck.size).to eq(38)
+      end
+    end
+  end
+
   describe '#issue_share' do
     it 'increase corp cash by 9' do
       expect {

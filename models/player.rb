@@ -5,7 +5,8 @@ class Player
   include Passer
   include Purchaser
 
-  attr_reader :id, :name, :companies, :shares, :cash
+  attr_reader :id, :name, :companies, :shares
+  attr_accessor :cash
 
   def initialize id, name
     @id = id
@@ -18,14 +19,6 @@ class Player
   def value
     @cash + (@companies.map(&:value).reduce(&:+) || 0)
   end
-
-=begin
-  def buy_company company, price
-    @cash -= price
-    company.owner = self
-    @companies << company
-  end
-=end
 
   def close_company company
     @companies.remove company
