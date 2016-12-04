@@ -18,7 +18,6 @@ class Game < Base
   end
 
   def load
-    @loaded = false
     @stock_market = SharePrice.initial_market
     @available_corportations = Corporation::CORPORATIONS.dup
     @corporations = {}
@@ -35,7 +34,7 @@ class Game < Base
   end
 
   def players
-    @players ||= User
+    @_players ||= User
       .where(id: users.to_a)
       .map { |user| [user.id, Player.new(user.id, user.name)] }
       .to_h
@@ -65,7 +64,7 @@ class Game < Base
     corporation = @corporations[data[:corporation]]
     corporation.pass
     issue_share corporation unless data[:pass]
-    check_phase_change @corporations.values
+    check_phase_change @corporations.values.reject { |c| c.shares.empty? }
   end
 
   def issue_share corporation
@@ -75,12 +74,14 @@ class Game < Base
 
   # phase 2
   def process_phase_2 data
-    company = @companies[data[:company]]
+    company = @all_companies[data[:company]]
     company.pass
 
-    share_price = @share_prices.find { |sp| sp.price == data[:price] }
-    corporation = data[:corporation]
-    form_corporation company, share_price, corporation
+    unless data[:pass]
+      share_price = @share_prices.find { |sp| sp.price == data[:price] }
+      corporation = data[:corporation]
+      form_corporation company, share_price, corporation
+    end
 
     check_phase_change players.flat_map(&:companies)
   end
@@ -111,7 +112,12 @@ class Game < Base
       player.unpass
     end
 
-    check_phase_change players
+    min = [
+      @corporations.values.map { |c| c.next_share_price.price }.min,
+      @companies.map(&:price).min,
+    ].min
+
+    check_phase_change players.reject { |p| p.cash < min }
   end
 
   def buy_share player, corporation
@@ -150,25 +156,64 @@ class Game < Base
   end
 
   # phase 6
-  def buy_company corporation, seller, company, price
+  def process_phase_6 data
+    corporation = @corporations[data[:corporation]]
+
+    if data[:pass]
+      corporation.pass
+    else
+      company = @all_companies[data[:company]]
+      buy_company corporation, company, data[:price]
+    end
+
+    min = [
+      players.flat_map { |p| p.companies.map &:min_price }.min,
+      @foreign_investor.companies.map(&:min_price).min,
+    ]
+
+    check_phase_change @corporations.values.reject { |c| c.cash < min }
+  end
+
+  def buy_company corporation, company, price
     raise unless company.valid_price? price
-    corporation.buy_company seller, company, price
+    corporation.buy_company company, price
   end
 
   # phase 7
+  def process_phase_7 data
+    holder = @corporations[data[:corporation]] || players[data[:player]]
+
+    if data[:pass]
+      holder.pass
+    else
+      company = @all_companies[data[:company]]
+      buy_company holder, company
+    end
+
+    check_phase_change(@corporations.values ++ players.values)
+  end
+
   def close_company holder, company
     holder.close_company company
   end
 
   # phase 8
   def collect_income
-    tier = get_tier_of_next_company
+    tier = cost_of_ownership_tier
     (@corporations.values + players.values).each do |entity|
       entity.collect_income tier
     end
+    @phase += 1
   end
 
   # phase 9
+  def process_phase_7 data
+    corporation = @corporations[data[:corporation]]
+    corporation.pass
+    pay_dividend corporation, data[:amount]
+    check_phase_change @corporations.values.reject { |c| c.cash.zero? }
+  end
+
   def pay_dividend corporation, amount
     corporation.pay_dividend amount, players.values
   end
@@ -179,7 +224,7 @@ class Game < Base
 
   private
 
-  def get_tier_of_next_company
+  def cost_of_ownership_tier
     if @company_deck.empty?
       @companies.empty? ? :last_turn : :penultimate
     else

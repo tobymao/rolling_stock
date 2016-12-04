@@ -8,9 +8,10 @@ describe Game do
   let(:user) { create :user }
   subject { create :game }
 
-
-  before :each do
-    subject.load
+  def mock_players num
+    allow(subject).to receive(:players).and_return(
+      num.times.map { |n| Player.new n, "player_#{n}" }
+    )
   end
 
   it 'should init' do
@@ -18,54 +19,42 @@ describe Game do
   end
 
   describe '#load' do
-    context 'with 3 players' do
-      subject { create :game, users: 3.times.map { create(:user).id } }
-
-      it 'should create deck' do
-        expect(subject.company_deck.size).to eq(24)
-      end
+    it 'should create deck for 3 players' do
+      mock_players 3
+      subject.load
+      expect(subject.company_deck.size).to eq(24)
     end
 
-    context 'with 4 players' do
-      subject { create :game, users: 4.times.map { create(:user).id } }
-
-      it 'should create deck' do
-        expect(subject.company_deck.size).to eq(31)
-      end
+    it 'should create deck with 4 players' do
+      mock_players 4
+      subject.load
+      expect(subject.company_deck.size).to eq(31)
     end
 
-    context 'with 5 players' do
-      subject { create :game, users: 5.times.map { create(:user).id } }
-
-      it 'should create deck' do
-        expect(subject.company_deck.size).to eq(38)
-      end
+    it 'should create deck with 5 players' do
+      mock_players 5
+      subject.load
+      expect(subject.company_deck.size).to eq(38)
     end
   end
 
-  describe '#collect_income' do
-    it 'should increase cash for corporations and players' do
-      allow(subject).to receive(:players).and_return(player.id => player)
-      player.companies << company
-      expect {
-        subject.collect_income
-      }.to change { player.cash
-      }.by 1
+  context 'after load' do
+    before :each do
+      subject.load
     end
-  end
 
-  describe '#issue_share' do
-    it 'increase corp cash by 9' do
-      expect {
-        subject.issue_share corporation
-      }.to change {
-        corporation.cash
-      }.by 9
+    describe '#collect_income' do
+      it 'should increase cash for corporations and players' do
+        player.companies << company
+        allow(subject).to receive(:players).and_return(player.id => player)
+        expect { subject.collect_income }.to change { player.cash }.by 1
+      end
+    end
+
+    describe '#issue_share' do
+      it 'increase corp cash by 9' do
+        expect { subject.issue_share corporation }.to change { corporation.cash }.by 9
+      end
     end
   end
 end
-
-def mock_players players
-  allow(subject).to receive(:players).and_return(players)
-end
-
