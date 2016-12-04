@@ -29,4 +29,5 @@ class SharePrice
   def valid_range? company
     @index.between? *RANGES[company.tier]
   end
+
 end

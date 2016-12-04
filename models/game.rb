@@ -38,6 +38,7 @@ class Game < Base
     @round = 0
     @phase = 0
     @cash = 0
+    @end_game_card = :penultimate
     setup_deck
     draw_companies
     untap_pending_companies
@@ -80,6 +81,18 @@ class Game < Base
   def issue_share corporation
     raise unless corporation.can_issue_share?
     corporation.issue_share
+
+    if corporation.is_bankrupt?
+      @corporations.remove corporation.name
+      @players.each do |player|
+        player.shares.each do |share|
+          if share.corporation == corporation
+            share.delete
+          end
+        end
+      end
+      @share_prices.shift corporation.share_price
+    end
   end
 
   # phase 2
@@ -230,13 +243,29 @@ class Game < Base
 
   # phase 10
   def check_end
+    puts "corp size is " + @corporations.size.to_s
+    @corporations.each do |corporation_name, corporation|
+      puts corporation_name + " price is " + corporation.share_price.price.to_s
+      if corporation.share_price.price == 100
+        return true
+      end
+    end
+    if cost_of_ownership_tier == :last_turn
+      return true
+    end
+
+    if cost_of_ownership_tier == :penultimate
+      @end_game_card = :last_turn
+      return false
+    end
+    return false
   end
 
   private
 
   def cost_of_ownership_tier
     if @company_deck.empty?
-      @companies.empty? ? :last_turn : :penultimate
+      @end_game_card
     else
       @company_deck.first.tier
     end
