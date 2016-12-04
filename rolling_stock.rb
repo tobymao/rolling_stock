@@ -55,7 +55,7 @@ class RollingStock < Roda
       games = Game.eager(:user).where(state: ['new', 'active']).all
 
       data = {
-        new_games: games.select(&:new?),
+        new_games: games.select(&:new_game?),
         active_games: games.select(&:active?),
       }
 

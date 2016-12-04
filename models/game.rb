@@ -33,6 +33,11 @@ class Game < Base
     setup_deck
   end
 
+  def start
+    draw_companies
+    untap_pending_companies
+  end
+
   def players
     @_players ||= User
       .where(id: users.to_a)
@@ -40,7 +45,7 @@ class Game < Base
       .to_h
   end
 
-  def new?
+  def new_game?
     state == 'new'
   end
 
@@ -228,7 +233,7 @@ class Game < Base
     if @company_deck.empty?
       @companies.empty? ? :last_turn : :penultimate
     else
-      @company_deck.first.tier
+      @company_deck.last.tier
     end
   end
 
@@ -247,13 +252,19 @@ class Game < Base
   end
 
   def setup_deck
-    groups = @all_companies.group_by &:tier
+    if deck.size.zero?
+      groups = @all_companies.group_by &:tier
 
-    Company::TIERS.each do |tier|
-      num_cards = players.size + 1
-      num_cards = 6 if tier == :orange && players.size == 4
-      num_cards = 8 if tier == :orange && players.size == 5
-      @company_deck.concat(groups[tier].shuffle.take num_cards)
+      Company::TIERS.reverse.each do |tier|
+        num_cards = players.size + 1
+        num_cards = 6 if tier == :orange && players.size == 4
+        num_cards = 8 if tier == :orange && players.size == 5
+        @company_deck.concat(groups[tier].shuffle.take num_cards)
+      end
+
+      update deck: @company_deck.map(&:symbol)
+    else
+      @company_deck = deck.map { |sym| Company.new self, sym, *Company::COMPANIES[sym] }
     end
   end
 end

@@ -5,7 +5,7 @@ module Views
     needs :game
 
     def render_main
-      render_new if game.new?
+      render_new if game.new_game?
       render_game
     end
 
@@ -15,12 +15,16 @@ module Views
           div player.name
         end
 
-        render_join_button if !game.players[app.current_user.id] && game.new?
+        render_join_button if !game.players[app.current_user.id] && game.new_game?
         render_start_button if game.user == app.current_user
       end
     end
 
     def render_game
+      game.companies.map do |company|
+        div company.name
+      end
+
       game.players.values.map do |player|
         widget PlayerHoldings, player: player
       end

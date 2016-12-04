@@ -5,6 +5,14 @@ class Company
 
   TIERS = [:red, :orange, :yellow, :green, :blue, :purple].freeze
 
+  OWNERSHIP_TIERS = {
+    green: [:red],
+    blue: [:red, :orange],
+    purple: [:red, :orange, :yellow],
+    penultimate: [:red, :orange, :yellow, :green],
+    last_turn: [:red, :orange, :yellow, :green],
+  }.freeze
+
   COMPANIES = {
     'BME' => ['Bergisch-Märkische Eisenbahn-Gesellschaft', :red, 1, 1, ['KME', 'BD', 'HE', 'PR']],
     'BSE' => ['Berlin-Stettiner Eisenbahn-Gesellschaft', :red, 2, 1, ['BPM', 'SX', 'MS', 'PR']],
@@ -58,7 +66,7 @@ class Company
     'TSI' => ['Trans-Space Inc.', :purple, 100, 25, ['OPC', 'RCC', 'MM', 'VP', 'AL', 'LE' ]],
   }
 
-  attr_reader :symbor, :name, :tier, :value, :income, :synergies
+  attr_reader :symbol, :name, :tier, :value, :income, :synergies
   attr_accessor :owner
 
   def initialize owner, symbol, name, tier, value, income, synergies
@@ -78,20 +86,7 @@ class Company
   end
 
   def cost_of_ownership ownership_tier
-    case ownership_tier
-    when :green
-      [:red].include? @tier ? 1 : 0
-    when :blue
-      [:red, :orange].include? @tier ? 3 : 0
-    when :purple
-      [:red, :orange, :yellow].include? @tier ? 6 : 0
-    when :penultimate
-      [:red, :orange, :yellow, :green].include? @tier ? 10 : 0
-    when :last_turn
-      [:red, :orange, :yellow, :green].include? @tier ? 16 : 0
-    else
-      0
-    end
+    OWNERSHIP_TIERS[ownership_tier]&.include?(@tier) || 0
   end
 
   def min_price
