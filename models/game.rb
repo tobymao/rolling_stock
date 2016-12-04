@@ -82,7 +82,7 @@ class Game < Base
     corporation = data[:corporation]
     form_corporation company, share_price, corporation
 
-    check_phase_change @players.flat_map(&:companies)
+    check_phase_change players.flat_map(&:companies)
   end
 
   def form_corporation company, share_price, corporation_name
@@ -94,7 +94,7 @@ class Game < Base
 
   # phase 3
   def process_phase_3 data
-    player = @players[data[:player]]
+    player = players[data[:player]]
 
     case data[:action]
     when 'pass'
@@ -111,7 +111,7 @@ class Game < Base
       player.unpass
     end
 
-    check_phase_change @players
+    check_phase_change players
   end
 
   def buy_share player, corporation
@@ -137,7 +137,7 @@ class Game < Base
   # phase 4
   def new_player_order
     untap_pending_companies
-    @players.sort_by(&:cash).reverse!
+    players.sort_by(&:cash).reverse!
     @phase += 1
   end
 
@@ -162,14 +162,15 @@ class Game < Base
 
   # phase 8
   def collect_income
-    (@corporations.values + @players.values).each do |entity|
-      entity.collect_income @cost_of_ownership
+    tier = get_tier_of_next_company
+    (@corporations.values + players.values).each do |entity|
+      entity.collect_income tier
     end
   end
 
   # phase 9
   def pay_dividend corporation, amount
-    corporation.pay_dividend amount, @players.values
+    corporation.pay_dividend amount, players.values
   end
 
   # phase 10
@@ -178,8 +179,16 @@ class Game < Base
 
   private
 
+  def get_tier_of_next_company
+    if @company_deck.empty?
+      @companies.empty? ? :last_turn : :penultimate
+    else
+      @company_deck.first.tier
+    end
+  end
+
   def draw_companies
-    @pending_companies.concat @company_deck.pop(@players.size - @companies.size)
+    @pending_companies.concat @company_deck.pop(players.size - @companies.size)
   end
 
   def untap_pending_companies

@@ -57,12 +57,12 @@ class Corporation
     @companies.remove company
   end
 
-  def collect_income cost_of_ownership
+  def collect_income tier
     synergies = @companies.map { |c| [c.symbol, c.tier] }.to_h
 
     @companies.each do |company|
       @cash += company.income
-      @cash -= cost_of_ownership[company.tier]
+      @cash -= company.cost_of_ownership tier
 
       company.synergies.each do |synergy|
         @cash += calculate_synergy company.tier, synergies[synergy]
