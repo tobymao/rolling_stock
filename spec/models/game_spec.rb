@@ -2,15 +2,12 @@ require './spec/spec_helper'
 
 describe Game do
   let(:player) { Player.new 1, 'Test' }
-  let(:company)  do
-    c = Company.new 'BME', 'Bergisch', :red, 1, 1, []
-    c.owner = player
-    c
-  end
+  let(:company) { Company.new player, 'BME', 'Bergisch', :red, 1, 1, [] }
   let(:share_price) { SharePrice.initial_market[6] } # 10, 6
   let(:corporation) { Corporation.new 'Android', company, share_price, SharePrice.initial_market }
   let(:user) { create :user }
   subject { create :game }
+
 
   before :each do
     subject.load
@@ -46,6 +43,17 @@ describe Game do
     end
   end
 
+  describe '#collect_income' do
+    it 'should increase cash for corporations and players' do
+      allow(subject).to receive(:players).and_return(player.id => player)
+      player.companies << company
+      expect {
+        subject.collect_income
+      }.to change { player.cash
+      }.by 1
+    end
+  end
+
   describe '#issue_share' do
     it 'increase corp cash by 9' do
       expect {
@@ -56,3 +64,8 @@ describe Game do
     end
   end
 end
+
+def mock_players players
+  allow(subject).to receive(:players).and_return(players)
+end
+

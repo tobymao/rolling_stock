@@ -24,10 +24,10 @@ class Player
     @companies.remove company
   end
 
-  def collect_income cost_of_ownership
+  def collect_income tier
     @companies.each do |company|
       @cash += company.income
-      @cash -= cost_of_ownership[company.tier]
+      @cash -= company.cost_of_ownership tier
     end
   end
 end

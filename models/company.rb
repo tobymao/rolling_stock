@@ -77,6 +77,23 @@ class Company
     price.between?(min_price, max_price)
   end
 
+  def cost_of_ownership ownership_tier
+    case ownership_tier
+    when :green
+      [:red].include? @tier ? 1 : 0
+    when :blue
+      [:red, :orange].include? @tier ? 3 : 0
+    when :purple
+      [:red, :orange, :yellow].include? @tier ? 6 : 0
+    when :penultimate
+      [:red, :orange, :yellow, :green].include? @tier ? 10 : 0
+    when :last_turn
+      [:red, :orange, :yellow, :green].include? @tier ? 16 : 0
+    else
+      0
+    end
+  end
+
   def min_price
     @income / 2
   end
