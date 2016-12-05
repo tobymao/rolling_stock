@@ -44,9 +44,7 @@ class Corporation
   end
 
   def is_bankrupt?
-    if @share_price.price == 0
-      true
-    end
+    @share_price.price.zero?
   end
 
   def buy_share player
