@@ -7,6 +7,13 @@ module Views
     def render_main
       render_new if game.new_game?
       render_game
+      widget Deck, {
+        available_companies: game.companies,
+        pending_companies: game.pending_companies,
+        all_companies: game.all_companies,
+        company_deck: game.company_deck,
+        cost_of_ownership: {},
+      }
     end
 
     def render_new
@@ -21,10 +28,6 @@ module Views
     end
 
     def render_game
-      game.companies.map do |company|
-        div company.name
-      end
-
       game.players.values.map do |player|
         widget PlayerHoldings, player: player
       end

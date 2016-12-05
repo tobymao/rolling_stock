@@ -5,8 +5,9 @@ module Views
     needs :player
 
     def content
-      div player.name
-      div "Cash: #{player.cash}, Value: #{player.value}"
+      div do
+        text "#{player.name} [#{player.value}]Cash: $#{player.cash} Value: #{player.value}"
+      end
       div player.companies
     end
   end

@@ -9,6 +9,23 @@ class Corporation
 
   attr_reader :name, :president, :companies, :share_price, :cash, :shares, :bank_shares
 
+  def self.calculate_synergy tier, other_tier
+    case tier
+    when :red
+      1
+    when :orange
+      other_tier == :red ? 1 : 2
+    when :yellow
+      other_tier == :orange ? 2 : 4
+    when :green
+      4
+    when :blue
+      [:green, :yellow].include? other_tier ? 4 : 8
+    when :purple
+      other_tier == :blue ? 8 : 16
+    end
+  end
+
   def initialize name, company, share_price, stock_market
     @name = name
     @president = company.owner
@@ -65,7 +82,7 @@ class Corporation
       @cash -= company.cost_of_ownership tier
 
       company.synergies.each do |synergy|
-        @cash += calculate_synergy company.tier, synergies[synergy]
+        @cash += self.class.calculate_synergy company.tier, synergies[synergy]
       end
 
       synergies.remove company.symbol
@@ -124,23 +141,6 @@ class Corporation
     @stock_market[@share_price.index] = @share_price
     @stock_market[new_price.index] = nil
     @share_price = new_price
-  end
-
-  def calculate_synergy tier, other_tier
-    case tier
-    when :red
-      1
-    when :orange
-      other_tier == :red ? 1 : 2
-    when :yellow
-      other_tier == :orange ? 2 : 4
-    when :green
-      4
-    when :blue
-      [:green, :yellow].include? other_tier ? 4 : 8
-    when :purple
-      other_tier == :blue ? 8 : 16
-    end
   end
 
   def above_valuation?

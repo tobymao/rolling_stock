@@ -4,7 +4,15 @@ require './models/share_price'
 class Game < Base
   many_to_one :user
 
-  attr_reader :stock_market, :available_corportations, :corporations, :companies, :pending_companies, :company_deck
+  attr_reader(
+    :stock_market,
+    :available_corportations,
+    :corporations,
+    :companies,
+    :pending_companies,
+    :company_deck,
+    :all_companies,
+  )
 
   def self.empty_game user
     Game.create(
@@ -24,16 +32,13 @@ class Game < Base
     @companies = [] # available companies
     @pending_companies = []
     @company_deck = []
-    @all_companies = Company::COMPANIES.map { |sym, params| Company.new self, sym, *params }
+    @all_companies = Company::COMPANIES.map { |sym, params| [sym, Company.new(self, sym, *params)] }.to_h
     @current_bid = nil
     @foreign_investor = ForeignInvestor.new
     @round = 0
     @phase = 0
     @cash = 0
     setup_deck
-  end
-
-  def start
     draw_companies
     untap_pending_companies
   end
@@ -233,12 +238,12 @@ class Game < Base
     if @company_deck.empty?
       @companies.empty? ? :last_turn : :penultimate
     else
-      @company_deck.last.tier
+      @company_deck.first.tier
     end
   end
 
   def draw_companies
-    @pending_companies.concat @company_deck.pop(players.size - @companies.size)
+    @pending_companies.concat @company_deck.shift(players.size - @companies.size)
   end
 
   def untap_pending_companies
@@ -253,9 +258,9 @@ class Game < Base
 
   def setup_deck
     if deck.size.zero?
-      groups = @all_companies.group_by &:tier
+      groups = @all_companies.values.group_by &:tier
 
-      Company::TIERS.reverse.each do |tier|
+      Company::TIERS.each do |tier|
         num_cards = players.size + 1
         num_cards = 6 if tier == :orange && players.size == 4
         num_cards = 8 if tier == :orange && players.size == 5

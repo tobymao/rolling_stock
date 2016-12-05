@@ -22,19 +22,19 @@ describe Game do
     it 'should create deck for 3 players' do
       mock_players 3
       subject.load
-      expect(subject.company_deck.size).to eq(24)
+      expect(subject.company_deck.size).to eq(21)
     end
 
     it 'should create deck with 4 players' do
       mock_players 4
       subject.load
-      expect(subject.company_deck.size).to eq(31)
+      expect(subject.company_deck.size).to eq(27)
     end
 
     it 'should create deck with 5 players' do
       mock_players 5
       subject.load
-      expect(subject.company_deck.size).to eq(38)
+      expect(subject.company_deck.size).to eq(33)
     end
   end
 

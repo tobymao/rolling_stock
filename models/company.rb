@@ -90,7 +90,7 @@ class Company
   end
 
   def min_price
-    @income / 2
+    (@value + 1) / 2
   end
 
   def max_price
