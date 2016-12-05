@@ -113,7 +113,7 @@ class Game < Base
     when 7
       check_phase_change(@corporations.values ++ players.values)
     when 8
-      @phase += 1
+      collect_income
     when 9
       check_phase_change @corporations.values.reject { |c| c.cash.zero? }
     when 10
@@ -260,6 +260,7 @@ class Game < Base
     (@corporations.values + players.values).each do |entity|
       entity.collect_income tier
     end
+    @phase += 1
   end
 
   # phase 9
@@ -276,9 +277,9 @@ class Game < Base
 
   # phase 10
   def check_end
-    @phase += 1
     @eng_game_card = :last_turn if cost_of_ownership_tier == :penultimate
-    cost_of_ownership_tier == :last_turn || @stock_market.last.nil?
+    game_end = cost_of_ownership_tier == :last_turn || @stock_market.last.nil?
+    game_end ? update(state: :finished) : @phase += 1
   end
 
   private

@@ -45,14 +45,21 @@ describe Game do
     end
 
     describe '#check_end' do
-      it 'should return true if any corporation share price is 100' do
-        subject.stock_market[31] = nil
-        expect(subject.check_end).to eq(true)
+      it 'should not change to finished if no conditions met' do
+        subject.check_end
+        expect(subject.state).not_to eq('finished')
       end
 
-      it 'should be the last card' do
+      it 'should change to finished if any corporation share price is 100' do
+        subject.stock_market[31] = nil
+        subject.check_end
+        expect(subject.state).to eq('finished')
+      end
+
+      it 'should change to finished if game end card' do
         allow(subject).to receive(:cost_of_ownership_tier).and_return(:last_turn)
-        expect(subject.check_end).to eq(true)
+        subject.check_end
+        expect(subject.state).to eq('finished')
       end
     end
 
