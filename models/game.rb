@@ -81,18 +81,7 @@ class Game < Base
   def issue_share corporation
     raise unless corporation.can_issue_share?
     corporation.issue_share
-
-    if corporation.is_bankrupt?
-      @corporations.remove corporation.name
-      @players.each do |player|
-        player.shares.each do |share|
-          if share.corporation == corporation
-            share.delete
-          end
-        end
-      end
-      @share_prices.shift corporation.share_price
-    end
+    check_bankruptcy corporation
   end
 
   # phase 2
@@ -101,7 +90,7 @@ class Game < Base
     company.pass
 
     unless data[:pass]
-      share_price = @share_prices.find { |sp| sp.price == data[:price] }
+      share_price = @stock_market.find { |sp| sp.price == data[:price] }
       corporation = data[:corporation]
       form_corporation company, share_price, corporation
     end
@@ -151,6 +140,7 @@ class Game < Base
   def sell_share player, corporation
     raise unless corporation.can_sell_share? player
     corporation.sell_share player
+    check_bankruptcy corporation
   end
 
   def auction_company player, company, price
@@ -239,26 +229,13 @@ class Game < Base
 
   def pay_dividend corporation, amount
     corporation.pay_dividend amount, players.values
+    check_bankruptcy corporation
   end
 
   # phase 10
   def check_end
-    puts "corp size is " + @corporations.size.to_s
-    @corporations.each do |corporation_name, corporation|
-      puts corporation_name + " price is " + corporation.share_price.price.to_s
-      if corporation.share_price.price == 100
-        return true
-      end
-    end
-    if cost_of_ownership_tier == :last_turn
-      return true
-    end
-
-    if cost_of_ownership_tier == :penultimate
-      @end_game_card = :last_turn
-      return false
-    end
-    return false
+    @eng_game_card = :last_turn if cost_of_ownership_tier == :penultimate
+    cost_of_ownership_tier == :last_turn || @stock_market.last.nil?
   end
 
   private
@@ -284,6 +261,17 @@ class Game < Base
     passers.each &:unpass
     @phase += 1
   end
+
+  def check_bankruptcy corporation
+    return unless corporation.is_bankrupt?
+    @corporations.remove corporation.name
+    @available_corportations << corporation.name
+    @players.each do |player|
+      player.shares.reject! { |share| share.corporation == corporation }
+    end
+    @stock_market[corporation.share_price.index] = corporation.share_price
+  end
+
 
   def setup_deck
     if deck.size.zero?
