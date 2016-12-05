@@ -43,6 +43,12 @@ class Corporation
     !@bank_shares.empty?
   end
 
+  def is_bankrupt?
+    if @share_price.price == 0
+      true
+    end
+  end
+
   def buy_share player
     swap_share_price next_share_price
     player.cash - @share_price.price
