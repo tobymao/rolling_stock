@@ -3,7 +3,6 @@ require './spec/spec_helper'
 describe Game do
   let(:player) { Player.new 1, 'Test' }
   let(:company) { Company.new player, 'BME', 'Bergisch', :red, 1, 1, [] }
-  #let(:share_price) { SharePrice.initial_market[6] } # 10, 6
   let(:share_price) { SharePrice.initial_market[31] } # 100, 31
   let(:corporation) { Corporation.new 'Android', company, share_price, SharePrice.initial_market }
   let(:user) { create :user }
@@ -49,13 +48,7 @@ describe Game do
         subject.corporations['Android'] = corporation
         expect(subject.check_end).to eq(true)
       end
-
-      it 'should return true if the @end_game_card is set to :last_turn' do
-        subject.end_game_card = :last_turn
-        expect(subject.check_end).to eq(true)
-      end
     end
-
 
     describe '#collect_income' do
       it 'should increase cash for corporations and players' do
