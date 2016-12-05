@@ -5,6 +5,10 @@ module Passer
     @passed
   end
 
+  def active?
+    !@passed
+  end
+
   def pass
     @passed = true
   end

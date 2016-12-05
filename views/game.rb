@@ -7,13 +7,6 @@ module Views
     def render_main
       render_new if game.new_game?
       render_game
-      widget Deck, {
-        available_companies: game.companies,
-        pending_companies: game.pending_companies,
-        all_companies: game.all_companies,
-        company_deck: game.company_deck,
-        cost_of_ownership: {},
-      }
     end
 
     def render_new
@@ -28,9 +21,22 @@ module Views
     end
 
     def render_game
+      h3 "Round: #{game.round} Phase: #{game.phase} (#{game.phase_name})"
+      entity = game.active_entity
+      name = entity.respond_to?(:symbol) ? entity.symbol : entity.name
+      div "To Act: #{entity.class} #{name}"
+
       game.players.values.map do |player|
         widget PlayerHoldings, player: player
       end
+
+      widget Deck, {
+        available_companies: game.companies,
+        pending_companies: game.pending_companies,
+        all_companies: game.all_companies,
+        company_deck: game.company_deck,
+        cost_of_ownership: {},
+      }
     end
 
     def render_join_button

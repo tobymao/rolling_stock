@@ -14,7 +14,7 @@ class ForeignInvestor
   def purchase_companies companies
     company = companies.first
 
-    while @cash >= company.price
+    while company && @cash >= company.price
       buy_company company, company.price
       company = companies.first
     end

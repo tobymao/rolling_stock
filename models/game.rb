@@ -4,6 +4,19 @@ require './models/share_price'
 class Game < Base
   many_to_one :user
 
+  PHASE_NAME = {
+    1 => 'Issue New Shares',
+    2 => 'Form Corporations',
+    3 => 'Auctions And Share Trading',
+    4 => 'Determine New Player Order',
+    5 => 'Foreign Investor Buys Companies',
+    6 => 'Corporations Buys Companies',
+    7 => 'Close Companies',
+    8 => 'Collect Income',
+    9 => 'Pay Dividends And Adjust Share Prices',
+    10 => 'Check Game End',
+  }.freeze
+
   attr_reader(
     :stock_market,
     :available_corportations,
@@ -12,6 +25,8 @@ class Game < Base
     :pending_companies,
     :company_deck,
     :all_companies,
+    :round,
+    :phase,
   )
 
   def self.empty_game user
@@ -35,13 +50,14 @@ class Game < Base
     @all_companies = Company::COMPANIES.map { |sym, params| [sym, Company.new(self, sym, *params)] }.to_h
     @current_bid = nil
     @foreign_investor = ForeignInvestor.new
-    @round = 0
-    @phase = 0
+    @round = 1
+    @phase = 1
     @cash = 0
     @end_game_card = :penultimate
     setup_deck
     draw_companies
     untap_pending_companies
+    step
   end
 
   def players
@@ -63,11 +79,55 @@ class Game < Base
     state == 'finished'
   end
 
+  def phase_name
+    PHASE_NAME[@phase]
+  end
+
+  def active_entity
+    case @phase
+    when 1, 7, 9
+      active_corporation
+    when 2
+      active_company
+    when 3
+      active_player
+    end
+  end
+
+  def step
+    current_phase = @phase
+
+    case @phase
+    when 1
+      check_phase_change @corporations.values.reject { |c| c.shares.empty? }
+    when 2
+      check_phase_change players.values.flat_map(&:companies)
+    when 3
+      check_no_player_purchases
+    when 4
+      new_player_order
+    when 5
+      foreign_investor_purchase
+    when 6
+      check_no_company_purchases
+    when 7
+      check_phase_change(@corporations.values ++ players.values)
+    when 8
+      @phase += 1
+    when 9
+      check_phase_change @corporations.values.reject { |c| c.cash.zero? }
+    when 10
+      check_end
+    end
+
+    step if @phase != current_phase
+  end
+
   def process_action
   end
 
-  def process_action_data phase, data
-    send "process_phase_#{phase}", data
+  def process_action_data data
+    send "process_phase_#{@phase}", data
   end
 
   # phase 1
@@ -123,13 +183,6 @@ class Game < Base
       sell_share player, data[:corporation]
       player.unpass
     end
-
-    min = [
-      @corporations.values.map { |c| c.next_share_price.price }.min,
-      @companies.map(&:price).min,
-    ].min
-
-    check_phase_change players.reject { |p| p.cash < min }
   end
 
   def buy_share player, corporation
@@ -162,7 +215,7 @@ class Game < Base
 
   # phase 5
   def foreign_investor_purchase
-    foreign_investor.purchase_companies @companies
+    @foreign_investor.purchase_companies @companies
     draw_companies
     untap_pending_companies
     @phase += 1
@@ -178,13 +231,6 @@ class Game < Base
       company = @all_companies[data[:company]]
       buy_company corporation, company, data[:price]
     end
-
-    min = [
-      players.flat_map { |p| p.companies.map &:min_price }.min,
-      @foreign_investor.companies.map(&:min_price).min,
-    ]
-
-    check_phase_change @corporations.values.reject { |c| c.cash < min }
   end
 
   def buy_company corporation, company, price
@@ -200,10 +246,8 @@ class Game < Base
       holder.pass
     else
       company = @all_companies[data[:company]]
-      buy_company holder, company
+      close_company holder, company
     end
-
-    check_phase_change(@corporations.values ++ players.values)
   end
 
   def close_company holder, company
@@ -216,7 +260,6 @@ class Game < Base
     (@corporations.values + players.values).each do |entity|
       entity.collect_income tier
     end
-    @phase += 1
   end
 
   # phase 9
@@ -224,7 +267,6 @@ class Game < Base
     corporation = @corporations[data[:corporation]]
     corporation.pass
     pay_dividend corporation, data[:amount]
-    check_phase_change @corporations.values.reject { |c| c.cash.zero? }
   end
 
   def pay_dividend corporation, amount
@@ -234,44 +276,12 @@ class Game < Base
 
   # phase 10
   def check_end
+    @phase += 1
     @eng_game_card = :last_turn if cost_of_ownership_tier == :penultimate
     cost_of_ownership_tier == :last_turn || @stock_market.last.nil?
   end
 
   private
-
-  def cost_of_ownership_tier
-    if @company_deck.empty?
-      @end_game_card
-    else
-      @company_deck.first.tier
-    end
-  end
-
-  def draw_companies
-    @pending_companies.concat @company_deck.shift(players.size - @companies.size)
-  end
-
-  def untap_pending_companies
-    @companies.concat @pending_companies.slice!(0..-1)
-  end
-
-  def check_phase_change passers
-    return unless passers.all? &:passed?
-    passers.each &:unpass
-    @phase += 1
-  end
-
-  def check_bankruptcy corporation
-    return unless corporation.is_bankrupt?
-    @corporations.remove corporation.name
-    @available_corportations << corporation.name
-    @players.each do |player|
-      player.shares.reject! { |share| share.corporation == corporation }
-    end
-    @stock_market[corporation.share_price.index] = corporation.share_price
-  end
-
 
   def setup_deck
     if deck.size.zero?
@@ -288,5 +298,67 @@ class Game < Base
     else
       @company_deck = deck.map { |sym| Company.new self, sym, *Company::COMPANIES[sym] }
     end
+  end
+
+  def cost_of_ownership_tier
+    if @company_deck.empty?
+      @end_game_card
+    else
+      @company_deck.first.tier
+    end
+  end
+
+  def active_corporation
+    @corporations.values.sort_by(&:price).reverse.find &:active?
+  end
+
+  def active_company
+    players.values.flat_map(&:companies).sort_by(&:value).reverse.find &:active?
+  end
+
+  def active_player
+    players.values.find &:active?
+  end
+
+  def draw_companies
+    @pending_companies.concat @company_deck.shift(players.size - @companies.size)
+  end
+
+  def untap_pending_companies
+    @companies.concat @pending_companies.slice!(0..-1)
+  end
+
+  def check_phase_change passers
+    return unless passers.all? &:passed?
+    passers.each &:unpass
+    @phase += 1
+  end
+
+  def check_no_player_purchases
+    min = [
+      @corporations.values.map { |c| c.next_share_price.price }.min,
+      @companies.map(&:value).min,
+    ].compact.min
+
+    check_phase_change players.values.reject { |p| p.cash < min && p.shares.empty? }
+  end
+
+  def check_no_company_purchases
+    min = [
+      players.flat_map { |p| p.companies.map &:min_price }.min,
+      @foreign_investor.companies.map(&:min_price).min,
+    ].compact.min
+
+    check_phase_change @corporations.values.reject { |c| c.cash < min }
+  end
+
+  def check_bankruptcy corporation
+    return unless corporation.is_bankrupt?
+    @corporations.remove corporation.name
+    @available_corportations << corporation.name
+    @players.each do |player|
+      player.shares.reject! { |share| share.corporation == corporation }
+    end
+    @stock_market[corporation.share_price.index] = corporation.share_price
   end
 end

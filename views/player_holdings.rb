@@ -6,9 +6,9 @@ module Views
 
     def content
       div do
-        text "#{player.name} [#{player.value}]Cash: $#{player.cash} Value: #{player.value}"
+        div "#{player.name} - $#{player.cash}"
+        player.companies.map  { |c| widget Company, company: c, all_companies: all_companies }
       end
-      div player.companies
     end
   end
 end

@@ -10,7 +10,7 @@ describe Game do
 
   def mock_players num
     allow(subject).to receive(:players).and_return(
-      num.times.map { |n| Player.new n, "player_#{n}" }
+      num.times.map { |n| [n, Player.new(n, "player_#{n}")] }.to_h
     )
   end
 
@@ -40,6 +40,7 @@ describe Game do
 
   context 'after load' do
     before :each do
+      mock_players 4
       subject.load
     end
 

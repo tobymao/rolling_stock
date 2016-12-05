@@ -39,17 +39,21 @@ class Corporation
     issue_initial_shares
   end
 
+  def price
+    @share_price.price
+  end
+
   def can_buy_share?
     !@bank_shares.empty?
   end
 
   def is_bankrupt?
-    @share_price.price.zero?
+    price.zero?
   end
 
   def buy_share player
     swap_share_price next_share_price
-    player.cash - @share_price.price
+    player.cash - price
     player.shares << @bank_shares.pop
   end
 
@@ -60,7 +64,7 @@ class Corporation
 
   def sell_share player
     swap_share_price prev_share_price
-    player.cash + @share_price.price
+    player.cash + price
     @bank_shares << player.shares.pop
   end
 
@@ -70,7 +74,7 @@ class Corporation
 
   def issue_share
     swap_share_price prev_share_price
-    @cash += @share_price.price
+    @cash += price
     @bank_shares << @shares.shift
   end
 
@@ -110,7 +114,7 @@ class Corporation
   end
 
   def market_cap
-    shares_issued * @share_price.price
+    shares_issued * price
   end
 
   def shares_issued
@@ -120,7 +124,6 @@ class Corporation
   private
   def issue_initial_shares
     company = @companies.first
-    price = @share_price.price
     value = company.value
     num_shares = (value / price) + 1
     seed = value - num_shares * price

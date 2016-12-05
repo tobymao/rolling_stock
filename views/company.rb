@@ -10,6 +10,8 @@ module Views
         display: 'inline-block',
         border: '1px solid black',
         padding: '0.2em',
+        margin: '0.2em',
+        max_width: '20em',
       )
 
       div style: container_style do
@@ -49,9 +51,10 @@ module Views
       default = {
         margin: '0 0.1em 0 0.1em',
         padding: '0 0.3em 0 0.3em',
+        display: 'inline-block',
       }.merge extra_style
 
-      span title: title, style: inline(default) do
+      div title: title, style: inline(default) do
         text content
       end
     end

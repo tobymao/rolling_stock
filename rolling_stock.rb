@@ -77,6 +77,17 @@ class RollingStock < Roda
           r.redirect path(game)
         end
 
+        r.post 'action' do
+          action = Action.find_or_create(
+            game_id: id,
+            round: game.round,
+            phase: game.phase,
+          )
+          game.process_action_data r['data']
+          action.update data: JSON.parse(action.data).concat(r['data']).to_json
+          r.redirect path(game)
+        end
+
         r.post 'start' do
           game.update state: 'active'
           r.redirect path(game)
@@ -107,10 +118,9 @@ class RollingStock < Roda
       end
     end
 
-    r.is 'logout', method: 'post' do
-      r.redirect '/' unless current_user
+    r.is 'logout' do
       request.response.set_cookie 'auth_token', nil
-      return_to
+      r.redirect '/'
     end
 
     r.on 'user' do
