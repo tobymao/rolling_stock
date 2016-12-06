@@ -139,7 +139,6 @@ class Game < Base
 
   def process_actions
     actions.sort_by { |action| [action.round, action.phase] }.each do |action|
-      puts "** #{action.phase} #{@phase}"
       raise 'Invalid action for phase' if action.phase != @phase
       action.turns.each { |turn| process_action_data turn }
     end
