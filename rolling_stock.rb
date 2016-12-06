@@ -86,12 +86,11 @@ class RollingStock < Roda
             phase: game.phase,
           )
 
-          r['data']['player'] = current_user.id
-          game.process_action_data r['data']
-          turns = JSON.parse(action.turns)
-          turns << r['data']
+          data = r['data']
 
-          action.update turns: turns.to_json
+          data['player'] = current_user.id
+          game.process_action_data data
+          action.append_turn data
           r.redirect path(game)
         end
 

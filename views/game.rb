@@ -22,19 +22,18 @@ module Views
 
     def render_game
       h3 "Round: #{game.round} Phase: #{game.phase} (#{game.phase_name})"
-      entity = game.active_entity
-      name = entity.respond_to?(:symbol) ? entity.symbol : entity.name
-
-      render_current_action
+      entity = game.active_entity || game.player_by_id(app.current_user.id)
+      render_current_action(entity) if entity && entity.active?
 
       game.players.map do |player|
-        widget PlayerHoldings, player: player
+        widget PlayerHoldings, player: player, game: game
       end
 
       widget Deck, game: game
     end
 
-    def render_current_action
+    def render_current_action entity
+      widget PassButton, game: game, entity: entity
     end
 
     def render_join_button

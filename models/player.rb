@@ -21,7 +21,7 @@ class Player
   end
 
   def close_company company
-    @companies.remove company
+    @companies.delete company
   end
 
   def collect_income tier

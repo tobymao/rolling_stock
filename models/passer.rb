@@ -1,5 +1,5 @@
 module Passer
-  attr_accessor :passed
+  attr_reader :passed
 
   def passed?
     @passed
@@ -15,5 +15,9 @@ module Passer
 
   def unpass
     @passed = false
+  end
+
+  def type
+    self.class.to_s.downcase
   end
 end

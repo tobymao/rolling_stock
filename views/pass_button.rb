@@ -1,23 +1,15 @@
 require './views/base'
 
 module Views
-  class Passbutton < Base
+  class PassButton < Base
     needs :game
+    needs :entity
 
     def content
-      s = inline(
-        display: 'none',
-        margin_top: '1em',
-      )
-
-      form_props = {
-        action: app.path(game, 'action'),
-        method: 'post',
-        style: s,
-      }
-
-      form form_props do
+      form action: app.path(game, 'action'), method: 'post' do
         rawtext app.csrf_tag
+        input type: 'hidden', name: "data[#{entity.type}]", value: entity.id
+        input type: 'hidden', name: "data[action]", value: 'pass'
         input type: 'submit', value: 'Pass'
       end
     end

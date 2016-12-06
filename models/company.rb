@@ -81,6 +81,10 @@ class Company
     @cash      = 0
   end
 
+  def id
+    @symbol
+  end
+
   def valid_price? price
     price.between?(min_price, max_price)
   end
