@@ -24,11 +24,12 @@ describe Corporation do
       player.companies << company_to_buy
       expect { subject.buy_company company_to_buy, 10}.to change { player.companies.size }.by(-1)
     end
+  end
 
-    it 'can_buy_shares should return false if bank shares is empty' do
+  describe '#can_buy_shares' do
+    it 'should return true if bank shares is not empty' do
       expect(subject.can_buy_share?).to eq(true)
     end
-
   end
 
   describe '#is_bankrupt' do
@@ -64,8 +65,15 @@ describe Corporation do
     end
   end
 
-  # Don't know how to create and pass in an array
-  #describe '#pay_dividend' do
+  describe '#pay_dividend' do
+    it 'should decrease corporation cash' do
+      expect { subject.pay_dividend 1, [player] }.to change { subject.cash }.by(-2)
+    end
+
+    it 'should increase player cash' do
+      expect { subject.pay_dividend 1, [player] }.to change { player.cash }.by(1)
+    end
+  end
 
   describe '#book_value' do
     it 'is worth some money' do

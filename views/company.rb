@@ -3,7 +3,7 @@ require './views/base'
 module Views
   class Company < Base
     needs :company
-    needs :all_companies
+    needs :game
 
     def content
       container_style = inline(
@@ -12,15 +12,20 @@ module Views
         padding: '0.2em',
         margin: '0.2em',
         max_width: '20em',
+        cursor: 'pointer',
       )
 
-      div style: container_style do
+      company_data = {
+        company: company.symbol,
+        value: company.value,
+      }
+
+      div style: container_style, data: company_data, onclick: 'Deck.onCompanyClick(this)' do
         company_style = inline(
           background_color: company.tier,
           margin_bottom: '0.2em',
           padding: '0.1em',
           display: 'inline-block',
-          cursor: 'pointer',
         )
 
         div style: company_style do
@@ -30,10 +35,10 @@ module Views
           render_title 'Base Income', "+$#{company.income}"
         end
 
-        div style: inline(margin_left: '1em', cursor: 'pointer') do
+        div style: inline(margin_left: '1em') do
           groups = company
             .synergies
-            .map { |sym| all_companies[sym] }
+            .map { |sym| game.all_companies[sym] }
             .group_by { |c| Corporation.calculate_synergy company.tier, c.tier }
 
           groups.map do |k, v|

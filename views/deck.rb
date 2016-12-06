@@ -3,21 +3,20 @@ require './views/company'
 
 module Views
   class Deck < Base
-    needs :available_companies
-    needs :all_companies
-    needs :pending_companies
-    needs :company_deck
-    needs :cost_of_ownership
+    needs :game
 
     def content
+      render_js
+
       h3 'Available Companies'
-      render_companies available_companies
+      render_companies game.companies
+      render_bid_box
 
       h3 'Pending Companies'
-      render_companies pending_companies
+      render_companies game.pending_companies
 
       h3 'Deck'
-      company_deck.map do |company|
+      game.company_deck.map do |company|
         span style: inline(
           background_color: company.tier,
           padding: '0.3em',
@@ -27,8 +26,55 @@ module Views
       end
     end
 
+    def render_js
+      script <<~JS
+        var Deck = {
+          onCompanyClick: function(el) {
+            var box = document.getElementById('bid_box');
+            var price = box.elements['bid_price'];
+            var company = box.elements['bid_company'];
+            var data = el.dataset;
+
+            if (company.value != data.company) {
+              box.style.display = 'block';
+              price.setAttribute('min', data.value);
+              price.setAttribute('value', data.value);
+              company.value = data.company;
+            } else {
+              box.style.display = 'none';
+              company.value = '';
+            }
+          }
+        };
+      JS
+    end
+
     def render_companies companies
-      companies.map { |c| widget Company, company: c, all_companies: all_companies }
+      companies.map { |c| widget Company, company: c, game: game }
+    end
+
+    def render_bid_box
+      s = inline(
+        display: 'none',
+        margin_top: '1em',
+      )
+
+      form_props = {
+        id: 'bid_box',
+        action: app.path(game, 'action'),
+        method: 'post',
+        style: s,
+      }
+
+      form form_props do
+        rawtext app.csrf_tag
+        span 'Price'
+        input id: 'bid_price', type: 'number', name: 'data[price]', placeholder: 'Price'
+        span 'Symbol'
+        input id: 'bid_company', type: 'text', name: 'data[company]', placeholder: 'Company'
+        input type: 'hidden', name: 'data[action]', value: 'bid'
+        input type: 'submit', value: 'Make Bid'
+      end
     end
   end
 end

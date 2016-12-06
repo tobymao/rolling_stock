@@ -42,10 +42,11 @@ Sequel.migration do
       foreign_key :game_id, :games, null: false, index: true, on_delete: :cascade
       Integer :round, null: false
       Integer :phase, null: false
-      String :data, null: false
+      String :turns, null: false, default: '[]'
 
       DateTime :created_at, null: false
       DateTime :updated_at, null: false
+      index [:game_id, :round, :phase], unique: true
     end
   end
 end

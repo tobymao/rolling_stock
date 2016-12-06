@@ -47,7 +47,7 @@ class RollingStock < Roda
   end
 
   path Game do |game, *paths|
-      "/game/#{game.id}/#{paths.join('/')}"
+    "/game/#{game.id}/#{paths.join('/')}"
   end
 
   route do |r|
@@ -65,9 +65,9 @@ class RollingStock < Roda
     r.on 'game' do
       r.on ':id' do |id|
         game = Game[id]
+        game.load
 
         r.get do
-          game.load
           widget Views::Game, game: game
         end
 
@@ -77,14 +77,21 @@ class RollingStock < Roda
           r.redirect path(game)
         end
 
+        r.halt 403 unless game.users.to_a.include? current_user.id
+
         r.post 'action' do
           action = Action.find_or_create(
             game_id: id,
             round: game.round,
             phase: game.phase,
           )
+
+          r['data']['player'] = current_user.id
           game.process_action_data r['data']
-          action.update data: JSON.parse(action.data).concat(r['data']).to_json
+          turns = JSON.parse(action.turns)
+          turns << r['data']
+
+          action.update turns: turns.to_json
           r.redirect path(game)
         end
 

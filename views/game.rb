@@ -11,11 +11,11 @@ module Views
 
     def render_new
       div do
-        game.players.values.map do |player|
+        game.players.map do |player|
           div player.name
         end
 
-        render_join_button if !game.players[app.current_user.id] && game.new_game?
+        render_join_button if !game.players.include?(app.current_user.id) && game.new_game?
         render_start_button if game.user == app.current_user
       end
     end
@@ -24,19 +24,17 @@ module Views
       h3 "Round: #{game.round} Phase: #{game.phase} (#{game.phase_name})"
       entity = game.active_entity
       name = entity.respond_to?(:symbol) ? entity.symbol : entity.name
-      div "To Act: #{entity.class} #{name}"
 
-      game.players.values.map do |player|
+      render_current_action
+
+      game.players.map do |player|
         widget PlayerHoldings, player: player
       end
 
-      widget Deck, {
-        available_companies: game.companies,
-        pending_companies: game.pending_companies,
-        all_companies: game.all_companies,
-        company_deck: game.company_deck,
-        cost_of_ownership: {},
-      }
+      widget Deck, game: game
+    end
+
+    def render_current_action
     end
 
     def render_join_button

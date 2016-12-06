@@ -10,7 +10,7 @@ describe Game do
 
   def mock_players num
     allow(subject).to receive(:players).and_return(
-      num.times.map { |n| [n, Player.new(n, "player_#{n}")] }.to_h
+      num.times.map { |n| Player.new(n, "player_#{n}") }
     )
   end
 
@@ -66,7 +66,7 @@ describe Game do
     describe '#collect_income' do
       it 'should increase cash for corporations and players' do
         player.companies << company
-        allow(subject).to receive(:players).and_return(player.id => player)
+        allow(subject).to receive(:players).and_return([player])
         expect { subject.collect_income }.to change { player.cash }.by 1
       end
     end

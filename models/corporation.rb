@@ -105,7 +105,7 @@ class Corporation
     players.each do |player|
       total = amount * player.shares.count { |share| share.corporation == self }
       @cash -= total
-      @player.cash += total
+      player.cash += total
     end
 
     adjust_share_price
@@ -153,7 +153,7 @@ class Corporation
   end
 
   def above_valuation?
-    book_value - market_cap >= SharePrice[@share_price.index]
+    book_value - market_cap >= SharePrice::PRICES[@share_price.index]
   end
 
   def adjust_share_price
