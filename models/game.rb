@@ -348,7 +348,7 @@ class Game < Base
 
   def get_entity data
     @corporations[data['corporation']] ||
-      @corporations[data['corporation']] ||
+      @all_companies[data['company']] ||
       player_by_id(data['player'])
   end
 
