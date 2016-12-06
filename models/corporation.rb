@@ -79,7 +79,7 @@ class Corporation
   end
 
   def close_company company
-    @companies.remove company
+    @companies.delete company
   end
 
   def collect_income tier
@@ -90,10 +90,12 @@ class Corporation
       @cash -= company.cost_of_ownership tier
 
       company.synergies.each do |synergy|
-        @cash += self.class.calculate_synergy company.tier, synergies[synergy]
+        if companies.include? synergy
+          @cash += self.class.calculate_synergy company.tier, synergies[synergy]
+        end
       end
 
-      synergies.remove company.symbol
+      synergies.delete company.symbol
     end
   end
 
@@ -110,7 +112,7 @@ class Corporation
   end
 
   def book_value
-    @cash + @companies.reduce { |c, p| c.price + p }
+    @cash + @companies.reduce(0) { |p, c| c.value + p }
   end
 
   def market_cap
