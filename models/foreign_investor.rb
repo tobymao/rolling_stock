@@ -22,12 +22,13 @@ class ForeignInvestor
     super
   end
 
-  def purchase_companies companies
-    company = companies.first
+  def purchase_companies available_companies
+    available_companies.sort_by! &:value
+    company = available_companies.first
 
     while company && @cash >= company.value
       buy_company company, company.value
-      company = companies.first
+      company = available_companies.first
     end
   end
 end

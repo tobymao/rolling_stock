@@ -1,7 +1,6 @@
 module Purchaser
   def buy_company company, price
     @cash -= price
-
     owner = company.owner
     owner.cash += price if owner.respond_to? :cash
     owner.companies.delete company
