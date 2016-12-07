@@ -38,7 +38,7 @@ module Views
         div style: inline(margin_left: '1em') do
           groups = company
             .synergies
-            .map { |sym| game.all_companies[sym] }
+            .map { |sym| ::Company.all[sym] }
             .group_by { |c| Corporation.calculate_synergy company.tier, c.tier }
 
           groups.map do |k, v|

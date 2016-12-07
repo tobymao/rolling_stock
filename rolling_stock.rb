@@ -87,8 +87,6 @@ class RollingStock < Roda
           )
 
           data = r['data']
-
-          data['player'] = current_user.id
           game.process_action_data data
           action.append_turn data
           r.redirect path(game)

@@ -11,6 +11,17 @@ class ForeignInvestor
     @cash = 0
   end
 
+  def close_companies tier
+    @companies.each do |company|
+      close_company(company) if company.income < company.cost_of_ownership(tier)
+    end
+  end
+
+  def collect_income tier
+    cash += 5
+    super
+  end
+
   def purchase_companies companies
     company = companies.first
 

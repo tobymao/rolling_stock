@@ -39,6 +39,10 @@ class Corporation
     issue_initial_shares
   end
 
+  def owner
+    @president
+  end
+
   def price
     @share_price.price
   end
@@ -76,10 +80,6 @@ class Corporation
     swap_share_price prev_share_price
     @cash += price
     @bank_shares << @shares.shift
-  end
-
-  def close_company company
-    @companies.delete company
   end
 
   def collect_income tier

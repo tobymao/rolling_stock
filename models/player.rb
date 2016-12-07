@@ -16,18 +16,11 @@ class Player
     @cash = 30
   end
 
+  def owner
+    self
+  end
+
   def value
     @cash + (@companies.map(&:value).reduce(&:+) || 0)
-  end
-
-  def close_company company
-    @companies.delete company
-  end
-
-  def collect_income tier
-    @companies.each do |company|
-      @cash += company.income
-      @cash -= company.cost_of_ownership tier
-    end
   end
 end

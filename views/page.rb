@@ -73,11 +73,10 @@ module Views
         ['Home', '/'],
         ['Games', '/games'],
         ['About Us', '/about'],
-        ['Contact', '/contact'],
       ]
 
       if app.current_user
-        links << ['Logout', '/logout']
+        links.concat [[app.current_user.name, '/'], ['Logout', '/logout']]
       else
         links.concat [['Login', '/login'], ['Sign Up', '/signup']]
       end

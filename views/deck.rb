@@ -59,19 +59,20 @@ module Views
         margin_top: '1em',
       )
 
-      form_props = {
+      props = {
         id: 'bid_box',
         action: app.path(game, 'action'),
         method: 'post',
         style: s,
       }
 
-      form form_props do
+      form props do
         rawtext app.csrf_tag
         span 'Price'
         input id: 'bid_price', type: 'number', name: 'data[price]', placeholder: 'Price'
         span 'Symbol'
         input id: 'bid_company', type: 'text', name: 'data[company]', placeholder: 'Company'
+        input type: 'hidden', name: 'data[player]', value: app.current_user.id
         input type: 'hidden', name: 'data[action]', value: 'bid'
         input type: 'submit', value: 'Make Bid'
       end

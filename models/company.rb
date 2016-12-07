@@ -69,6 +69,12 @@ class Company
   attr_reader :symbol, :name, :tier, :value, :income, :synergies
   attr_accessor :owner
 
+  def self.all
+    Company::COMPANIES.map do |sym, params|
+      [sym, Company.new(self, sym, *params).freeze]
+    end.to_h
+  end
+
   def initialize owner, symbol, name, tier, value, income, synergies
     @symbol    = symbol
     @name      = name
