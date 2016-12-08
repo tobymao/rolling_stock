@@ -3,24 +3,30 @@ require './views/base'
 module Views
   class Company < Base
     needs :company
-    needs :game
+    needs onclick: false
 
     def content
-      container_style = inline(
+      container_style = {
         display: 'inline-block',
         border: '1px solid black',
         padding: '0.2em',
         margin: '0.2em',
         max_width: '20em',
-        cursor: 'pointer',
-      )
-
-      company_data = {
-        company: company.symbol,
-        value: company.value,
       }
 
-      div style: container_style, data: company_data, onclick: 'Deck.onCompanyClick(this)' do
+      container_style[:cursor] = 'pointer' if onclick
+
+      props = {
+        style: inline(container_style),
+        data: {
+          company: company.symbol,
+          value: company.value,
+        },
+      }
+
+      props[:onclick] = onclick if onclick
+
+      div props do
         company_style = inline(
           background_color: company.tier,
           margin_bottom: '0.2em',
@@ -42,10 +48,12 @@ module Views
             .group_by { |c| Corporation.calculate_synergy company.tier, c.tier }
 
           groups.map do |k, v|
-            render_title "$#{k} Synergy Income", "+$#{k}", synergy_style(v.first.tier)
+            div do
+              render_title "$#{k} Synergy Income", "+$#{k}", synergy_style(v.first.tier)
 
-            v.map do |synergy|
-              render_title synergy.name, "#{synergy.symbol} [#{synergy.value}]", synergy_style(synergy.tier)
+              v.map do |synergy|
+                render_title synergy.name, "#{synergy.symbol} [#{synergy.value}]", synergy_style(synergy.tier)
+              end
             end
           end
         end

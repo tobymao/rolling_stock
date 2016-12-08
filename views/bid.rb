@@ -1,0 +1,14 @@
+require './views/base'
+
+module Views
+  class Bid < Base
+    needs :bid
+
+    def content
+      h3 "Current Bid"
+      div "High Bidder - #{bid.player.name}"
+      div "Price - #{bid.price}"
+      widget Company, company: bid.company
+    end
+  end
+end

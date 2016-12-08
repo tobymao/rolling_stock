@@ -70,7 +70,7 @@ class Company
   attr_accessor :owner
 
   def self.all
-    Company::COMPANIES.map do |sym, params|
+    @@all ||= Company::COMPANIES.map do |sym, params|
       [sym, Company.new(self, sym, *params).freeze]
     end.to_h
   end

@@ -22,19 +22,16 @@ module Views
 
     def render_game
       h3 "Round: #{game.round} Phase: #{game.phase} (#{game.phase_name})"
-      current_player = game.player_by_id app.current_user.id
 
-      render_current_action current_player
+      widget Bid, bid: game.current_bid if game.current_bid
+      current_player = game.player_by_id app.current_user.id
+      widget Action, game: game, current_player: current_player
 
       game.players.map do |player|
         widget PlayerHoldings, player: player, game: game
       end
 
       widget Deck, game: game
-    end
-
-    def render_current_action current_player
-      widget PassButton, game: game, current_player: current_player
     end
 
     def render_join_button

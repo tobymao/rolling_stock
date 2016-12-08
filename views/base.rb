@@ -20,6 +20,24 @@ module Views
       self.class.inline hash
     end
 
+    def game_form hash = {}
+      default = {
+        action: app.path(game, 'action'),
+        method: 'post',
+      }
+
+      form default.merge(hash) do
+        rawtext app.csrf_tag
+        input type: 'hidden', name: 'data[round]', value: game.round
+        input type: 'hidden', name: 'data[phase]', value: game.phase
+        yield
+      end
+    end
+
+    def data key
+      "data[actions][][#{key}]"
+    end
+
     # override
     def widget w, hash = nil, &block
       hash ||= {}

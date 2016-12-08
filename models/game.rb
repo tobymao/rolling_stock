@@ -19,11 +19,12 @@ class Game < Base
 
   attr_reader(
     :stock_market,
-    :available_corportations,
-    :corporation,
+    :available_corporations,
+    :corporations,
     :companies,
     :pending_companies,
     :company_deck,
+    :current_bid,
     :round,
     :phase,
   )
@@ -41,7 +42,7 @@ class Game < Base
 
   def load
     @stock_market = SharePrice.initial_market
-    @available_corportations = Corporation::CORPORATIONS.dup
+    @available_corporations = Corporation::CORPORATIONS.dup
     @corporations = []
     @companies = [] # available companies
     @pending_companies = []
@@ -104,25 +105,34 @@ class Game < Base
     end
   end
 
+  # todo get rid of this sort
   def active_corporations
     @corporations.sort_by(&:price).reverse.select &:active?
   end
 
   def active_companies
-    (@corporations.flat_map(&:companies) + players.flat_map(&:companies)).select &:active?
+    held_companies.select &:active?
   end
 
   def active_player_companies
     players.flat_map(&:companies).sort_by(&:value).reverse.select &:active?
   end
 
-  def active_entity
+  def acting
     case @phase
     when 1, 2, 3, 9
-      active_entities.first
+      active_entities.slice(0..0)
     when 6, 7
       active_entities
     end
+  end
+
+  def can_act? player
+    acting.map(&:owner).include? player
+  end
+
+  def held_companies
+    @corporations.flat_map(&:companies) + players.flat_map(&:companies)
   end
 
   def step
@@ -142,7 +152,7 @@ class Game < Base
     when 6
       check_no_company_purchases
     when 7
-      check_phase_change(@corporations.flat_map(&:companies) + players.flat_map(&:companies))
+      check_phase_change held_companies
     when 8
       collect_income
     when 9
@@ -204,9 +214,9 @@ class Game < Base
   end
 
   def form_corporation company, share_price, corporation_name
-    raise unless @available_corportations.include? corporation_name
+    raise unless @available_corporations.include? corporation_name
     raise unless share_price.valid_range? company
-    @available_corportations.remove corporation_name
+    @available_corporations.remove corporation_name
     @corporations << Corporation.new(corporation_name, company, share_price)
   end
 
@@ -214,7 +224,7 @@ class Game < Base
   def process_phase_3 data
     player = player_by_id data['player']
     action = data['action']
-    raise 'Not your turn' unless active_entity.id == player.id
+    raise 'Not your turn' unless can_act? player
     raise 'You must bid or pass' if @current_bid && action != 'bid'
 
     case action
@@ -292,9 +302,7 @@ class Game < Base
   def process_phase_6 data
     corporation = @corporations[data['corporation']]
 
-    companies = @corporations.flat_map(&:companies) +
-      players.flat_map(&:companies) +
-      @foreign_investor.companies
+    companies = held_companies + @foreign_investor.companies
 
     company = companies.find { |c| c.symbol == [data['company']] }
     buy_company corporation, company, data['price']
@@ -306,14 +314,10 @@ class Game < Base
   end
 
   # phase 7
+  # todo check if you can close other people's company
   def process_phase_7 data
-    holder = @corporations[data['corporation']] || player_by_id(data['player'])
-    company = holder.companies.find { |c| c.symbol == [data['company']] }
-    close_company holder, company
-  end
-
-  def close_company holder, company
-    holder.close_company company
+    company = held_companies.find { |c| c.symbol == data['company'] }
+    company.owner.close_company company
   end
 
   # phase 8
@@ -416,7 +420,7 @@ class Game < Base
   def check_bankruptcy corporation
     return unless corporation.is_bankrupt?
     @corporations.drop corporation
-    @available_corportations << corporation.name
+    @available_corporations << corporation.name
     players.each do |player|
       player.shares.reject! { |share| share.corporation == corporation }
     end
