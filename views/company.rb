@@ -12,6 +12,7 @@ module Views
         padding: '0.2em',
         margin: '0.2em',
         max_width: '20em',
+        vertical_align: 'top',
       }
 
       container_style[:cursor] = 'pointer' if onclick
