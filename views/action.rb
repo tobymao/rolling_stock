@@ -13,12 +13,18 @@ module Views
     def action_widget
       case game.phase
       when 2
-        widget FormCorporations, game: game, current_player: current_player
+        render_action FormCorporations
       when 3
-        widget CompanyAuction, game: game, current_player: current_player
+        render_action AuctionCompanies
+      when 6
+        render_action BuyCompanies
       when 7
-        widget CloseCompanies, game: game, current_player: current_player
+        render_action CloseCompanies
       end
+    end
+
+    def render_action klass
+      widget klass, game: game, current_player: current_player
     end
   end
 end

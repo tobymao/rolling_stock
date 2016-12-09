@@ -10,7 +10,8 @@ module Views
         div do
           span "#{player.name} - $#{player.cash}"
         end
-        player.companies.map  { |c| widget Company, company: c, game: game }
+        widget Shares, shares: player.shares
+        widget Companies, companies: player.companies
       end
     end
   end

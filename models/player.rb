@@ -4,6 +4,7 @@ require './models/purchaser'
 class Player
   include Passer
   include Purchaser
+  include Ownable
 
   attr_reader :id, :name, :companies, :shares
   attr_accessor :cash

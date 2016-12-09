@@ -4,6 +4,7 @@ require './models/purchaser'
 class Corporation
   include Passer
   include Purchaser
+  include Ownable
 
   CORPORATIONS = %w(Android Bear Eagle Horse Jupiter Orion Saturn Ship Star Wheel).freeze
 
@@ -27,6 +28,8 @@ class Corporation
   end
 
   def initialize name, company, share_price, stock_market
+    company.owner.companies.delete company
+
     @name = name
     @president = company.owner
     @companies = [company]
@@ -37,6 +40,10 @@ class Corporation
     @bank_shares = []
 
     issue_initial_shares
+  end
+
+  def id
+    @name
   end
 
   def owner
@@ -123,6 +130,14 @@ class Corporation
     10 - @shares.size
   end
 
+  def prev_share_price
+    @stock_market.take(@share_price.index).reverse.compact.first || @stock_market.first
+  end
+
+  def next_share_price
+    @stock_market.drop(@share_price.index).compact.first || @stock_market.last
+  end
+
   private
   def issue_initial_shares
     company = @companies.first
@@ -136,14 +151,6 @@ class Corporation
 
     @president.shares.concat @shares.shift(num_shares)
     @bank_shares.concat @shares.shift(num_shares)
-  end
-
-  def prev_share_price
-    @stock_market.take(@share_price.index).reverse.compact.first || @stock_market.first
-  end
-
-  def next_share_price
-    @stock_market.drop(@share_price.index).compact.first || @stock_market.last
   end
 
   def swap_share_price new_price

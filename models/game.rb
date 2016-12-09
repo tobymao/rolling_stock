@@ -25,6 +25,8 @@ class Game < Base
     :pending_companies,
     :company_deck,
     :current_bid,
+    :offers,
+    :foreign_investor,
     :round,
     :phase,
   )
@@ -48,6 +50,7 @@ class Game < Base
     @pending_companies = []
     @company_deck = []
     @current_bid = nil
+    @offers = []
     @foreign_investor = ForeignInvestor.new
     @round = 1
     @phase = 1
@@ -101,7 +104,7 @@ class Game < Base
     when 3
       players.select &:active?
     when 7
-      (active_corporations + active_companies)
+      active_companies
     end
   end
 
@@ -128,7 +131,7 @@ class Game < Base
   end
 
   def can_act? player
-    acting.map(&:owner).include? player
+    acting.any? { |e| e.owned_by? player }
   end
 
   def held_companies
@@ -172,6 +175,7 @@ class Game < Base
     end
   end
 
+  # todo fix auto passing on corps and stuff
   def process_action_data data
     if data['action'] == 'pass'
       entities = [
@@ -206,18 +210,18 @@ class Game < Base
 
   # phase 2
   def process_phase_2 data
-    company = active_player_companies.find [data['company']]
-    company.pass
-    share_price = @stock_market.find { |sp| sp.price == data['price'] }
     corporation = data['corporation']
+    share_price = @stock_market.find { |sp| sp.price == data['price'].to_i }
+    company = active_player_companies.find { |c| c.symbol == data['company'] }
+    company.pass
     form_corporation company, share_price, corporation
   end
 
   def form_corporation company, share_price, corporation_name
     raise unless @available_corporations.include? corporation_name
     raise unless share_price.valid_range? company
-    @available_corporations.remove corporation_name
-    @corporations << Corporation.new(corporation_name, company, share_price)
+    @available_corporations.delete corporation_name
+    @corporations << Corporation.new(corporation_name, company, share_price, @stock_market)
   end
 
   # phase 3
@@ -299,22 +303,37 @@ class Game < Base
   end
 
   # phase 6
+  # corporations buy companies
+  # todo: don't allow multi movement of cash and companies
   def process_phase_6 data
-    corporation = @corporations[data['corporation']]
-
+    corporation = @corporations.find { |c| c.name == data['corporation'] }
     companies = held_companies + @foreign_investor.companies
+    company = companies.find { |c| c.symbol == data['company'] }
+    offer = @offers.find { |o| o.corporation == corporation && o.company == company }
+    owner = company.owner
+    raise "Can't sell last company" if owner.is_a?(Corporation) && owner.companies.size == 1
 
-    company = companies.find { |c| c.symbol == [data['company']] }
-    buy_company corporation, company, data['price']
-  end
+    case data['action']
+    when 'accept'
+      corporation.buy_company company, offer.price
+    when 'decline'
+      @offers.delete offer
+    else
+      price = data['price'].to_i
+      raise "Not a valid price" unless company.valid_price? price
+      raise "Already have an offer" if @offers.any? { |o| o.corporation == corporation && o.company == company}
 
-  def buy_company corporation, company, price
-    raise unless company.valid_price? price
-    corporation.buy_company company, price
+      if corporation.president != company.owner
+        @offers << Offer.new(corporation, company, price)
+      else
+        corporation.buy_company company, price
+      end
+    end
   end
 
   # phase 7
   # todo check if you can close other people's company
+  # solve this buy passing current_user into external action
   def process_phase_7 data
     company = held_companies.find { |c| c.symbol == data['company'] }
     company.owner.close_company company
@@ -411,7 +430,9 @@ class Game < Base
   def check_no_company_purchases
     min = [
       players.flat_map { |p| p.companies.map &:min_price }.min,
+      @corporations.reject { |c| c.companies.size == 1 }.flat_map { |p| p.companies.map &:min_price }.min,
       @foreign_investor.companies.map(&:min_price).min,
+      99999,
     ].compact.min
 
     check_phase_change @corporations.reject { |c| c.cash < min }

@@ -18,7 +18,7 @@ module Views
           end
         end
 
-        game.corporations.select { |c| c.owner == current_player }.map do |corporation|
+        game.corporations.select { |c| c.owned_by? current_player }.map do |corporation|
           div "Companies owned by #{corporation.name}"
 
           corporation.companies.each do |company|

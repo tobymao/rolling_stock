@@ -24,7 +24,7 @@ module Views
       h3 "Round: #{game.round} Phase: #{game.phase} (#{game.phase_name})"
 
       widget Bid, bid: game.current_bid if game.current_bid
-      current_player = game.player_by_id app.current_user.id
+      current_player = game.player_by_id app.current_user&.id
       widget Action, game: game, current_player: current_player
 
       game.players.map do |player|

@@ -158,9 +158,8 @@ class RollingStock < Roda
     @current_user ||=
       begin
         token = request.cookies['auth_token']
-        session = Session.where(token: token).first
-        user = session.user if session&.valid?
-        user
+        session = Session.find token: token
+        session.user if session&.valid?
       end
   end
 

@@ -8,13 +8,13 @@ module Views
     def content
       render_js
 
-      entities = game.active_entities.select { |e| e.owner == current_player }
+      entities = game.active_entities.select { |e| e.owned_by? current_player }
       active_entity = game.acting.first if game.acting.size == 1
 
       game_form do
         single_pass active_entity
         input type: 'submit', value: "Pass"
-      end if active_entity&.owner == current_player
+      end if active_entity&.owned_by? current_player
 
       game_form do
         entities.size == 1 ? single_pass(entities.first) : multi_pass(entities)

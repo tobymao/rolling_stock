@@ -1,7 +1,9 @@
 require './models/passer'
+require './models/ownable'
 
 class Company
   include Passer
+  include Ownable
 
   TIERS = [:red, :orange, :yellow, :green, :blue, :purple].freeze
 

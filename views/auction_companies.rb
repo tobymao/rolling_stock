@@ -1,7 +1,7 @@
 require './views/base'
 
 module Views
-  class CompanyAuction < Base
+  class AuctionCompanies < Base
     needs :game
     needs :current_player
 
