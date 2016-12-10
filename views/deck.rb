@@ -17,7 +17,7 @@ module Views
     end
 
     def render_deck
-      game.company_deck.map do |company|
+      game.company_deck.each do |company|
         span style: inline(
           background_color: company.tier,
           padding: '0.3em',

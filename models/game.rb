@@ -230,10 +230,12 @@ class Game < Base
     action = data['action']
     raise 'Not your turn' unless can_act? player
     raise 'You must bid or pass' if @current_bid && action != 'bid'
+    raise unless player
 
     case action
     when 'bid'
       company = @companies.find { |c| c.symbol == data['company'] }
+      raise unless company
       players.each &:unpass unless @current_bid
       bid_company player, company, data['price']
     when 'buy'
@@ -285,7 +287,7 @@ class Game < Base
 
   def restart_order
     players.rotate!
-    restart_order if @auction_starter != players.first
+    restart_order if @auction_starter != players.last
   end
 
   # phase 4
@@ -343,19 +345,18 @@ class Game < Base
   def collect_income
     tier = cost_of_ownership_tier
     @foreign_investor.close_companies tier
-    (@corporations + players).each { |entity| entity.collect_income tier }
+    (@corporations + players + [@foreign_investor]).each do |entity|
+      entity.collect_income tier
+    end
     @phase += 1
   end
 
   # phase 9
   def process_phase_9 data
     corporation = @corporations.find { |c| c.name == data['corporation'] }
+    raise 'Not corporation turn' unless acting.include? corporation
     corporation.pass
-    pay_dividend corporation, data[:amount]
-  end
-
-  def pay_dividend corporation, amount
-    corporation.pay_dividend amount, players
+    corporation.pay_dividend data['amount'].to_i, players
     check_bankruptcy corporation
   end
 
@@ -406,9 +407,13 @@ class Game < Base
     @companies.concat @pending_companies.slice!(0..-1)
   end
 
+  def unpass_all
+    (players + held_companies + @corporations).each &:unpass
+  end
+
   def check_phase_change passers
     return unless passers.all? &:passed?
-    passers.each &:unpass
+    unpass_all
     @phase += 1
   end
 

@@ -20,6 +20,8 @@ module Views
         render_action BuyCompanies
       when 7
         render_action CloseCompanies
+      when 9
+        render_action PayDividends
       end
     end
 

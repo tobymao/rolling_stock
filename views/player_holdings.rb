@@ -3,7 +3,6 @@ require './views/base'
 module Views
   class PlayerHoldings < Base
     needs :player
-    needs :game
 
     def content
       div do

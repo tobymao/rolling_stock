@@ -23,7 +23,7 @@ module Views
     def render_join_games
       div 'Join Game'
 
-      new_games.map do |game|
+      new_games.each do |game|
         div do
           span game.id
           span game.user.name
@@ -35,7 +35,7 @@ module Views
     def render_active_games
       div 'Active Games'
 
-      active_games.map do |game|
+      active_games.each do |game|
         div do
           span game.id
           span game.user.name

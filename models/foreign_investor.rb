@@ -18,7 +18,7 @@ class ForeignInvestor
   end
 
   def collect_income tier
-    cash += 5
+    @cash += 5
     super
   end
 

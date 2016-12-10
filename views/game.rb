@@ -11,7 +11,7 @@ module Views
 
     def render_new
       div do
-        game.players.map do |player|
+        game.players.each do |player|
           div player.name
         end
 
@@ -27,9 +27,11 @@ module Views
       current_player = game.player_by_id app.current_user&.id
       widget Action, game: game, current_player: current_player
 
-      game.players.map do |player|
-        widget PlayerHoldings, player: player, game: game
+      game.players.each do |player|
+        widget PlayerHoldings, player: player
       end
+
+      widget ForeignInvestor, foreign_investor: game.foreign_investor
 
       widget Deck, game: game
     end

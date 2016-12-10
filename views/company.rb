@@ -48,11 +48,11 @@ module Views
             .map { |sym| ::Company.all[sym] }
             .group_by { |c| Corporation.calculate_synergy company.tier, c.tier }
 
-          groups.map do |k, v|
+          groups.each do |k, v|
             div do
               render_title "$#{k} Synergy Income", "+$#{k}", synergy_style(v.first.tier)
 
-              v.map do |synergy|
+              v.each do |synergy|
                 render_title synergy.name, "#{synergy.symbol} [#{synergy.value}]", synergy_style(synergy.tier)
               end
             end
