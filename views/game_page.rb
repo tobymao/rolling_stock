@@ -30,6 +30,7 @@ module Views
           _onOpen: function() {
             this.open = true;
             console.log("Websocket open");
+            this.ping();
           },
 
           _onClose: function() {
@@ -54,6 +55,11 @@ module Views
               var el = array[i];
               el.value = "#{app.csrf_token}";
             }
+          },
+
+          ping: function() {
+            this.send({"kind": "ping"});
+            setTimeout(this.ping.bind(this), 20000);
           },
 
           send: function(obj) {

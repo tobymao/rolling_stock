@@ -12,6 +12,23 @@ module Views
         onclick: 'CompanyAuction.onClick(this)'
       } unless game.current_bid
       widget BidBox, game: game, current_player: current_player
+
+      game_form do
+        select name: data('corporation') do
+          game.corporations.each do |corporation|
+            next if corporation.bank_shares.empty?
+            option(value: corporation.name) { text corporation.name }
+          end
+        end
+
+        button name: 'action', type: 'submit', value: 'buy' do
+          text 'Buy'
+        end
+
+        button name: 'action', type: 'submit', value: 'sell' do
+          text 'Sell'
+        end
+      end
     end
 
     def js_block

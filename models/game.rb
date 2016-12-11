@@ -55,6 +55,12 @@ class Game < Base
     @round = 1
     @phase = 1
     @end_game_card = :penultimate
+    @start_player = players.first
+
+    start_game unless new_game?
+  end
+
+  def start_game
     setup_deck
     draw_companies
     untap_pending_companies
@@ -69,6 +75,10 @@ class Game < Base
       .where(id: users_array)
       .map { |user| Player.new(user.id, user.name) }
       .sort_by { |p| users_array.find_index p.id }
+  end
+
+  def players_in_order
+    players.rotate(players.find_index @start_player)
   end
 
   def player_by_user user
@@ -248,7 +258,7 @@ class Game < Base
       raise 'Unspecified action'
     end
 
-    players.rotate!
+    restart_order player
   end
 
   def buy_share player, corporation
@@ -280,19 +290,20 @@ class Game < Base
     @current_bid.player.buy_company company, @current_bid.price
     draw_companies
     players.each &:unpass
-    restart_order
+    restart_order @auction_starter
     @auction_starter = nil
     @current_bid = nil
   end
 
-  def restart_order
+  def restart_order player
     players.rotate!
-    restart_order if @auction_starter != players.last
+    restart_order player if player != players.last
   end
 
   # phase 4
   def new_player_order
     players.sort_by(&:cash).reverse!
+    @start_player = players.first
     @phase += 1
   end
 
@@ -363,6 +374,7 @@ class Game < Base
   # phase 10
   def check_end
     @eng_game_card = :last_turn if cost_of_ownership_tier == :penultimate
+
     if cost_of_ownership_tier == :last_turn || @stock_market.last.nil?
       update(state: :finished)
     else

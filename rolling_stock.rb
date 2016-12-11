@@ -85,6 +85,7 @@ class RollingStock < Roda
         r.get do
            r.websocket do |ws|
              ws.on :message do |event|
+               puts "received ping"
                #sync{ room.dup }.each do |connection|
                #  puts "** sending data ** "
                #end

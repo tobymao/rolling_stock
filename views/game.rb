@@ -28,8 +28,8 @@ module Views
       current_player = game.player_by_id current_user&.id
       widget Action, game: game, current_player: current_player
 
-      game.players.each do |player|
-        widget PlayerHoldings, player: player
+      game.players_in_order.each do |player|
+        widget PlayerHoldings, player: player, acting: game.can_act?(player)
       end
 
       widget ForeignInvestor, foreign_investor: game.foreign_investor

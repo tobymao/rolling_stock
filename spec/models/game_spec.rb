@@ -19,26 +19,40 @@ describe Game do
   end
 
   describe '#load' do
-    it 'should create deck for 3 players' do
-      mock_players 3
-      subject.load
-      expect(subject.company_deck.size).to eq(21)
+    context 'new game' do
+      it 'should not load deack' do
+        mock_players 3
+        subject.load
+        expect(subject.company_deck.size).to eq(0)
+      end
     end
 
-    it 'should create deck with 4 players' do
-      mock_players 4
-      subject.load
-      expect(subject.company_deck.size).to eq(27)
-    end
+    context 'active game' do
+      subject { create :game, state: 'active' }
 
-    it 'should create deck with 5 players' do
-      mock_players 5
-      subject.load
-      expect(subject.company_deck.size).to eq(33)
+      it 'should create deck for 3 players' do
+        mock_players 3
+        subject.load
+        expect(subject.company_deck.size).to eq(21)
+      end
+
+      it 'should create deck with 4 players' do
+        mock_players 4
+        subject.load
+        expect(subject.company_deck.size).to eq(27)
+      end
+
+      it 'should create deck with 5 players' do
+        mock_players 5
+        subject.load
+        expect(subject.company_deck.size).to eq(33)
+      end
     end
   end
 
   context 'after load' do
+    subject { create :game, state: 'active' }
+
     before :each do
       mock_players 4
       subject.load
