@@ -33,6 +33,9 @@ GEM
     eventmachine (1.2.1)
     factory_girl (4.7.0)
       activesupport (>= 3.0.0)
+    faye-websocket (0.10.5)
+      eventmachine (>= 0.12.0)
+      websocket-driver (>= 0.5.1)
     ffi (1.9.14)
     fortitude (0.9.6)
       activesupport (>= 3.0)
@@ -102,6 +105,9 @@ GEM
     thread_safe (0.3.5)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
+    websocket-driver (0.6.4)
+      websocket-extensions (>= 0.1.0)
+    websocket-extensions (0.1.2)
 
 PLATFORMS
   ruby
@@ -112,6 +118,7 @@ DEPENDENCIES
   capistrano
   capistrano-bundler
   factory_girl
+  faye-websocket
   fortitude
   rack-test
   rack_csrf

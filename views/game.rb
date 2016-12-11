@@ -1,10 +1,11 @@
-require './views/page'
+require './views/base'
 
 module Views
-  class Game < Page
+  class Game < Base
     needs :game
+    needs :current_user
 
-    def render_main
+    def content
       render_new if game.new_game?
       render_game
     end
@@ -15,8 +16,8 @@ module Views
           div player.name
         end
 
-        render_join_button if !game.players.include?(app.current_user.id) && game.new_game?
-        render_start_button if game.user == app.current_user
+        render_join_button if !game.players.include?(current_user.id) && game.new_game?
+        render_start_button if game.user == current_user
       end
     end
 
@@ -24,7 +25,7 @@ module Views
       h3 "Round: #{game.round} Phase: #{game.phase} (#{game.phase_name})"
 
       widget Bid, bid: game.current_bid if game.current_bid
-      current_player = game.player_by_id app.current_user&.id
+      current_player = game.player_by_id current_user&.id
       widget Action, game: game, current_player: current_player
 
       game.players.each do |player|

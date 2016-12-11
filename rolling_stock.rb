@@ -37,6 +37,7 @@ class RollingStock < Roda
   plugin :status_handler
   plugin :halt
   plugin :path
+  plugin :websockets, adapter: :thin
 
   status_handler 403 do
     'You are forbidden from seeing that!'
@@ -49,6 +50,19 @@ class RollingStock < Roda
   path Game do |game, *paths|
     "/game/#{game.id}/#{paths.join('/')}"
   end
+
+  MUTEX = Mutex.new
+  ROOMS = Hash.new { |h, k| h[k] = [] }
+
+  def sync
+    MUTEX.synchronize { yield }
+  end
+
+  #Thread.new do
+  #  DB.listen 'game', loop: true do |_, _, msg|
+  #    puts "** received notification #{msg}"
+  #  end
+  #end
 
   route do |r|
     r.root do
@@ -64,11 +78,29 @@ class RollingStock < Roda
 
     r.on 'game' do
       r.on ':id' do |id|
+        room = sync { ROOMS[id] }
         game = Game[id]
         game.load
 
         r.get do
-          widget Views::Game, game: game
+           r.websocket do |ws|
+             ws.on :message do |event|
+               #sync{ room.dup }.each do |connection|
+               #  puts "** sending data ** "
+               #end
+             end
+
+             ws.on :close do |event|
+               sync do
+                 room.delete [ws, current_user]
+                 ROOMS[id].delete id if room.empty?
+               end
+             end
+
+             sync { room << [ws, current_user] }
+           end
+
+          widget Views::GamePage, game: game
         end
 
         r.post 'join' do
@@ -94,6 +126,13 @@ class RollingStock < Roda
             # maybe check round and phase here
             game.process_action_data action_data
             action.append_turn action_data
+          end
+
+
+          sync { room.dup }.each do |connection, user|
+            next if user == current_user
+            game_html = widget Views::Game, game: game, current_user: user
+            connection.send game_html
           end
 
           r.redirect path(game)

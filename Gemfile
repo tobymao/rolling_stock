@@ -10,6 +10,7 @@ gem 'shrine'
 gem 'roda-basic-auth'
 gem 'bcrypt'
 gem 'rake'
+gem 'faye-websocket'
 
 group :development, :test do
   # deploy

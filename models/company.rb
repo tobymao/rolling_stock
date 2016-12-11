@@ -15,6 +15,14 @@ class Company
     last_turn: [:red, :orange, :yellow, :green],
   }.freeze
 
+  OWNERSHIP_COSTS = {
+    green: 1,
+    blue: 3,
+    purple: 6,
+    penultimate: 10,
+    last_turn: 16,
+  }
+
   COMPANIES = {
     'BME' => ['Bergisch-Märkische Eisenbahn-Gesellschaft', :red, 1, 1, ['KME', 'BD', 'HE', 'PR']],
     'BSE' => ['Berlin-Stettiner Eisenbahn-Gesellschaft', :red, 2, 1, ['BPM', 'SX', 'MS', 'PR']],
@@ -97,8 +105,12 @@ class Company
     price.between?(min_price, max_price)
   end
 
-  def cost_of_ownership ownership_tier
-    OWNERSHIP_TIERS[ownership_tier]&.include?(@tier) || 0
+  def cost_of_ownership for_tier
+    if OWNERSHIP_TIERS[for_tier]&.include? @tier
+      OWNERSHIP_COSTS[for_tier]
+    else
+      0
+    end
   end
 
   def min_price
