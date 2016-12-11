@@ -17,6 +17,12 @@ FactoryGirl.define do
     association :user
   end
 
+  factory :session do
+    token  "token"
+    association :user
+  end
+
+
   factory :action do
   end
 end
