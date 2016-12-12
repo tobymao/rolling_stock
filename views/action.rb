@@ -12,6 +12,8 @@ module Views
 
     def action_widget
       case game.phase
+      when 1
+        render_action IssueShares
       when 2
         render_action FormCorporations
       when 3

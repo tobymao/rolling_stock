@@ -77,6 +77,12 @@ class RollingStock < Roda
     end
 
     r.on 'game' do
+      r.is method: 'post' do
+        r.halt 403 unless current_user
+        game = Game.empty_game current_user
+        r.redirect path(game)
+      end
+
       r.on ':id' do |id|
         room = sync { ROOMS[id] }
         game = Game[id]
@@ -104,52 +110,48 @@ class RollingStock < Roda
           widget Views::GamePage, game: game
         end
 
-        r.post 'join' do
-          game.users << current_user.id
-          game.save
-          r.redirect path(game)
-        end
-
-        r.halt 403 unless game.users.to_a.include? current_user.id
-
-        r.post 'action' do
-          action = Action.find_or_create(
-            game_id: id,
-            round: game.round,
-            phase: game.phase,
-          )
-
-          data = r['data']
-
-          r.halt 403 if game.round != data['round'].to_i || game.phase != data['phase'].to_i
-
-          data['actions'].each do |action_data|
-            # maybe check round and phase here
-            game.process_action_data action_data
-            action.append_turn action_data
+        r.post do
+          r.is 'join' do
+            game.users << current_user.id
+            game.players << Player.new(current_user.id, current_user.name)
+            game.save
+            update_connections room, game
+            r.redirect path(game)
           end
 
+          r.halt 403 unless game.users.to_a.include? current_user.id
 
-          sync { room.dup }.each do |connection, user|
-            next if user == current_user
-            game_html = widget Views::Game, game: game, current_user: user
-            connection.send game_html
+          r.is 'action' do
+            action = Action.find_or_create(
+              game_id: id,
+              round: game.round,
+              phase: game.phase,
+            )
+
+            data = r['data']
+
+            r.halt 403 if game.round != data['round'].to_i || game.phase != data['phase'].to_i
+
+            data['actions'].each do |action_data|
+              # maybe check round and phase here
+              game.process_action_data action_data
+              action.append_turn action_data
+            end
+
+            update_connections room, game
+
+            r.redirect path(game)
           end
 
-          r.redirect path(game)
+          r.halt 403 unless game.user = current_user
+
+          r.is 'start' do
+            game.update state: 'active'
+            game.start_game
+            update_connections room, game
+            r.redirect path(game)
+          end
         end
-
-        r.post 'start' do
-          game.update state: 'active'
-          r.redirect path(game)
-        end
-      end
-
-      r.halt 403 unless current_user
-
-      r.post do
-        game = Game.empty_game current_user
-        r.redirect path(game)
       end
     end
 
@@ -219,6 +221,14 @@ class RollingStock < Roda
     unless current_user
       session[:return_to] = path
       request.redirect '/login'
+    end
+  end
+
+  def update_connections room, game
+    sync { room.dup }.each do |connection, user|
+      next if user == current_user
+      game_html = widget Views::Game, game: game, current_user: user
+      connection.send game_html
     end
   end
 

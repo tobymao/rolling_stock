@@ -141,7 +141,8 @@ class Game < Base
   end
 
   def can_act? player
-    acting.any? { |e| e.owned_by? player }
+    acting.any? { |e| e.owned_by? player } ||
+      @offers.find { |o| o.company.owned_by? player }
   end
 
   def held_companies
@@ -238,6 +239,7 @@ class Game < Base
   def process_phase_3 data
     player = player_by_id data['player']
     action = data['action']
+    corporation = @corporations.find { |c| c.name == data['corporation'] }
     raise 'Not your turn' unless can_act? player
     raise 'You must bid or pass' if @current_bid && action != 'bid'
     raise unless player
@@ -247,12 +249,12 @@ class Game < Base
       company = @companies.find { |c| c.symbol == data['company'] }
       raise unless company
       players.each &:unpass unless @current_bid
-      bid_company player, company, data['price']
+      bid_company player, company, data['price'].to_i
     when 'buy'
-      buy_share player, data['corporation']
+      buy_share player, corporation
       player.unpass
     when 'sell'
-      sell_share player, data['corporation']
+      sell_share player, corporation
       player.unpass
     else
       raise 'Unspecified action'
@@ -273,8 +275,6 @@ class Game < Base
   end
 
   def bid_company player, company, price
-    price = price.to_i
-
     if @current_bid
       raise 'Must bid on same company' if @current_bid.company != company
       raise 'Bid must be greater than previous' unless @current_bid.price < price

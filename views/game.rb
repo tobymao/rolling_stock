@@ -34,6 +34,8 @@ module Views
 
       widget ForeignInvestor, foreign_investor: game.foreign_investor
 
+      widget Corporations, corporations: game.corporations
+
       widget Deck, game: game
     end
 
