@@ -21,9 +21,14 @@ module Views
     end
 
     def game_form hash = {}
+      default_style = {
+        display: 'inline-block',
+      }
+
       default = {
         action: app.path(game, 'action'),
         method: 'post',
+        style: inline(default_style),
       }
 
       form default.merge(hash) do

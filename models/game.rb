@@ -55,7 +55,6 @@ class Game < Base
     @round = 1
     @phase = 1
     @end_game_card = :penultimate
-    @start_player = players.first
 
     start_game unless new_game?
   end
@@ -69,16 +68,11 @@ class Game < Base
   end
 
   def players
-    users_array = users.to_a
-
     @_players ||= User
-      .where(id: users_array)
+      .where(id: users.to_a)
       .map { |user| Player.new(user.id, user.name) }
-      .sort_by { |p| users_array.find_index p.id }
-  end
-
-  def players_in_order
-    players.rotate(players.find_index @start_player)
+      .each_with_index { |p, i| p.order = i }
+      .sort_by(&:order)
   end
 
   def player_by_user user
@@ -128,7 +122,11 @@ class Game < Base
   end
 
   def active_player_companies
-    players.flat_map(&:companies).sort_by(&:value).reverse.select &:active?
+    player_companies.select &:active?
+  end
+
+  def player_companies
+    players.flat_map(&:companies).sort_by(&:value).reverse
   end
 
   def acting
@@ -147,6 +145,14 @@ class Game < Base
 
   def held_companies
     @corporations.flat_map(&:companies) + players.flat_map(&:companies)
+  end
+
+  def cost_of_ownership_tier
+    if @company_deck.empty?
+      @end_game_card
+    else
+      @company_deck.first.tier
+    end
   end
 
   def step
@@ -190,7 +196,7 @@ class Game < Base
   def process_action_data data
     if data['action'] == 'pass'
       entities = [
-        active_companies.select { |c| data['company']&.include? c.symbol },
+        active_companies.select { |c| data['company']&.include? c.name },
         player_by_id(data['player']&.first),
         @corporations.select { |c| data['corporation']&.include? c.name },
       ].flatten.compact
@@ -223,7 +229,7 @@ class Game < Base
   def process_phase_2 data
     corporation = data['corporation']
     share_price = @stock_market.find { |sp| sp.price == data['price'].to_i }
-    company = active_player_companies.find { |c| c.symbol == data['company'] }
+    company = active_player_companies.find { |c| c.name == data['company'] }
     company.pass
     form_corporation company, share_price, corporation
   end
@@ -246,7 +252,7 @@ class Game < Base
 
     case action
     when 'bid'
-      company = @companies.find { |c| c.symbol == data['company'] }
+      company = @companies.find { |c| c.name == data['company'] }
       raise unless company
       players.each &:unpass unless @current_bid
       bid_company player, company, data['price'].to_i
@@ -303,7 +309,7 @@ class Game < Base
   # phase 4
   def new_player_order
     players.sort_by(&:cash).reverse!
-    @start_player = players.first
+    players.each_with_index { |p, i| p.order = i }
     @phase += 1
   end
 
@@ -321,7 +327,7 @@ class Game < Base
   def process_phase_6 data
     corporation = @corporations.find { |c| c.name == data['corporation'] }
     companies = held_companies + @foreign_investor.companies
-    company = companies.find { |c| c.symbol == data['company'] }
+    company = companies.find { |c| c.name == data['company'] }
     offer = @offers.find { |o| o.corporation == corporation && o.company == company }
     owner = company.owner
     raise "Can't sell last company" if owner.is_a?(Corporation) && owner.companies.size == 1
@@ -348,7 +354,7 @@ class Game < Base
   # todo check if you can close other people's company
   # solve this buy passing current_user into external action
   def process_phase_7 data
-    company = held_companies.find { |c| c.symbol == data['company'] }
+    company = held_companies.find { |c| c.name == data['company'] }
     company.owner.close_company company
   end
 
@@ -356,9 +362,8 @@ class Game < Base
   def collect_income
     tier = cost_of_ownership_tier
     @foreign_investor.close_companies tier
-    (@corporations + players + [@foreign_investor]).each do |entity|
-      entity.collect_income tier
-    end
+    entities = @corporations + players + [@foreign_investor]
+    entities.each { |entity| entity.collect_income tier }
     @phase += 1
   end
 
@@ -396,17 +401,9 @@ class Game < Base
         @company_deck.concat(groups[tier].shuffle.take num_cards)
       end
 
-      update deck: @company_deck.map(&:symbol)
+      update deck: @company_deck.map(&:name)
     else
       @company_deck = deck.map { |sym| Company.new self, sym, *Company::COMPANIES[sym] }
-    end
-  end
-
-  def cost_of_ownership_tier
-    if @company_deck.empty?
-      @end_game_card
-    else
-      @company_deck.first.tier
     end
   end
 

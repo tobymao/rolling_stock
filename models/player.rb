@@ -7,7 +7,7 @@ class Player
   include Ownable
 
   attr_reader :id, :name, :companies, :shares
-  attr_accessor :cash
+  attr_accessor :cash, :order
 
   def initialize id, name
     @id = id
@@ -22,6 +22,8 @@ class Player
   end
 
   def value
-    @cash + (@companies.map(&:value).reduce(&:+) || 0)
+    @cash +
+      (@companies.map(&:value).reduce(&:+) || 0) +
+      (@shares.map { |s| s.corporation.share_price.price }.reduce(&:+) || 0)
   end
 end

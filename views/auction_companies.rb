@@ -1,17 +1,23 @@
 require './views/base'
 
 module Views
-  class AuctionCompanies < Base
+  class AuctionCompanies < Action
     needs :game
     needs :current_player
 
-    def content
+    def render_action
+      widget EntityOrder, game: game, entities: game.players
+
       widget Companies, {
         companies: game.companies,
         js_block: js_block,
         onclick: 'CompanyAuction.onClick(this)'
       } unless game.current_bid
 
+      render_controls if game.can_act? current_player
+    end
+
+    def render_controls
       widget BidBox, game: game, current_player: current_player
 
       if game.corporations.any? &:can_buy_share?

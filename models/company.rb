@@ -28,7 +28,7 @@ class Company
     'BSE' => ['Berlin-Stettiner Eisenbahn-Gesellschaft', :red, 2, 1, ['BPM', 'SX', 'MS', 'PR']],
     'KME' => ['Köln-Mindener Eisenbahn-Gesellschaft', :red, 5, 2, ['BME', 'MHE', 'OL', 'HE', 'PR']],
     'AKE' => ['Altona-Kieler Eisenbahn-Gesellschaft', :red, 6, 2, ['BPM', 'MHE', 'OL', 'MS', 'PR']],
-    'BPM' => ['Berlin-Potsdam-Magdeburger Eisenbahn', :red, 7, 2, ['BPM', 'MHE', 'OL', 'MS', 'PR']],
+    'BPM' => ['Berlin-Potsdam-Magdeburger Eisenbahn', :red, 7, 2, ['BSE', 'AKE', 'MHE', 'SX', 'MS', 'PR']],
     'MHE' => ['Magdeburg-Halberstädter Eisenbahngesellschaft', :red, 8, 2, ['KME', 'AKE', 'BPM', 'OL', 'SX', 'MS', 'PR']],
 
     'WT' => ['Königlich Württembergische Staats-Eisenbahnen', :orange, 11, 3, ['BD', 'BY', 'SBB', 'DR']],
@@ -76,7 +76,7 @@ class Company
     'TSI' => ['Trans-Space Inc.', :purple, 100, 25, ['OPC', 'RCC', 'MM', 'VP', 'AL', 'LE' ]],
   }
 
-  attr_reader :symbol, :name, :tier, :value, :income, :synergies
+  attr_reader :name, :full_name, :tier, :value, :income, :synergies
   attr_accessor :owner
 
   def self.all
@@ -85,20 +85,41 @@ class Company
     end.to_h
   end
 
-  def initialize owner, symbol, name, tier, value, income, synergies
-    @symbol    = symbol
+  def initialize owner, name, full_name, tier, value, income, synergies
     @name      = name
+    @full_name = full_name
     @tier      = tier
     @value     = value
     @income    = income
     @synergies = synergies
-    @name      = name
     @owner     = owner
     @cash      = 0
   end
 
   def id
-    @symbol
+    @name
+  end
+
+  def valid_share_price? share_price
+    range =
+      case @tier
+      when :red
+        [10, 14]
+      when :orange
+        [10, 20]
+      when :yellow
+        [10, 26]
+      when :green
+        [15, 34]
+      when :blue
+        [22, 45]
+      when :purple
+        [28, 45]
+      else
+        raise
+      end
+
+    share_price.price.between?(range[0], range[1])
   end
 
   def valid_price? price

@@ -1,11 +1,15 @@
 require './views/base'
 
 module Views
-  class FormCorporations < Base
+  class FormCorporations < Action
     needs :current_player
     needs :game
 
-    def content
+    def render_action
+      company = game.acting.first
+      widget EntityOrder, game: game, entities: game.player_companies
+      widget Companies, companies: game.acting
+
       game_form do
         select name: data('corporation') do
           game.available_corporations.each do |corporation|
@@ -15,36 +19,17 @@ module Views
 
         select name: data('price') do
           game.stock_market.each do |share_price|
+            next unless share_price
+            next unless company.valid_share_price? share_price
             price = share_price.price
             option(value: price) { text price }
           end
         end
 
-        input id: 'form_company', type: 'text', name: data('company'), placeholder: 'Company'
-
-        widget Companies, {
-          companies: current_player.companies,
-          onclick: 'FormCorporations.onClick(this)',
-          js_block: js_block,
-        }
-
-        input type: 'submit', value: 'Form Corporation'
-      end
+        input id: 'form_company', type: 'hidden', name: data('company'), value: company.name
+        input id: 'form_submit', type: 'submit', value: 'Form Corporation'
+      end if game.can_act? current_player
     end
 
-    def js_block
-      <<~JS
-        var FormCorporations = {
-          onClick: function(el) {
-            var company = document.getElementById('form_company');
-            var data = el.dataset;
-
-            if (company.value != data.company) {
-              company.value = data.company;
-            }
-          }
-        };
-      JS
-    end
   end
 end

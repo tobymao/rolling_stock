@@ -35,6 +35,7 @@ class Corporation
     @companies = [company]
     @share_price = share_price
     @stock_market = stock_market
+    @stock_market[@share_price.index] = nil
     @cash = 0
     @shares = [Share.president(self)].concat 9.times.map { Share.normal(self) }
     @bank_shares = []
@@ -90,7 +91,7 @@ class Corporation
   end
 
   def collect_income tier
-    synergies = @companies.map { |c| [c.symbol, c.tier] }.to_h
+    synergies = @companies.map { |c| [c.name, c.tier] }.to_h
 
     @companies.each do |company|
       @cash += company.income
@@ -102,8 +103,25 @@ class Corporation
         end
       end
 
-      synergies.delete company.symbol
+      synergies.delete company.name
     end
+  end
+
+  def income tier
+    synergies = @companies.map { |c| [c.name, c.tier] }.to_h
+    total = super
+
+    @companies.each do |company|
+      company.synergies.each do |synergy|
+        if companies.include? synergy
+          total += self.class.calculate_synergy company.tier, synergies[synergy]
+        end
+      end
+
+      synergies.delete company.name
+    end
+
+    total
   end
 
   def pay_dividend amount, players
@@ -135,7 +153,7 @@ class Corporation
   end
 
   def next_share_price
-    @stock_market.drop(@share_price.index).compact.first || @stock_market.last
+    @stock_market.drop(@share_price.index + 1).compact.first || @stock_market.last
   end
 
   private

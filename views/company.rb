@@ -20,7 +20,7 @@ module Views
       props = {
         style: inline(container_style),
         data: {
-          company: company.symbol,
+          company: company.name,
           value: company.value,
         },
       }
@@ -38,7 +38,7 @@ module Views
         div style: company_style do
           render_title 'Face Value', "[$#{company.value}]", font_weight: 'bold'
           render_title 'Price Span', "($#{company.min_price}-$#{company.max_price})", font_size: '0.7em'
-          render_title company.name, company.symbol
+          render_title company.full_name, company.name
           render_title 'Base Income', "+$#{company.income}"
         end
 
@@ -53,7 +53,7 @@ module Views
               render_title "$#{k} Synergy Income", "+$#{k}", synergy_style(v.first.tier)
 
               v.each do |synergy|
-                render_title synergy.name, "#{synergy.symbol} [#{synergy.value}]", synergy_style(synergy.tier)
+                render_title synergy.name, "#{synergy.name} [#{synergy.value}]", synergy_style(synergy.tier)
               end
             end
           end

@@ -1,18 +1,18 @@
 require './views/base'
 
 module Views
-  class BuyCompanies < Base
+  class BuyCompanies < Action
     needs :current_player
     needs :game
 
-    def content
+    def render_action
       offers = game.offers.select { |o| o.company.owner == current_player }
 
       offers.each do |offer|
         game_form do
-          div "#{offer.corporation.name} offers to buy #{offer.company.symbol} for #{offer.price}"
+          div "#{offer.corporation.name} offers to buy #{offer.company.name} for #{offer.price}"
           input type: 'hidden', name: data('corporation'), value: offer.corporation.name
-          input type: 'hidden', name: data('company'), value: offer.company.symbol
+          input type: 'hidden', name: data('company'), value: offer.company.name
           input type: 'submit', name: data('action'), value: 'accept'
           input type: 'submit', name: data('action'), value: 'decline'
         end

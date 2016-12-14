@@ -43,18 +43,9 @@ module Views
           },
 
           _onMessage: function(msg) {
-            document.getElementById('game_container').innerHTML = msg;
-            this._replaceCsrf();
+            $('#game_container').html(msg);
+            $("[name='_csrf']").attr('value', "#{app.csrf_token}");
             console.log("Updating");
-          },
-
-          _replaceCsrf: function() {
-            var array = document.getElementsByName("_csrf");
-
-            for (var i = 0; i < array.length; i++) {
-              var el = array[i];
-              el.value = "#{app.csrf_token}";
-            }
           },
 
           ping: function() {

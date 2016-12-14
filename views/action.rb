@@ -6,29 +6,21 @@ module Views
     needs :current_player
 
     def content
-      action_widget if game.can_act? current_player
-      widget Pass, game: game, current_player: current_player
-    end
-
-    def action_widget
-      case game.phase
-      when 1
-        render_action IssueShares
-      when 2
-        render_action FormCorporations
-      when 3
-        render_action AuctionCompanies
-      when 6
-        render_action BuyCompanies
-      when 7
-        render_action CloseCompanies
-      when 9
-        render_action PayDividends
+      div class: 'heading' do
+        text "Round: #{game.round} Phase: #{game.phase} (#{game.phase_name})"
       end
-    end
 
-    def render_action klass
-      widget klass, game: game, current_player: current_player
+      default = {
+        display: 'inline-block',
+        vertical_align: 'top',
+        padding: '5px',
+        min_width: '360px',
+      }
+
+      div style: inline(default) do
+        render_action
+        widget Pass, game: game, current_player: current_player
+      end
     end
   end
 end

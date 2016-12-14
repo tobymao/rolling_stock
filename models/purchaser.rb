@@ -14,9 +14,12 @@ module Purchaser
   end
 
   def collect_income tier
-    @companies.each do |company|
-      @cash += company.income
-      @cash -= company.cost_of_ownership tier
-    end
+    @cash += income(tier)
+  end
+
+  def income tier
+    @companies
+      .map { |c| c.income - c.cost_of_ownership(tier) }
+      .reduce(&:+) || 0
   end
 end

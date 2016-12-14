@@ -6,8 +6,8 @@ module Views
     needs :current_user
 
     def content
-      render_new if game.new_game?
-      render_game
+      @current_player = game.player_by_id current_user&.id
+      game.new_game? ? render_new : render_game
     end
 
     def render_new
@@ -16,25 +16,21 @@ module Views
           div player.name
         end
 
-        render_join_button if !game.players.include?(current_user.id) && game.new_game?
+        render_join_button if !game.players.include?(@current_player) && game.new_game?
         render_start_button if game.user == current_user
       end
     end
 
     def render_game
-      h3 "Round: #{game.round} Phase: #{game.phase} (#{game.phase_name})"
-
       widget Bid, bid: game.current_bid if game.current_bid
-      current_player = game.player_by_id current_user&.id
-      widget Action, game: game, current_player: current_player
 
-      game.players_in_order.each do |player|
-        widget PlayerHoldings, player: player, acting: game.can_act?(player)
-      end
+      render_action_widget
 
-      widget ForeignInvestor, foreign_investor: game.foreign_investor
+      widget Players, game: game, current_player: @current_player
 
-      widget Corporations, corporations: game.corporations
+      widget ForeignInvestor, game: game
+
+      widget Corporations, game: game
 
       widget Deck, game: game
     end
@@ -51,6 +47,27 @@ module Views
         rawtext app.csrf_tag
         input type: 'submit', value: 'Start Game'
       end
+    end
+
+    def render_action_widget
+      case game.phase
+      when 1
+        render_action IssueShares
+      when 2
+        render_action FormCorporations
+      when 3
+        render_action AuctionCompanies
+      when 6
+        render_action BuyCompanies
+      when 7
+        render_action CloseCompanies
+      when 9
+        render_action PayDividends
+      end
+    end
+
+    def render_action klass
+      widget klass, game: game, current_player: @current_player
     end
   end
 end

@@ -7,8 +7,8 @@ module Views
     def content
       html do
         head do
-          link rel: 'stylesheet', type: 'text/css', href: 'https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700'
           link rel: 'shortcut icon', type: 'image/png', href: '/images/favicon.ico'
+          script src: 'https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js'
           render_head
           render_style
           render_analytics
@@ -41,16 +41,21 @@ module Views
     def render_style
       style <<~CSS
         body {
-          font-family: 'Open Sans';
+          font-family: 'Helvetica';
           width: 100%;
         }
 
         .container {
           position: relative;
-          padding: 0 5% 0 5%;
+          padding: 0 2% 0 0;
           margin: 0 auto;
           text-align: justify;
           max-width: #{MAX_W};
+        }
+
+        .heading {
+          font-weight: bold;
+          font-size: 1.1em;
         }
       CSS
     end

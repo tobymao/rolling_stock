@@ -31,7 +31,7 @@ module Views
           name: data('company'),
           placeholder: 'Company',
         }
-        company_props[:value] = bid.company.symbol if bid
+        company_props[:value] = bid.company.name if bid
         input company_props
 
         input type: 'hidden', name: data('player'), value: current_player.id

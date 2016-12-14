@@ -8,12 +8,12 @@ describe Company do
 
   describe '#initialize' do
     it 'should provision variables' do
-      expect(subject.symbol).not_to be_nil
+      expect(subject.name).not_to be_nil
     end
   end
 
   describe '#id' do
-    it 'should return the symbol' do
+    it 'should return the name' do
       expect(subject.id).to eq("MM")
     end
   end

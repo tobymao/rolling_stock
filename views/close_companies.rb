@@ -1,11 +1,11 @@
 require './views/base'
 
 module Views
-  class CloseCompanies < Base
+  class CloseCompanies < Action
     needs :current_player
     needs :game
 
-    def content
+    def render_action
       h3 'Close Companies'
 
       game_form do
@@ -13,8 +13,8 @@ module Views
 
         current_player.companies.each do |company|
           label do
-            input type: 'checkbox', name: data('company'), value: company.symbol
-            text company.symbol
+            input type: 'checkbox', name: data('company'), value: company.name
+            text company.name
           end
         end
 
@@ -23,8 +23,8 @@ module Views
 
           corporation.companies.each do |company|
             label do
-              input type: 'checkbox', name: data('company'), value: company.symbol
-              text company.symbol
+              input type: 'checkbox', name: data('company'), value: company.name
+              text company.name
             end
           end
         end
