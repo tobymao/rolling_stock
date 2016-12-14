@@ -36,10 +36,6 @@ module Views
       end
     end
 
-    def render_companies player
-      widget Companies, companies: player.companies
-    end
-
     def render_shares player
       names = []
       num_shares = []
