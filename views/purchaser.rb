@@ -34,7 +34,7 @@ module Views
 
       div style: header_style do
         Array(values).each do |v|
-          if bold == true
+          if bold
             div style: inline('font-weight': 'bold') do
               text v
             end
