@@ -188,7 +188,6 @@ class Game < Base
 
   def process_actions
     actions.sort_by { |action| [action.round, action.phase] }.each do |action|
-      puts "** #{action.phase} - #{@phase}"
       raise 'Invalid action for phase' if action.phase != @phase
       action.turns.each { |turn| process_action_data turn }
     end
@@ -382,7 +381,7 @@ class Game < Base
 
   # phase 10
   def check_end
-    @eng_game_card = :last_turn if ownership_tier == :penultimate
+    @end_game_card = :last_turn if ownership_tier == :penultimate
     sort_corporations
 
     if ownership_tier == :last_turn || @stock_market.last.nil?

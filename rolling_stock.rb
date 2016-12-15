@@ -225,10 +225,12 @@ class RollingStock < Roda
   end
 
   def update_connections room, game
+    games = {}
+
     sync { room.dup }.each do |connection, user|
       next if user == current_user
-      game_html = widget Views::Game, game: game, current_user: user
-      connection.send game_html
+      html = games[user || 'none'] ||= widget(Views::Game, game: game, current_user: user)
+      connection.send html
     end
   end
 

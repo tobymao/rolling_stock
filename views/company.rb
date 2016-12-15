@@ -48,10 +48,6 @@ module Views
         .group_by { |c| ::Corporation.calculate_synergy company.tier, c.tier }
 
       set = show_synergies ? company.owner.companies.map(&:name) : []
-      puts "*** #{company.name} #{company.owner}"
-      set.each do |s|
-        puts s
-      end
 
       groups.each do |k, v|
         div style: inline(text_align: 'left') do
