@@ -101,7 +101,9 @@ class Game < Base
 
   def active_entities
     case @phase
-    when 1, 6, 9
+    when 1
+      active_corporations.select &:can_issue_share?
+    when 6, 9
       active_corporations
     when 2
       active_player_companies
@@ -114,7 +116,7 @@ class Game < Base
 
   # todo get rid of this sort
   def active_corporations
-    @corporations.sort_by(&:price).reverse.select &:active?
+    @corporations.select &:active?
   end
 
   def active_companies
@@ -308,7 +310,7 @@ class Game < Base
 
   # phase 4
   def new_player_order
-    players.sort_by(&:cash).reverse!
+    players.sort_by!(&:cash).reverse!
     players.each_with_index { |p, i| p.order = i }
     @phase += 1
   end
@@ -364,6 +366,7 @@ class Game < Base
     @foreign_investor.close_companies tier
     entities = @corporations + players + [@foreign_investor]
     entities.each { |entity| entity.collect_income tier }
+    sort_corporations
     @phase += 1
   end
 
@@ -379,6 +382,7 @@ class Game < Base
   # phase 10
   def check_end
     @eng_game_card = :last_turn if cost_of_ownership_tier == :penultimate
+    sort_corporations
 
     if cost_of_ownership_tier == :last_turn || @stock_market.last.nil?
       update(state: :finished)
@@ -418,6 +422,10 @@ class Game < Base
 
   def unpass_all
     (players + held_companies + @corporations).each &:unpass
+  end
+
+  def sort_corporations
+    @corporations.sort_by(&:price).reverse!
   end
 
   def check_phase_change passers

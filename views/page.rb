@@ -41,7 +41,9 @@ module Views
     def render_style
       style <<~CSS
         body {
-          font-family: 'Helvetica';
+          font-family: Helvetica;
+          font-weight: lighter;
+          font-size: 0.9em;
           width: 100%;
         }
 

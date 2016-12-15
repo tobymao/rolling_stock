@@ -1,5 +1,6 @@
 require './models/passer'
 require './models/purchaser'
+require './models/ownable'
 
 class Corporation
   include Passer

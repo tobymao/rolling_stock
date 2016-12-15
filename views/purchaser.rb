@@ -6,7 +6,7 @@ module Views
       {
         display: 'inline-block',
         min_height: '200px',
-        min_width: '300px',
+        width: '350px',
         border: 'solid thin rgba(0,0,0,0.66)',
         margin: '10px 10px',
         vertical_align: 'top',
@@ -24,7 +24,6 @@ module Views
     def render_header values, label_text = nil
       header_style = inline(
         display: 'inline-block',
-        font_weight: 'lighter',
         text_align: 'right',
         margin: '0 10px',
       )

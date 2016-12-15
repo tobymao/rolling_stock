@@ -6,32 +6,40 @@ module Views
     needs :game
 
     def render_action
-      h3 'Close Companies'
+      widget EntityOrder, game: game, entities: game.active_entities
 
-      game_form do
-        div "Companies owned by #{current_player.name}"
+      render_controls
+    end
 
-        current_player.companies.each do |company|
-          label do
-            input type: 'checkbox', name: data('company'), value: company.name
-            text company.name
-          end
-        end
+    def render_controls
+      div do
+        companies = current_player&.companies || []
 
-        game.corporations.select { |c| c.owned_by? current_player }.each do |corporation|
-          div "Companies owned by #{corporation.name}"
+        game_form do
+          div "Companies owned by #{current_player.name}"
 
-          corporation.companies.each do |company|
+          current_player.companies.each do |company|
             label do
               input type: 'checkbox', name: data('company'), value: company.name
               text company.name
             end
           end
-        end
 
-        input type: 'submit', value: 'Close Companies'
+          game.corporations.select { |c| c.owned_by? current_player }.each do |corporation|
+            div "Companies owned by #{corporation.name}"
+
+            corporation.companies.each do |company|
+              label do
+                input type: 'checkbox', name: data('company'), value: company.name
+                text company.name
+              end
+            end
+          end
+
+          input type: 'submit', value: 'Close Companies'
+        end unless companies.empty?
       end
-
     end
+
   end
 end

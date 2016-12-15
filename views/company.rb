@@ -1,4 +1,5 @@
 require './views/base'
+require './models/corporation'
 
 module Views
   class Company < Base
@@ -46,7 +47,7 @@ module Views
           groups = company
             .synergies
             .map { |sym| ::Company.all[sym] }
-            .group_by { |c| Corporation.calculate_synergy company.tier, c.tier }
+            .group_by { |c| ::Corporation.calculate_synergy company.tier, c.tier }
 
           groups.each do |k, v|
             div do

@@ -12,7 +12,7 @@ module Views
       end
 
       div do
-        game.players.rotate(current_player.order).each do |player|
+        game.players.rotate(current_player&.order || 0).each do |player|
           render_player player
         end
       end
@@ -28,7 +28,7 @@ module Views
 
     def render_headers player
       div style: inline(headers_style) do
-        render_header player.name, 'Name'
+        render_header player.name, 'Player'
         render_header "$#{player.cash}", 'Cash'
         render_header "$#{player.value}", 'Value'
         render_header "$#{player.income(game.cost_of_ownership_tier)}", 'Income'
@@ -57,7 +57,7 @@ module Views
       )
 
       div style: shares_style do
-        render_header names, 'Corporation'
+        render_header names, 'Corp'
         render_header num_shares, 'Shares'
         render_header prices, 'Price'
         render_header values, 'Value'

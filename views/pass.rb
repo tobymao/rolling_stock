@@ -12,10 +12,9 @@ module Views
       game_form do
         entities.each do |entity|
           input type: 'hidden', name: data(entity.type), value: entity.id
+          input type: 'hidden', name: data('action'), value: 'pass'
         end
-
-        input type: 'hidden', name: data('action'), value: 'pass'
-        button_text = game.can_act?(current_player) ? "Pass" : "Pass Out Of Order"
+        button_text = game.can_act?(current_player) ? 'Pass' : 'Pass Out Of Order'
         input type: 'submit', value: button_text
       end
     end

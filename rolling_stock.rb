@@ -146,7 +146,7 @@ class RollingStock < Roda
           r.halt 403 unless game.user = current_user
 
           r.is 'start' do
-            game.update state: 'active'
+            game.update state: 'active', users: game.users.shuffle
             game.start_game
             update_connections room, game
             r.redirect path(game)

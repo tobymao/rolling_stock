@@ -6,6 +6,19 @@ module Views
     needs :game
 
     def render_action
+      widget EntityOrder, game: game, entities: game.active_entities
+      render_offers
+      render_corporations
+      render_companies
+      render_controls
+    end
+
+    def render_corporations
+      corporations = game.corporations.select { |c| c.owned_by? current_player }
+      widget Corporations, game: game, corporations: corporations, header: false
+    end
+
+    def render_offers
       offers = game.offers.select { |o| o.company.owner == current_player }
 
       offers.each do |offer|
@@ -17,35 +30,9 @@ module Views
           input type: 'submit', name: data('action'), value: 'decline'
         end
       end
+    end
 
-      game_form do
-        select name: data('corporation') do
-          current_player.shares.select(&:president?).each do |share|
-            name = share.corporation.name
-            option(value: name) { text name }
-          end
-        end
-
-        span 'Price'
-        price_props = {
-          id: 'bid_price',
-          type: 'number',
-          name: data('price'),
-          placeholder: 'Price',
-        }
-        input price_props
-
-        span 'Symbol'
-        company_props = {
-          id: 'bid_company',
-          type: 'text',
-          name: data('company'),
-          placeholder: 'Company',
-        }
-        input company_props
-        input type: 'submit', value: 'Make Offer'
-      end
-
+    def render_companies
       game.corporations.each do |corporation|
         next if corporation.companies.size == 1
         div "#{corporation.name}'s companies"
@@ -71,11 +58,49 @@ module Views
       unless foreign_companies.empty?
         div "Foreign Investor's companies"
         widget Companies, {
-          companies: companies,
+          companies: foreign_companies,
           onclick: 'FormCorporations.onClick(this)',
           js_block: js_block,
         }
       end
+    end
+
+    def render_controls
+      corporations = (current_player&.shares || [])
+        .select(&:president?)
+        .map(&:corporation)
+
+      game_form do
+        select name: data('corporation') do
+          corporations.each do |corporation|
+            name = corporation.name
+            option(value: name) { text name }
+          end
+        end unless corporations.empty?
+
+        span 'Price'
+
+        price_props = {
+          id: 'bid_price',
+          type: 'number',
+          name: data('price'),
+          placeholder: 'Price',
+        }
+
+        input price_props
+
+        span 'Symbol'
+
+        company_props = {
+          id: 'bid_company',
+          type: 'text',
+          name: data('company'),
+          placeholder: 'Company',
+        }
+
+        input company_props
+        input type: 'submit', value: 'Make Offer'
+      end unless corporations.empty?
     end
 
     def js_block
