@@ -149,7 +149,7 @@ class Game < Base
     @corporations.flat_map(&:companies) + players.flat_map(&:companies)
   end
 
-  def cost_of_ownership_tier
+  def ownership_tier
     if @company_deck.empty?
       @end_game_card
     else
@@ -283,9 +283,11 @@ class Game < Base
   end
 
   def bid_company player, company, price
+    raise 'Bid must be greater than value' if price < company.value
+
     if @current_bid
       raise 'Must bid on same company' if @current_bid.company != company
-      raise 'Bid must be greater than previous' unless @current_bid.price < price
+      raise 'Bid must be greater than previous' if price < @current_bid.price
     else
       @auction_starter = player
     end
@@ -362,10 +364,9 @@ class Game < Base
 
   # phase 8
   def collect_income
-    tier = cost_of_ownership_tier
-    @foreign_investor.close_companies tier
+    @foreign_investor.close_companies ownership_tier
     entities = @corporations + players + [@foreign_investor]
-    entities.each { |entity| entity.collect_income tier }
+    entities.each { |entity| entity.collect_income ownership_tier }
     sort_corporations
     @phase += 1
   end
@@ -381,10 +382,10 @@ class Game < Base
 
   # phase 10
   def check_end
-    @eng_game_card = :last_turn if cost_of_ownership_tier == :penultimate
+    @eng_game_card = :last_turn if ownership_tier == :penultimate
     sort_corporations
 
-    if cost_of_ownership_tier == :last_turn || @stock_market.last.nil?
+    if ownership_tier == :last_turn || @stock_market.last.nil?
       update(state: :finished)
     else
       @phase = 1

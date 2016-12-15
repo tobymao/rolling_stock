@@ -3,13 +3,13 @@ require './views/purchaser'
 
 module Views
   class Corporation < Purchaser
-    needs :game
     needs :corporation
+    needs :tier
 
     def content
       div style: inline(container_style) do
         render_headers corporation
-        render_companies corporation
+        render_companies corporation, true
       end
     end
 
@@ -18,8 +18,8 @@ module Views
         render_header corporation.name, 'Corp'
         render_header "$#{corporation.cash}", 'Cash'
         render_header "$#{corporation.book_value}", 'Value'
-        render_header "$#{corporation.share_price.price}", 'Share Price'
-        render_header "$#{corporation.income(game.cost_of_ownership_tier)}", 'Income'
+        render_header "$#{corporation.share_price.price}", 'Price'
+        render_header "$#{corporation.income(tier)}", 'Income'
       end
     end
 

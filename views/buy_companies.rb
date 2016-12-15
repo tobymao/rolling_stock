@@ -9,13 +9,13 @@ module Views
       widget EntityOrder, game: game, entities: game.active_entities
       render_offers
       render_corporations
-      render_companies
+      render_all_companies
       render_controls
     end
 
     def render_corporations
       corporations = game.corporations.select { |c| c.owned_by? current_player }
-      widget Corporations, game: game, corporations: corporations, header: false
+      widget Corporations, corporations: corporations, tier: game.ownership_tier, header: false
     end
 
     def render_offers
@@ -32,37 +32,34 @@ module Views
       end
     end
 
-    def render_companies
+    def render_all_companies
       game.corporations.each do |corporation|
         next if corporation.companies.size == 1
         div "#{corporation.name}'s companies"
-        widget Companies, {
-          companies: corporation.companies,
-          onclick: 'FormCorporations.onClick(this)',
-          js_block: js_block,
-        }
+        render_companies corporation.companies
       end
 
       game.players.each do |player|
         next if player.companies.empty?
         div "#{player.name}'s companies"
-        widget Companies, {
-          companies: player.companies,
-          onclick: 'FormCorporations.onClick(this)',
-          js_block: js_block,
-        }
+        render_companies player.companies
       end
 
       foreign_companies = game.foreign_investor.companies
 
       unless foreign_companies.empty?
         div "Foreign Investor's companies"
-        widget Companies, {
-          companies: foreign_companies,
-          onclick: 'FormCorporations.onClick(this)',
-          js_block: js_block,
-        }
+        render_companies foreign_companies
       end
+    end
+
+    def render_companies companies
+      widget Companies, {
+        companies: companies,
+        tier: game.ownership_tier,
+        onclick: 'FormCorporations.onClick(this)',
+        js_block: js_block,
+      }
     end
 
     def render_controls

@@ -3,8 +3,7 @@ require './views/purchaser'
 
 module Views
   class Players < Purchaser
-    needs :game
-    needs :current_player
+    needs :players
 
     def content
       div class: 'heading' do
@@ -12,7 +11,7 @@ module Views
       end
 
       div do
-        game.players.rotate(current_player&.order || 0).each do |player|
+        players.each do |player|
           render_player player
         end
       end
@@ -22,7 +21,7 @@ module Views
       div style: inline(container_style) do
         render_headers player
         render_companies player
-        render_shares player
+        render_shares player unless player.shares.empty?
       end
     end
 
@@ -31,7 +30,7 @@ module Views
         render_header player.name, 'Player'
         render_header "$#{player.cash}", 'Cash'
         render_header "$#{player.value}", 'Value'
-        render_header "$#{player.income(game.cost_of_ownership_tier)}", 'Income'
+        render_header "$#{player.income(tier)}", 'Income'
         render_header player.order, 'Order'
       end
     end
@@ -51,12 +50,7 @@ module Views
         values << "$#{num * price}"
       end
 
-      shares_style = inline(
-        position: 'absolute',
-        bottom: 0,
-      )
-
-      div style: shares_style do
+      div do
         render_header names, 'Corp'
         render_header num_shares, 'Shares'
         render_header prices, 'Price'

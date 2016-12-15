@@ -3,6 +3,8 @@ require './views/base'
 module Views
   class Companies < Base
     needs :companies
+    needs :tier
+    needs show_synergies: false
     needs onclick: nil
     needs js_block: nil
 
@@ -11,9 +13,14 @@ module Views
         script js_block if js_block
 
         companies.each do |c|
-          widget Company, company: c, onclick: onclick
+          widget Company,
+            company: c,
+            tier: tier,
+            onclick: onclick,
+            show_synergies: show_synergies
         end
       end
     end
+
   end
 end

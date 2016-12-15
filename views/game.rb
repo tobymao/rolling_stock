@@ -22,17 +22,17 @@ module Views
     end
 
     def render_game
-      widget Bid, bid: game.current_bid if game.current_bid
-
+      tier = game.ownership_tier
+      widget Bid, bid: game.current_bid, tier: tier if game.current_bid
       render_action_widget
-
-      widget Players, game: game, current_player: @current_player
-
-      widget ForeignInvestor, game: game
-
-      widget Corporations, game: game
-
-      widget Deck, game: game
+      widget Players, players: game.players, tier: tier, current_player: @current_player
+      widget Corporations, corporations: game.corporations, tier: tier
+      widget ForeignInvestor, investor: game.foreign_investor, tier: tier
+      widget Deck,
+        companies: game.companies,
+        pending_companies: game.pending_companies,
+        company_deck: game.company_deck,
+        tier: tier
     end
 
     def render_join_button

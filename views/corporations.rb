@@ -2,15 +2,16 @@ require './views/base'
 
 module Views
   class Corporations < Base
-    needs :game
+    needs :corporations
+    needs :tier
     needs header: true
 
     def content
       div(class: 'heading') { text 'Corporations' } if header
 
       div do
-        game.corporations.each do |corporation|
-          widget Corporation, game: game, corporation: corporation
+        corporations.each do |corporation|
+          widget Corporation, corporation: corporation, tier: tier
         end
       end
     end

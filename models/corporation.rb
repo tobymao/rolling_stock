@@ -29,8 +29,6 @@ class Corporation
   end
 
   def initialize name, company, share_price, stock_market
-    company.owner.companies.delete company
-
     @name = name
     @president = company.owner
     @companies = [company]
@@ -40,6 +38,9 @@ class Corporation
     @cash = 0
     @shares = [Share.president(self)].concat 9.times.map { Share.normal(self) }
     @bank_shares = []
+
+    company.owner.companies.delete company
+    company.owner = self
 
     issue_initial_shares
   end

@@ -154,4 +154,21 @@ class Company
       @value * 1.10 + 30
     end.floor
   end
+
+  def color
+    case @tier
+    when :red
+      'indianred'
+    when :orange
+      'orange'
+    when :yellow
+      ' #FFFF33'
+    when :green
+      'lightgreen'
+    when :blue
+      'lightblue'
+    when :purple
+      'mediumpurple'
+    end
+  end
 end

@@ -8,7 +8,7 @@ module Views
     def render_action
       company = game.acting.first
       widget EntityOrder, game: game, entities: game.player_companies
-      widget Companies, companies: game.acting
+      widget Companies, companies: game.acting, tier: game.ownership_tier
 
       game_form do
         select name: data('corporation') do

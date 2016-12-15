@@ -71,7 +71,7 @@ describe Game do
       end
 
       it 'should change to finished if game end card' do
-        allow(subject).to receive(:cost_of_ownership_tier).and_return(:last_turn)
+        allow(subject).to receive(:ownership_tier).and_return(:last_turn)
         subject.check_end
         expect(subject.state).to eq('finished')
       end

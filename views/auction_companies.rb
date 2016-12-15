@@ -11,7 +11,8 @@ module Views
       widget Companies, {
         companies: game.companies,
         js_block: js_block,
-        onclick: 'CompanyAuction.onClick(this)'
+        onclick: 'CompanyAuction.onClick(this)',
+        tier: game.ownership_tier,
       } unless game.current_bid
 
       render_controls if game.can_act? current_player

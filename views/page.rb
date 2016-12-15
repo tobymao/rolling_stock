@@ -43,7 +43,6 @@ module Views
         body {
           font-family: Helvetica;
           font-weight: lighter;
-          font-size: 0.9em;
           width: 100%;
         }
 
