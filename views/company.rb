@@ -34,7 +34,7 @@ module Views
       header_style = inline(headers_style.merge(background_color: company.color))
 
       div style: header_style do
-        render_header company.name, 'Company'
+        render_header company.name, 'Company', true
         render_header "$#{company.value}", 'Value'
         render_header "($#{company.min_price}-$#{company.max_price})", 'Range'
         render_header "$#{company.income}", 'Income'

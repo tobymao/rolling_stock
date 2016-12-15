@@ -25,7 +25,7 @@ module Views
       }
     end
 
-    def render_header values, label_text = nil
+    def render_header values, label_text = nil, bold = false
       header_style = inline(
         display: 'inline-block',
         text_align: 'right',
@@ -34,7 +34,13 @@ module Views
 
       div style: header_style do
         Array(values).each do |v|
-          div { text v }
+          if bold == true
+            div style: inline('font-weight': 'bold') do
+              text v
+            end
+          else
+            div { text v }
+          end
         end
 
         div { text label_text }
