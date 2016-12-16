@@ -75,6 +75,10 @@ class Game < Base
       .sort_by(&:order)
   end
 
+  def players_in_order
+    players.sort_by &:order
+  end
+
   def player_by_user user
     player_by_id user.id
   end
