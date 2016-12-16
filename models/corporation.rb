@@ -127,6 +127,8 @@ class Corporation
   end
 
   def pay_dividend amount, players
+    raise 'Total dividends must be payable with corporation cash' if (shares_issued * amount) > @cash
+
     @cash -= amount * @bank_shares.size
 
     players.each do |player|

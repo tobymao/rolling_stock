@@ -15,7 +15,7 @@ module Views
 
     def render_headers corporation
       div style: inline(headers_style.merge(background_color: 'lightblue')) do
-        render_header corporation.name, 'Corp'
+        render_header corporation.name, 'Corp', true
         render_header "$#{corporation.cash}", 'Cash'
         render_header "$#{corporation.book_value}", 'Value'
         render_header "$#{corporation.share_price.price}", 'Price'
