@@ -85,6 +85,12 @@ describe Game do
       end
     end
 
+    describe '#bid_company' do
+      it 'should not allow player to bid beyond cash on hand' do
+        expect { subject.bid_company player, company, 400 }.to raise_error
+      end
+    end
+
     describe '#issue_share' do
       it 'increase corp cash by 9' do
         expect { subject.issue_share corporation }.to change { corporation.cash }.by 9

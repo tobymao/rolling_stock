@@ -197,9 +197,9 @@ class Game < Base
   def process_action_data data
     if data['action'] == 'pass'
       entities = [
-        active_companies.select { |c| data['company']&.include? c.name },
-        player_by_id(data['player']&.first),
-        @corporations.select { |c| data['corporation']&.include? c.name },
+        active_companies.select { |c| data['company'] == c.name },
+        player_by_id(data['player']),
+        @corporations.select { |c| data['corporation'] ==  c.name },
       ].flatten.compact
 
       entities.each do |entity|
@@ -283,6 +283,7 @@ class Game < Base
 
   def bid_company player, company, price
     raise 'Bid must be greater than value' if price < company.value
+    raise 'Bid must not be more than cash on hand' if price > player.cash
 
     if @current_bid
       raise 'Must bid on same company' if @current_bid.company != company
