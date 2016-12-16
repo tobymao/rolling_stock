@@ -283,6 +283,7 @@ class Game < Base
 
   def bid_company player, company, price
     raise 'Bid must be greater than value' if price < company.value
+    raise 'Bid must not be more than cash on hand' if price > player.cash
 
     if @current_bid
       raise 'Must bid on same company' if @current_bid.company != company

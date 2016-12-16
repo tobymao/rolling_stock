@@ -70,6 +70,10 @@ describe Corporation do
       expect { subject.pay_dividend 1, [player] }.to change { subject.cash }.by(-2)
     end
 
+    it 'should not pay out more than cash on hand' do
+      expect { subject.pay_dividend 100, [player] }.to raise_error
+    end
+
     it 'should increase player cash' do
       expect { subject.pay_dividend 1, [player] }.to change { player.cash }.by(1)
     end
