@@ -307,6 +307,7 @@ class Game < Base
     restart_order @auction_starter
     @auction_starter = nil
     @current_bid = nil
+    check_no_player_purchases
   end
 
   def restart_order player
@@ -445,7 +446,7 @@ class Game < Base
       finalize_auction if eligible.all? &:passed?
     else
       min = [
-        @corporations.map { |c| c.next_share_price.price }.min,
+        @corporations.select(&:can_buy_share?).map { |c| c.next_share_price.price }.min,
         @companies.map(&:value).min,
         99999,
       ].compact.min

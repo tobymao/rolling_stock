@@ -9,7 +9,8 @@ module Views
       game_form do
         select name: data('corporation') do
           game.corporations.each do |corporation|
-            next unless corporation.can_buy_share?
+            next if !corporation.can_buy_share? &&
+              current_player.shares.none? { |s| s.corporation == corporation }
             option(value: corporation.name) { text corporation.name }
           end
         end

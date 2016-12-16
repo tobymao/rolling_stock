@@ -10,6 +10,7 @@ module Views
       div style: inline(container_style) do
         render_headers corporation
         render_companies corporation, true
+        render_price_movement
       end
     end
 
@@ -23,5 +24,24 @@ module Views
       end
     end
 
+    def render_price_movement
+      div do
+        div "Issued Shares: #{corporation.shares_issued}"
+        div "Shares In Bank: #{corporation.bank_shares.size}"
+
+        index = corporation.share_price.index
+        double_drop = SharePrice::PRICES[index - 2]
+        single_drop = SharePrice::PRICES[index - 1]
+        current_price =  SharePrice::PRICES[index]
+        single_jump = SharePrice::PRICES[index + 1]
+        double_jump = SharePrice::PRICES[index + 2]
+
+        num = corporation.shares_issued
+        div "$#{num * single_jump} double jump to $#{double_jump}"
+        div "$#{num * current_price}-$#{num * single_jump - 1} jump to $#{single_jump}"
+        div "$#{num * single_drop}-$#{num * current_price - 1} drop to $#{single_drop}"
+        div "$#{num * single_drop - 1} double drop to $#{double_drop}"
+      end
+    end
   end
 end
