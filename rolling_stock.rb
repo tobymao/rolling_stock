@@ -113,7 +113,6 @@ class RollingStock < Roda
         r.post do
           r.is 'join' do
             game.users << current_user.id
-            game.players << Player.new(current_user.id, current_user.name)
             game.save
             update_connections room, game
             r.redirect path(game)
@@ -143,7 +142,7 @@ class RollingStock < Roda
             r.redirect path(game)
           end
 
-          r.halt 403 unless game.user = current_user
+          r.halt 403 unless game.user == current_user
 
           r.is 'start' do
             game.update state: 'active', users: game.users.shuffle

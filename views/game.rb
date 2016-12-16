@@ -25,14 +25,15 @@ module Views
       tier = game.ownership_tier
       widget Bid, bid: game.current_bid, tier: tier if game.current_bid
       render_action_widget
-      widget Players, players: game.players, tier: tier, current_player: @current_player
+      widget Players, players: game.players_in_order, tier: tier, current_player: @current_player
       widget Corporations, corporations: game.corporations, tier: tier
       widget ForeignInvestor, investor: game.foreign_investor, tier: tier
-      widget Deck,
+      widget Deck, {
         companies: game.companies,
         pending_companies: game.pending_companies,
         company_deck: game.company_deck,
         tier: tier
+      }
     end
 
     def render_join_button
