@@ -197,9 +197,9 @@ class Game < Base
   def process_action_data data
     if data['action'] == 'pass'
       entities = [
-        active_companies.select { |c| data['company']&.include? c.name },
-        player_by_id(data['player']&.first),
-        @corporations.select { |c| data['corporation']&.include? c.name },
+        active_companies.select { |c| data['company'] == c.name },
+        player_by_id(data['player']),
+        @corporations.select { |c| data['corporation'] ==  c.name },
       ].flatten.compact
 
       entities.each do |entity|
