@@ -18,7 +18,7 @@ class Game < Base
   }.freeze
 
   attr_reader(
-    :stock_market,
+    :share_prices,
     :available_corporations,
     :corporations,
     :companies,
@@ -43,7 +43,7 @@ class Game < Base
   end
 
   def load
-    @stock_market = SharePrice.initial_market
+    @share_prices = SharePrice.initial_market
     @available_corporations = Corporation::CORPORATIONS.dup
     @corporations = []
     @companies = [] # available companies
@@ -229,14 +229,14 @@ class Game < Base
   # phase 2
   def process_phase_2 data
     name = data['corporation']
-    share_price = @stock_market.find { |sp| sp.price == data['price'].to_i }
+    share_price = @share_prices.find { |sp| sp.price == data['price'].to_i }
     company = active_player_companies.find { |c| c.name == data['company'] }
     raise if share_price.corporation
     raise unless @available_corporations.include? name
     raise unless share_price.valid_range? company
     company.pass
     @available_corporations.delete name
-    @corporations << Corporation.new(name, company, share_price, @stock_market)
+    @corporations << Corporation.new(name, company, share_price, @share_prices)
   end
 
   # phase 3
@@ -383,7 +383,7 @@ class Game < Base
     @end_game_card = :last_turn if ownership_tier == :penultimate
     sort_corporations
 
-    if ownership_tier == :last_turn || @stock_market.last.nil?
+    if ownership_tier == :last_turn || @share_prices.last.nil?
       update(state: :finished)
     else
       @phase = 1
@@ -466,6 +466,6 @@ class Game < Base
     players.each do |player|
       player.shares.reject! { |share| share.corporation == corporation }
     end
-    @stock_market[corporation.share_price.index] = corporation.share_price
+    @share_prices[corporation.share_price.index] = corporation.share_price
   end
 end

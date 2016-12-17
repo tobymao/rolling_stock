@@ -32,8 +32,9 @@ module Views
         companies: game.companies,
         pending_companies: game.pending_companies,
         company_deck: game.company_deck,
-        tier: tier
+        tier: tier,
       }
+      widget SharePrices, share_prices: game.share_prices
     end
 
     def render_join_button

@@ -28,13 +28,13 @@ class Corporation
     end
   end
 
-  def initialize name, company, share_price, stock_market
+  def initialize name, company, share_price, share_prices
     @name = name
     @president = company.owner
     @companies = [company]
     @share_price = share_price
     @share_price.corporation = self
-    @stock_market = stock_market
+    @share_prices = share_prices
     @cash = 0
     @shares = [Share.president(self)].concat 9.times.map { Share.normal(self) }
     @bank_shares = []
@@ -158,12 +158,12 @@ class Corporation
 
   def prev_share_price
     return nil if index == 0
-    @stock_market.slice(0..(index - 1)).reverse.find &:unowned?
+    @share_prices.slice(0..(index - 1)).reverse.find &:unowned?
   end
 
   def next_share_price
-    return nil if index >= @stock_market.size - 1
-    @stock_market.slice((index + 1)..-1).find &:unowned?
+    return nil if index >= @share_prices.size - 1
+    @share_prices.slice((index + 1)..-1).find &:unowned?
   end
 
   private
@@ -182,8 +182,8 @@ class Corporation
   end
 
   def swap_share_price new_price
-    @stock_market[@share_price.index] = @share_price
-    @stock_market[new_price.index] = nil
+    @share_prices[@share_price.index] = @share_price
+    @share_prices[new_price.index] = nil
     @share_price = new_price
   end
 
