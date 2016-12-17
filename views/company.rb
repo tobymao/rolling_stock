@@ -10,7 +10,15 @@ module Views
     needs onclick: false
 
     def content
-      props = { data: { company: company.name, value: company.value } }
+      props = {
+        data: {
+          company: company.name,
+          value: company.value,
+          min: company.min_price,
+          max: company.max_price,
+        }
+      }
+
       company_style = container_style.merge(
         width: '300px',
         min_height: '100px',

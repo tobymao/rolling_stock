@@ -21,7 +21,8 @@ module Views
     def render_controls
       widget BidBox, game: game, current_player: current_player
 
-      if game.corporations.any?(&:can_buy_share?) || !current_player.shares.empty?
+      if (game.corporations.any?(&:can_buy_share?) || !current_player.shares.empty?) &&
+          !game.current_bid
         widget BuyShares, game: game, current_player: current_player
       end
     end

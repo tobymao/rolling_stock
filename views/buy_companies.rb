@@ -10,7 +10,7 @@ module Views
       render_offers
       render_corporations
       render_all_companies
-      render_controls
+      render_controls if game.can_act? current_player
     end
 
     def render_corporations
@@ -57,7 +57,7 @@ module Views
       widget Companies, {
         companies: companies,
         tier: game.ownership_tier,
-        onclick: 'FormCorporations.onClick(this)',
+        onclick: 'BuyCompanies.onClick(this)',
         js_block: js_block,
       }
     end
@@ -102,14 +102,11 @@ module Views
 
     def js_block
       <<~JS
-        var FormCorporations = {
+        var BuyCompanies = {
           onClick: function(el) {
-            var company = document.getElementById('form_company');
             var data = el.dataset;
-
-            if (company.value != data.company) {
-              company.value = data.company;
-            }
+            $('#bid_price').attr({'min': data.min, 'max': data.max, 'value': data.value});
+            $('#bid_company').attr('value', data.company);
           }
         };
       JS

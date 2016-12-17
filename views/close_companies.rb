@@ -8,7 +8,7 @@ module Views
     def render_action
       widget EntityOrder, game: game, entities: game.active_entities
 
-      render_controls
+      render_controls if game.can_act? current_player
     end
 
     def render_controls
@@ -36,7 +36,9 @@ module Views
             end
           end
 
-          input type: 'submit', value: 'Close Companies'
+          div do
+            input type: 'submit', value: 'Close Companies'
+          end
         end unless companies.empty?
       end
     end

@@ -10,10 +10,10 @@ module Views
 
       corporation = game.acting.first
 
+      widget Corporations, corporations: [corporation], tier: game.ownership_tier, header: false
+
       div do
         game_form do
-          div corporation.name
-
           max_dividend = corporation.cash / corporation.shares_issued
 
           input type: 'hidden', name: data('corporation'), value: corporation.name
