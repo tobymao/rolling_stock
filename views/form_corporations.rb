@@ -18,8 +18,7 @@ module Views
         end
 
         select name: data('price') do
-          game.stock_market.each do |share_price|
-            next unless share_price
+          game.stock_market.reject(&:corporation).each do |share_price|
             next unless company.valid_share_price? share_price
             price = share_price.price
             option(value: price) { text price }

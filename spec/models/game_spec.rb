@@ -91,9 +91,11 @@ describe Game do
       end
     end
 
-    describe '#issue_share' do
-      it 'increase corp cash by 9' do
-        expect { subject.issue_share corporation }.to change { corporation.cash }.by 9
+    describe '#process_phase_2' do
+      it 'form a corporation' do
+        allow(subject).to receive(:active_player_companies).and_return([company])
+        subject.process_phase_2 'corporation' => 'Bear', 'price' => 10, 'company' => 'BME'
+        expect(subject.corporations.first).to have_attributes(name: 'Bear', price: 10)
       end
     end
   end

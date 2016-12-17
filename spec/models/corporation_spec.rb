@@ -91,4 +91,16 @@ describe Corporation do
     end
   end
 
+  describe '#prev_share_price' do
+    it 'should find the prev price' do
+      expect(subject.prev_share_price).to have_attributes(index: 5, price: 9)
+    end
+  end
+
+  describe '#next_share_price' do
+    it 'should find the next price' do
+      expect(subject.next_share_price).to have_attributes(index: 7, price: 11)
+    end
+  end
+
 end

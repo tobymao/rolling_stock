@@ -221,10 +221,6 @@ class Game < Base
   def process_phase_1 data
     corporation = @corporations.find { |c| c.name == data['corporation'] }
     corporation.pass
-    issue_share corporation
-  end
-
-  def issue_share corporation
     raise unless corporation.can_issue_share?
     corporation.issue_share
     check_bankruptcy corporation
@@ -232,18 +228,15 @@ class Game < Base
 
   # phase 2
   def process_phase_2 data
-    corporation = data['corporation']
+    name = data['corporation']
     share_price = @stock_market.find { |sp| sp.price == data['price'].to_i }
     company = active_player_companies.find { |c| c.name == data['company'] }
-    company.pass
-    form_corporation company, share_price, corporation
-  end
-
-  def form_corporation company, share_price, corporation_name
-    raise unless @available_corporations.include? corporation_name
+    raise if share_price.corporation
+    raise unless @available_corporations.include? name
     raise unless share_price.valid_range? company
-    @available_corporations.delete corporation_name
-    @corporations << Corporation.new(corporation_name, company, share_price, @stock_market)
+    company.pass
+    @available_corporations.delete name
+    @corporations << Corporation.new(name, company, share_price, @stock_market)
   end
 
   # phase 3

@@ -33,8 +33,8 @@ class Corporation
     @president = company.owner
     @companies = [company]
     @share_price = share_price
+    @share_price.corporation = self
     @stock_market = stock_market
-    @stock_market[@share_price.index] = nil
     @cash = 0
     @shares = [Share.president(self)].concat 9.times.map { Share.normal(self) }
     @bank_shares = []
@@ -55,6 +55,10 @@ class Corporation
 
   def price
     @share_price.price
+  end
+
+  def index
+    @share_price.index
   end
 
   def can_buy_share?
@@ -153,11 +157,13 @@ class Corporation
   end
 
   def prev_share_price
-    @stock_market.take(@share_price.index).reverse.compact.first || @stock_market.first
+    return nil if index == 0
+    @stock_market.slice(0..(index - 1)).reverse.find &:unowned?
   end
 
   def next_share_price
-    @stock_market.drop(@share_price.index + 1).compact.first || @stock_market.last
+    return nil if index >= @stock_market.size - 1
+    @stock_market.slice((index + 1)..-1).find &:unowned?
   end
 
   private
