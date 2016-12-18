@@ -71,7 +71,7 @@ class Corporation
 
   def buy_share player
     swap_share_price next_share_price
-    player.cash - price
+    player.cash -= price
     player.shares << @bank_shares.pop
   end
 
@@ -82,7 +82,7 @@ class Corporation
 
   def sell_share player
     swap_share_price prev_share_price
-    player.cash + price
+    player.cash += price
     @bank_shares << player.shares.pop
   end
 
@@ -163,6 +163,7 @@ class Corporation
 
   def next_share_price
     return nil if index >= @share_prices.size - 1
+    puts "** #{@share_prices.slice((index + 1)..-1)}"
     @share_prices.slice((index + 1)..-1).find &:unowned?
   end
 
@@ -182,8 +183,8 @@ class Corporation
   end
 
   def swap_share_price new_price
-    @share_prices[@share_price.index] = @share_price
-    @share_prices[new_price.index] = nil
+    new_price.corporation = self
+    @share_price.corporation = nil
     @share_price = new_price
   end
 
