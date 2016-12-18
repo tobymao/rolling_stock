@@ -164,7 +164,7 @@ class RollingStock < Roda
       end
 
       r.post do
-        user = User.where(email: r['email']).first
+        user = User[Sequel.function(:lower, :email) => r['email'].downcase]
         r.redirect '/login' unless user
         login_user user
       end
