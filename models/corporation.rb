@@ -163,7 +163,6 @@ class Corporation
 
   def next_share_price
     return nil if index >= @share_prices.size - 1
-    puts "** #{@share_prices.slice((index + 1)..-1)}"
     @share_prices.slice((index + 1)..-1).find &:unowned?
   end
 
@@ -189,7 +188,7 @@ class Corporation
   end
 
   def above_valuation?
-    book_value - market_cap >= SharePrice::PRICES[@share_price.index]
+    book_value - market_cap >= 0
   end
 
   def adjust_share_price
@@ -198,7 +197,7 @@ class Corporation
       swap_share_price next_share_price if above_valuation?
     else
       swap_share_price prev_share_price
-      swap_share_price next_share_price unless above_valuation?
+      swap_share_price prev_share_price unless above_valuation?
     end
   end
 end

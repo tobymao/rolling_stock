@@ -12,22 +12,13 @@ describe ForeignInvestor do
     expect(subject).not_to be_nil
   end
 
-  describe '#initialize' do
-    it 'should set variables correctly' do
-      expect(subject.companies).not_to be_nil
-      expect(subject.cash).to eq(0)
-    end
-  end
-
   describe '#purchase_companies' do
     it "should buy only one company if it has 5 dollars" do
-
       game = double('Game', companies: [company1, company2])
       company1.owner = game
       company2.owner = game
       subject.cash = 3
       expect { subject.purchase_companies game.companies }.to change { subject.companies.size }.by(1)
-
     end
 
     it 'should not buy anything if it does not have enough money.' do

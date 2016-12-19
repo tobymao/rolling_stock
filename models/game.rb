@@ -112,13 +112,13 @@ class Game < Base
     when 2
       active_player_companies
     when 3
+      # check if player doesn't have enough money to buy anything
       players.select &:active?
     when 7
       active_companies
     end
   end
 
-  # todo get rid of this sort
   def active_corporations
     @corporations.select &:active?
   end
@@ -197,7 +197,6 @@ class Game < Base
     end
   end
 
-  # todo fix auto passing on corps and stuff
   def process_action_data data
     if data['action'] == 'pass'
       entities = [
@@ -330,22 +329,43 @@ class Game < Base
     corporation = @corporations.find { |c| c.name == data['corporation'] }
     companies = held_companies + @foreign_investor.companies
     company = companies.find { |c| c.name == data['company'] }
-    offer = @offers.find { |o| o.corporation == corporation && o.company == company }
+    offer = @offers.find do |o|
+      (o.corporation == corporation && o.company == company) ||
+        (o.company == company && o.foreign_purchase?)
+    end
     owner = company.owner
     raise "Can't sell last company" if owner.is_a?(Corporation) && owner.companies.size == 1
 
     case data['action']
     when 'accept'
-      corporation.buy_company company, offer.price
+      offer.suitors.delete corporation
+
+      if !offer.foreign_purchase? || offer.suitors.empty?
+        corporation.buy_company company, offer.price
+      end
     when 'decline'
-      @offers.delete offer
+      offer.suitors.delete corporation
+
+      if offer.foreign_purchase?
+        corporation.buy_company(company, offer.price) if offer.suitors.empty?
+      else
+        @offers.delete offer
+      end
     else
       price = data['price'].to_i
       raise "Not a valid price" unless company.valid_price? price
       raise "Already have an offer" if @offers.any? { |o| o.corporation == corporation && o.company == company}
 
-      if corporation.president != company.owner
-        @offers << Offer.new(corporation, company, price)
+      suitors = @corporations.select do |c|
+        c.price > corporation.price && c.owner != corporation.owner
+      end if owner.is_a? ForeignInvestor
+
+      if suitors && suitors.empty?
+        puts "** getting bought ** "
+        raise 'Foreign Investor purchase must be max price' if price != company.max_price
+        corporation.buy_company company, price
+      elsif corporation.owner != owner
+        @offers << Offer.new(corporation, company, price, suitors)
       else
         corporation.buy_company company, price
       end
@@ -424,7 +444,7 @@ class Game < Base
   end
 
   def sort_corporations
-    @corporations.sort_by(&:price).reverse!
+    @corporations.sort_by!(&:price).reverse!
   end
 
   def check_phase_change passers

@@ -7,6 +7,8 @@ module Views
 
     def render_action
       widget EntityOrder, game: game, entities: game.active_entities
+      @corporations = game.corporations.select { |c| c.owned_by? current_player }
+
       render_offers
       render_corporations
       render_all_companies
@@ -14,23 +16,44 @@ module Views
     end
 
     def render_corporations
-      corporations = game.corporations.select { |c| c.owned_by? current_player }
-      widget Corporations, corporations: corporations, tier: game.ownership_tier, header: false
+      widget Corporations, corporations: @corporations, tier: game.ownership_tier, header: false
     end
 
     def render_offers
-      offers = game.offers.select { |o| o.company.owner == current_player }
+      offers = game.offers.select do |offer|
+        offer.company.owner == current_player || offer.suitor?(current_player)
+      end
 
-      offers.each do |offer|
-        game_form do
-          div "#{offer.corporation.name} offers to buy #{offer.company.name} for #{offer.price}"
-          input type: 'hidden', name: data('corporation'), value: offer.corporation.name
-          input type: 'hidden', name: data('company'), value: offer.company.name
-          input type: 'submit', name: data('action'), value: 'accept'
-          input type: 'submit', name: data('action'), value: 'decline'
+      offers.each { |offer| render_offer offer }
+    end
+
+    def render_offer offer
+      corporation = offer.corporation
+      company = offer.company
+      div do
+        text "#{corporation.name} offers to buy #{company.name} from #{company.owner.name} for #{offer.price}"
+      end
+
+      game_form do
+        if offer.suitor? current_player
+          div 'You can purchase this company from the Foreign Investor instead.'
+          div 'Click Accept to make the purchase and Decline to pass on the purchase.'
+
+          select name: data('corporation') do
+            @corporations.select { |c| offer.suitor? current_player }.each do |corporation|
+              option(value: corporation.name) { text corporation.name }
+            end
+          end
+        else
+          input type: 'hidden', name: data('corporation'), value: corporation.name
         end
+
+        input type: 'hidden', name: data('company'), value: company.name
+        input type: 'submit', name: data('action'), value: 'accept'
+        input type: 'submit', name: data('action'), value: 'decline'
       end
     end
+
 
     def render_all_companies
       game.corporations.each do |corporation|

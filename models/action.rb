@@ -7,7 +7,7 @@ class Action < Base
   end
 
   def turns= data
-    super data.to_json
+    super JSON.dump(data)
   end
 
   def append_turn data

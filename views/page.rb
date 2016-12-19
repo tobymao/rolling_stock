@@ -77,8 +77,6 @@ module Views
     def render_nav
       links = [
         ['Home', '/'],
-        ['Games', '/games'],
-        ['About Us', '/about'],
       ]
 
       if app.current_user
