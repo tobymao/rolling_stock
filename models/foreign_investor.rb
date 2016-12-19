@@ -8,7 +8,7 @@ class ForeignInvestor
 
   def initialize
     @companies = []
-    @cash = 0
+    @cash = 4
   end
 
   def close_companies tier
