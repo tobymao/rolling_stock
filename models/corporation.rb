@@ -31,8 +31,8 @@ class Corporation
   end
 
   def initialize name, company, share_price, share_prices, log = nil
-    raise if share_price.corporation
-    raise unless share_price.valid_range? company
+    raise GameException, "Share price #{share_price.price} taken by #{share_price.corporation.name}" if share_price.corporation
+    raise GameException, "Share price #{share_price.price} not valid" unless share_price.valid_range? company
 
     @name = name
     @president = company.owner
@@ -76,8 +76,8 @@ class Corporation
   end
 
   def buy_share player
-    raise 'Cannot buy share. None available' unless can_buy_share?
-    raise 'Player does not have enough money to buy a share.' if player.cash < next_share_price.price
+    raise GameException, 'Cannot buy share. None available' unless can_buy_share?
+    raise GameException, 'Player does not have enough money to buy a share.' if player.cash < next_share_price.price
     swap_share_price next_share_price
     player.cash -= price
     player.shares << @bank_shares.pop
@@ -90,7 +90,7 @@ class Corporation
   end
 
   def sell_share player
-    raise unless can_sell_share? player
+    raise GameException, 'Cannot sell share' unless can_sell_share? player
     swap_share_price prev_share_price
     player.cash += price
     @bank_shares << player.shares.pop
@@ -102,7 +102,7 @@ class Corporation
   end
 
   def issue_share
-    raise unless can_issue_share?
+    raise GameException, 'Cannot issue share' unless can_issue_share?
     swap_share_price prev_share_price
     @cash += price
     @bank_shares << @shares.shift
@@ -126,7 +126,7 @@ class Corporation
   end
 
   def pay_dividend amount, players
-    raise 'Total dividends must be payable with corporation cash' if (shares_issued * amount) > @cash
+    raise GameException, 'Total dividends must be payable with corporation cash' if (shares_issued * amount) > @cash
 
     @cash -= amount * @bank_shares.size
 

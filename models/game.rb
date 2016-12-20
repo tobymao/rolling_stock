@@ -1,5 +1,8 @@
 require './models/base'
 
+class GameException < Exception
+end
+
 class Game < Base
   many_to_one :user
   one_to_many :actions
@@ -194,7 +197,7 @@ class Game < Base
 
   def process_actions
     actions.sort_by { |action| [action.round, action.phase] }.each do |action|
-      raise 'Invalid action for phase' if action.phase != @phase
+      raise GameException, 'Invalid action for phase' if action.phase != @phase
       action.turns.each { |turn| process_action_data turn }
     end
   end
@@ -207,10 +210,10 @@ class Game < Base
         @corporations.select { |c| data['corporation'] ==  c.name },
       ].flatten.compact
 
-      raise 'No one to pass' if entities.empty?
+      raise GameException, 'No one to pass' if entities.empty?
 
       entities.each do |entity|
-        raise 'Already passed' if entity.passed?
+        raise GameException, 'Already passed' if entity.passed?
         entity.pass
       end
     else
@@ -233,7 +236,7 @@ class Game < Base
     name = data['corporation']
     share_price = @share_prices.find { |sp| sp.price == data['price'].to_i }
     company = active_player_companies.find { |c| c.name == data['company'] }
-    raise unless @available_corporations.include? name
+    raise GameException, "Corporation #{name} not available" unless @available_corporations.include? name
     company.pass
     @available_corporations.delete name
     @corporations << Corporation.new(name, company, share_price, @share_prices, @log)
@@ -244,14 +247,12 @@ class Game < Base
     player = player_by_id data['player']
     action = data['action']
     corporation = @corporations.find { |c| c.name == data['corporation'] }
-    raise 'Not your turn' unless can_act? player
-    raise 'You must bid or pass' if @current_bid && action != 'bid'
-    raise unless player
+    raise GameException, 'Not your turn' unless can_act? player
+    raise GameException, 'You must bid or pass' if @current_bid && action != 'bid'
 
     case action
     when 'bid'
       company = @companies.find { |c| c.name == data['company'] }
-      raise unless company
       players.each &:unpass unless @current_bid
       price = data['price'].to_i
       bid_company player, company, price
@@ -263,7 +264,7 @@ class Game < Base
       check_bankruptcy corporation
       player.unpass
     else
-      raise 'Unspecified action'
+      raise GameException, 'Unspecified action'
     end
 
     restart_order player
@@ -271,8 +272,8 @@ class Game < Base
 
   def bid_company player, company, price
     if @current_bid
-      raise 'Must bid on same company' if @current_bid.company != company
-      raise 'Bid must be greater than previous' if price < @current_bid.price
+      raise GameException, 'Must bid on same company' if @current_bid.company != company
+      raise GameException, 'Bid must be greater than previous' if price < @current_bid.price
     else
       @auction_starter = player
     end
@@ -282,7 +283,7 @@ class Game < Base
 
   def finalize_auction
     company = @current_bid.company
-    raise 'Must buy company for at least face value' if company.value < @current_bid.price
+    raise GameException, 'Must buy company for at least face value' if company.value < @current_bid.price
     @current_bid.player.buy_company company, @current_bid.price
     draw_companies
     players.each &:unpass
@@ -345,15 +346,15 @@ class Game < Base
       end
     else
       price = data['price'].to_i
-      raise "Not a valid price" unless company.valid_price? price
-      raise "Already have an offer" if @offers.any? { |o| o.corporation == corporation && o.company == company}
+      raise GameException, "Not a valid price" unless company.valid_price? price
+      raise GameException, "Already have an offer" if @offers.any? { |o| o.corporation == corporation && o.company == company}
 
       suitors = @corporations.select do |c|
         c.price > corporation.price && c.owner != corporation.owner
       end if owner.is_a? ForeignInvestor
 
       if suitors && suitors.empty?
-        raise 'Foreign Investor purchase must be max price' if price != company.max_price
+        raise GameException, 'Foreign Investor purchase must be max price' if price != company.max_price
         corporation.buy_company company, price
       elsif corporation.owner != owner
         @offers << Offer.new(corporation, company, price, suitors, @log)
@@ -383,7 +384,7 @@ class Game < Base
   # phase 9
   def process_phase_9 data
     corporation = @corporations.find { |c| c.name == data['corporation'] }
-    raise 'Not corporation turn' unless acting.include? corporation
+    raise GameException, 'Not corporation turn' unless acting.include? corporation
     corporation.pass
     corporation.pay_dividend data['amount'].to_i, players
     check_bankruptcy corporation

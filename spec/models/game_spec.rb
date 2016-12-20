@@ -87,7 +87,7 @@ describe Game do
 
     describe '#bid_company' do
       it 'should not allow player to bid beyond cash on hand' do
-        expect { subject.bid_company player, company, 40 }.to raise_error
+        expect { subject.bid_company player, company, 40 }.to raise_error(GameException)
       end
     end
 

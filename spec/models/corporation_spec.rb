@@ -71,7 +71,7 @@ describe Corporation do
     end
 
     it 'should not pay out more than cash on hand' do
-      expect { subject.pay_dividend 100, [player] }.to raise_error
+      expect { subject.pay_dividend 100, [player] }.to raise_error(GameException)
     end
 
     it 'should increase player cash' do
