@@ -33,7 +33,7 @@ class Company
 
     'WT' => ['Königlich Württembergische Staats-Eisenbahnen', :orange, 11, 3, ['BD', 'BY', 'SBB', 'DR']],
     'BD' => ['Großherzoglich Badische Staatseisenbahnen', :orange, 12, 3, ['BME', 'WT', 'HE', 'SNCF', 'SBB', 'DR']],
-    'BY' => ['Königlich Bayerische Staatseisenbahnen', :orange, 13, 3, ['BY', 'WT', 'HE', 'SX', 'KK', 'DR']],
+    'BY' => ['Königlich Bayerische Staatseisenbahnen', :orange, 13, 3, ['WT', 'HE', 'SX', 'KK', 'DR']],
     'OL' => ['Großherzoglich Oldenburgische Staatseisenbahnen', :orange, 14, 3, ['KME', 'AKE', 'MHE', 'MS', 'PR', 'DSB', 'NS', 'DR']],
     'HE' => ['Großherzoglich Hessische Staatseisenbahnen', :orange, 15, 3, ['BME', 'KME', 'BD', 'BY', 'PR', 'DR']],
     'SX' => ['Königlich Sächsische Staatseisenbahnen', :orange, 16, 3, ['BSE', 'BPM', 'MHE', 'BY', 'MS', 'PR', 'PKP', 'KK', 'DR']],

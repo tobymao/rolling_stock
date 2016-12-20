@@ -23,7 +23,6 @@ module Views
 
     def render_game
       tier = game.ownership_tier
-      widget Bid, bid: game.current_bid, tier: tier if game.current_bid
       render_action_widget
       widget Players, players: game.players_in_order, tier: tier, current_player: @current_player
       widget Corporations, corporations: game.corporations, tier: tier

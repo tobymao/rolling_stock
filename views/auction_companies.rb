@@ -7,6 +7,7 @@ module Views
 
     def render_action
       widget EntityOrder, game: game, entities: game.players_in_order
+      widget Bid, bid: game.current_bid, tier: game.ownership_tier if game.current_bid
 
       widget Companies, {
         companies: game.companies,

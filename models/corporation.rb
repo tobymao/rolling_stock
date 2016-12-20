@@ -12,6 +12,8 @@ class Corporation
   attr_reader :name, :president, :companies, :share_price, :cash, :shares, :bank_shares
 
   def self.calculate_synergy tier, other_tier
+    return 0 unless other_tier
+
     case tier
     when :red
       1
@@ -101,14 +103,13 @@ class Corporation
   end
 
   def income tier
-    synergies = @companies.map { |c| [c.name, c.tier] }.to_h
     total = super
+
+    synergies = @companies.map { |c| [c.name, c.tier] }.to_h
 
     @companies.each do |company|
       company.synergies.each do |synergy|
-        if companies.include? synergy
-          total += self.class.calculate_synergy company.tier, synergies[synergy]
-        end
+        total += self.class.calculate_synergy company.tier, synergies[synergy]
       end
 
       synergies.delete company.name

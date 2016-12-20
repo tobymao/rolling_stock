@@ -6,7 +6,7 @@ module Views
     needs :current_player
 
     def content
-      entities = game.active_entities.select {|e| e.owned_by? current_player }
+      entities = game.active_entities.select { |e| e.owned_by? current_player }
       return if entities.empty?
 
       game_form do
