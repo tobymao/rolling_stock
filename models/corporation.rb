@@ -28,7 +28,7 @@ class Corporation
     end
   end
 
-  def initialize name, company, share_price, share_prices
+  def initialize name, company, share_price, share_prices, log = nil
     @name = name
     @president = company.owner
     @companies = [company]
@@ -38,6 +38,7 @@ class Corporation
     @cash = 0
     @shares = [Share.president(self)].concat 9.times.map { Share.normal(self) }
     @bank_shares = []
+    @log = log || []
 
     company.owner.companies.delete company
     company.owner = self
@@ -73,6 +74,7 @@ class Corporation
     swap_share_price next_share_price
     player.cash -= price
     player.shares << @bank_shares.pop
+    @log << "#{player.name} buys share of #{name} for $#{price}"
   end
 
   def can_sell_share? player
@@ -84,6 +86,7 @@ class Corporation
     swap_share_price prev_share_price
     player.cash += price
     @bank_shares << player.shares.pop
+    @log << "#{player.name} sells share of #{name} for $#{price}"
   end
 
   def can_issue_share?
@@ -94,23 +97,7 @@ class Corporation
     swap_share_price prev_share_price
     @cash += price
     @bank_shares << @shares.shift
-  end
-
-  def collect_income tier
-    synergies = @companies.map { |c| [c.name, c.tier] }.to_h
-
-    @companies.each do |company|
-      @cash += company.income
-      @cash -= company.cost_of_ownership tier
-
-      company.synergies.each do |synergy|
-        if companies.include? synergy
-          @cash += self.class.calculate_synergy company.tier, synergies[synergy]
-        end
-      end
-
-      synergies.delete company.name
-    end
+    @log << "Corporation #{name} issues a share"
   end
 
   def income tier
@@ -135,11 +122,15 @@ class Corporation
 
     @cash -= amount * @bank_shares.size
 
+    dividend_log = String.new "Corporation #{name} pays $#{amount} dividends - "
+
     players.each do |player|
       total = amount * player.shares.count { |share| share.corporation == self }
       @cash -= total
       player.cash += total
+      dividend_log << " #{player.name} receives #{total}"
     end
+    @log << dividend_log
 
     adjust_share_price
   end
@@ -179,9 +170,11 @@ class Corporation
 
     @president.shares.concat @shares.shift(num_shares)
     @bank_shares.concat @shares.shift(num_shares)
+    @log << "#{owner.name} forms corporation #{name} with #{company.name} at $#{price} - #{num_shares} shares issued."
   end
 
   def swap_share_price new_price
+    @log << "#{name} changes share price #{price} to #{new_price.price}"
     new_price.corporation = self
     @share_price.corporation = nil
     @share_price = new_price

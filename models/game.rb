@@ -29,6 +29,7 @@ class Game < Base
     :foreign_investor,
     :round,
     :phase,
+    :log,
   )
 
   def self.empty_game user
@@ -43,6 +44,7 @@ class Game < Base
   end
 
   def load
+    @log = []
     @share_prices = SharePrice.initial_market
     @available_corporations = Corporation::CORPORATIONS.dup
     @corporations = []
@@ -51,7 +53,7 @@ class Game < Base
     @company_deck = []
     @current_bid = nil
     @offers = []
-    @foreign_investor = ForeignInvestor.new
+    @foreign_investor = ForeignInvestor.new @log
     @round = 1
     @phase = 1
     @end_game_card = :penultimate
@@ -70,7 +72,7 @@ class Game < Base
   def players
     @_players ||= User
       .where(id: users.to_a)
-      .map { |user| Player.new(user.id, user.name) }
+      .map { |user| Player.new(user.id, user.name, @log) }
       .each_with_index { |p, i| p.order = i }
       .sort_by(&:order)
   end
@@ -221,6 +223,7 @@ class Game < Base
     corporation = @corporations.find { |c| c.name == data['corporation'] }
     corporation.pass
     raise unless corporation.can_issue_share?
+    previous_price = corporation.price
     corporation.issue_share
     check_bankruptcy corporation
   end
@@ -235,7 +238,8 @@ class Game < Base
     raise unless share_price.valid_range? company
     company.pass
     @available_corporations.delete name
-    @corporations << Corporation.new(name, company, share_price, @share_prices)
+    corporation = Corporation.new(name, company, share_price, @share_prices, @log)
+    @corporations << corporation
   end
 
   # phase 3
@@ -246,13 +250,15 @@ class Game < Base
     raise 'Not your turn' unless can_act? player
     raise 'You must bid or pass' if @current_bid && action != 'bid'
     raise unless player
+    previous_price = corporation&.price
 
     case action
     when 'bid'
       company = @companies.find { |c| c.name == data['company'] }
       raise unless company
       players.each &:unpass unless @current_bid
-      bid_company player, company, data['price'].to_i
+      price = data['price'].to_i
+      bid_company player, company, price
     when 'buy'
       buy_share player, corporation
       player.unpass
@@ -289,7 +295,7 @@ class Game < Base
       @auction_starter = player
     end
 
-    @current_bid = Bid.new player, company, price
+    @current_bid = Bid.new player, company, price, @log
   end
 
   def finalize_auction
@@ -312,7 +318,8 @@ class Game < Base
   def new_player_order
     players.sort_by!(&:cash).reverse!
     players.each_with_index { |p, i| p.order = i }
-    @phase += 1
+    @log << "New player order: #{players.map &:name}"
+    change_phase
   end
 
   # phase 5
@@ -320,7 +327,7 @@ class Game < Base
     @foreign_investor.purchase_companies @companies
     draw_companies
     untap_pending_companies
-    @phase += 1
+    change_phase
   end
 
   # phase 6
@@ -348,7 +355,9 @@ class Game < Base
       offer.suitors.delete corporation
 
       if offer.foreign_purchase?
-        offer.corporation.buy_company(company, offer.price) if offer.suitors.empty?
+        if offer.suitors.empty?
+          offer.corporation.buy_company(company, offer.price)
+        end
       else
         @offers.delete offer
       end
@@ -365,7 +374,7 @@ class Game < Base
         raise 'Foreign Investor purchase must be max price' if price != company.max_price
         corporation.buy_company company, price
       elsif corporation.owner != owner
-        @offers << Offer.new(corporation, company, price, suitors)
+        @offers << Offer.new(corporation, company, price, suitors, @log)
       else
         corporation.buy_company company, price
       end
@@ -386,7 +395,7 @@ class Game < Base
     entities = @corporations + players + [@foreign_investor]
     entities.each { |entity| entity.collect_income ownership_tier }
     sort_corporations
-    @phase += 1
+    change_phase
   end
 
   # phase 9
@@ -426,7 +435,7 @@ class Game < Base
 
       update deck: @company_deck.map(&:name)
     else
-      @company_deck = deck.map { |sym| Company.new self, sym, *Company::COMPANIES[sym] }
+      @company_deck = deck.map { |sym| Company.new self, sym, *Company::COMPANIES[sym], @log }
     end
   end
 
@@ -450,7 +459,7 @@ class Game < Base
   def check_phase_change passers
     return unless passers.all? &:passed?
     unpass_all
-    @phase += 1
+    change_phase
   end
 
   def check_no_player_purchases
@@ -487,5 +496,10 @@ class Game < Base
       player.shares.reject! { |share| share.corporation == corporation }
     end
     @share_prices[corporation.share_price.index] = corporation.share_price
+  end
+
+  def change_phase
+    @phase += 1
+    @log << "Round: #{@round} Phase: #{@phase} (#{phase_name})"
   end
 end

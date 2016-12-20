@@ -1,4 +1,4 @@
-require './views/base'
+require './views/action'
 
 module Views
   class AuctionCompanies < Action

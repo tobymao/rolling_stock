@@ -6,9 +6,10 @@ class ForeignInvestor
   attr_reader :companies
   attr_accessor :cash
 
-  def initialize
+  def initialize log = nil
     @companies = []
     @cash = 4
+    @log = log || []
   end
 
   def name
@@ -22,8 +23,9 @@ class ForeignInvestor
   end
 
   def collect_income tier
-    @cash += 5
-    super
+    amount = income(tier) + 5
+    @cash += amount
+    @log << "#{self.name} collects #{amount} income"
   end
 
   def purchase_companies available_companies

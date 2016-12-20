@@ -9,12 +9,13 @@ class Player
   attr_reader :id, :name, :companies, :shares
   attr_accessor :cash, :order
 
-  def initialize id, name
-    @id = id
-    @name = name
+  def initialize id, name, log = nil
+    @id        = id
+    @name      = name
     @companies = []
-    @shares = []
-    @cash = 30
+    @shares    = []
+    @cash      = 30
+    @log       = log || []
   end
 
   def owner

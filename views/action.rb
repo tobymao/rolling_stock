@@ -10,6 +10,8 @@ module Views
         text "Round: #{game.round} Phase: #{game.phase} (#{game.phase_name})"
       end
 
+      widget Log, log: game.log
+
       default = {
         display: 'inline-block',
         vertical_align: 'top',

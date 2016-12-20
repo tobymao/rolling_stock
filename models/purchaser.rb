@@ -7,14 +7,18 @@ module Purchaser
 
     company.owner = self
     @companies << company
+    @log << "#{self.name} buys #{company.name} for #{price}"
   end
 
   def close_company company
     @companies.delete company
+    @log << "#{self.name} closes #{company.name}"
   end
 
   def collect_income tier
-    @cash += income(tier)
+    amount = income(tier)
+    @cash += amount
+    @log << "#{self.name} collects #{amount} income"
   end
 
   def income tier

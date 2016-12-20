@@ -85,7 +85,7 @@ class Company
     end.to_h
   end
 
-  def initialize owner, name, full_name, tier, value, income, synergies
+  def initialize owner, name, full_name, tier, value, income, synergies, log = nil
     @name      = name
     @full_name = full_name
     @tier      = tier
@@ -94,6 +94,7 @@ class Company
     @synergies = synergies
     @owner     = owner
     @cash      = 0
+    @log       = log || []
   end
 
   def id
