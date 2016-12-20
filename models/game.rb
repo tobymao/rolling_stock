@@ -221,10 +221,8 @@ class Game < Base
   # phase 1
   def process_phase_1 data
     corporation = @corporations.find { |c| c.name == data['corporation'] }
-    corporation.pass
-    raise unless corporation.can_issue_share?
-    previous_price = corporation.price
     corporation.issue_share
+    corporation.pass
     check_bankruptcy corporation
   end
 
@@ -233,13 +231,10 @@ class Game < Base
     name = data['corporation']
     share_price = @share_prices.find { |sp| sp.price == data['price'].to_i }
     company = active_player_companies.find { |c| c.name == data['company'] }
-    raise if share_price.corporation
     raise unless @available_corporations.include? name
-    raise unless share_price.valid_range? company
     company.pass
     @available_corporations.delete name
-    corporation = Corporation.new(name, company, share_price, @share_prices, @log)
-    @corporations << corporation
+    @corporations << Corporation.new(name, company, share_price, @share_prices, @log)
   end
 
   # phase 3
@@ -250,7 +245,6 @@ class Game < Base
     raise 'Not your turn' unless can_act? player
     raise 'You must bid or pass' if @current_bid && action != 'bid'
     raise unless player
-    previous_price = corporation&.price
 
     case action
     when 'bid'
@@ -260,10 +254,11 @@ class Game < Base
       price = data['price'].to_i
       bid_company player, company, price
     when 'buy'
-      buy_share player, corporation
+      corporation.buy_share player
       player.unpass
     when 'sell'
-      sell_share player, corporation
+      corporation.sell_share player
+      check_bankruptcy corporation
       player.unpass
     else
       raise 'Unspecified action'
@@ -272,22 +267,7 @@ class Game < Base
     restart_order player
   end
 
-  def buy_share player, corporation
-    raise unless corporation.can_buy_share?
-    raise 'Player does not have enough money to buy a share.' if player.cash < corporation.next_share_price.price
-    corporation.buy_share player
-  end
-
-  def sell_share player, corporation
-    raise unless corporation.can_sell_share? player
-    corporation.sell_share player
-    check_bankruptcy corporation
-  end
-
   def bid_company player, company, price
-    raise 'Bid must be greater than value' if price < company.value
-    raise 'Bid must not be more than cash on hand' if price > player.cash
-
     if @current_bid
       raise 'Must bid on same company' if @current_bid.company != company
       raise 'Bid must be greater than previous' if price < @current_bid.price
@@ -342,7 +322,6 @@ class Game < Base
         (o.company == company && o.foreign_purchase?)
     end
     owner = company.owner
-    raise "Can't sell last company" if owner.is_a?(Corporation) && owner.companies.size == 1
 
     case data['action']
     when 'accept'

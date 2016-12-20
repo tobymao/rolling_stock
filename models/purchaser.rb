@@ -1,7 +1,10 @@
 module Purchaser
   def buy_company company, price
-    @cash -= price
     owner = company.owner
+    raise 'Not enough cash' if @cash < price
+    raise "Can't sell last company" if owner.is_a?(Corporation) && owner.companies.size == 1
+
+    @cash -= price
     owner.cash += price if owner.respond_to? :cash
     owner.companies.delete company
 
