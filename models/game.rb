@@ -268,6 +268,7 @@ class Game < Base
 
   def buy_share player, corporation
     raise unless corporation.can_buy_share?
+    raise 'Player does not have enough money to buy a share.' if player.cash < corporation.next_share_price.price
     corporation.buy_share player
   end
 
