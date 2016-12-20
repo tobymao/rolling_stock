@@ -32,16 +32,9 @@ module Views
       <<~JS
         var CompanyAuction = {
           onClick: function(el) {
-            var box = document.getElementById('bid_box');
-            var price = box.elements['bid_price'];
-            var company = box.elements['bid_company'];
             var data = el.dataset;
-
-            if (company.value != data.company) {
-              price.setAttribute('min', data.value);
-              price.setAttribute('value', data.value);
-              company.value = data.company;
-            }
+            $('#bid_price').attr({'min': data.value, 'value': data.value});
+            $('#bid_company').attr('value', data.company);
           }
         };
       JS

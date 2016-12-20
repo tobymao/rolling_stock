@@ -207,6 +207,8 @@ class Game < Base
         @corporations.select { |c| data['corporation'] ==  c.name },
       ].flatten.compact
 
+      raise 'No one to pass' if entities.empty?
+
       entities.each do |entity|
         raise 'Already passed' if entity.passed?
         entity.pass
@@ -280,6 +282,7 @@ class Game < Base
 
   def finalize_auction
     company = @current_bid.company
+    raise 'Must buy company for at least face value' if company.value < @current_bid.price
     @current_bid.player.buy_company company, @current_bid.price
     draw_companies
     players.each &:unpass

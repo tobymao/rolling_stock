@@ -7,28 +7,29 @@ module Views
 
     def render_action
       widget EntityOrder, game: game, entities: game.active_entities
-
       render_controls if game.can_act? current_player
     end
 
     def render_controls
       div do
+        corporations = game.corporations.select { |c| c.owned_by?(current_player) }
         companies = current_player&.companies || []
+        return if corporations.empty? && companies.empty?
 
         game_form do
           div "Companies owned by #{current_player.name}"
 
-          current_player.companies.each do |company|
+          companies.each do |company|
             label do
               input type: 'checkbox', name: data('company'), value: company.name
               text company.name
             end
           end
 
-          game.corporations.select { |c| c.owned_by? current_player }.each do |corporation|
+          corporations.select { |c| c.owned_by? current_player }.each do |corporation|
             div "Companies owned by #{corporation.name}"
 
-            corporation.companies.each do |company|
+            corporation.companies.select(&:active?).each do |company|
               label do
                 input type: 'checkbox', name: data('company'), value: company.name
                 text company.name
@@ -39,7 +40,7 @@ module Views
           div do
             input type: 'submit', value: 'Close Companies'
           end
-        end unless companies.empty?
+        end
       end
     end
 
