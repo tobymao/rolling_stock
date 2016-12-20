@@ -347,7 +347,7 @@ class Game < Base
       offer.suitors.delete corporation
 
       if offer.foreign_purchase?
-        corporation.buy_company(company, offer.price) if offer.suitors.empty?
+        offer.corporation.buy_company(company, offer.price) if offer.suitors.empty?
       else
         @offers.delete offer
       end
@@ -361,7 +361,6 @@ class Game < Base
       end if owner.is_a? ForeignInvestor
 
       if suitors && suitors.empty?
-        puts "** getting bought ** "
         raise 'Foreign Investor purchase must be max price' if price != company.max_price
         corporation.buy_company company, price
       elsif corporation.owner != owner
