@@ -6,9 +6,11 @@ module Views
     needs :active_games
 
     def render_main
-      render_new_game if app.current_user
-      render_join_games
-      render_active_games
+      div class: 'wrapper' do
+        render_new_game if app.current_user
+        render_join_games
+        render_active_games
+      end
     end
 
     def render_new_game
