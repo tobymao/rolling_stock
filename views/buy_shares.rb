@@ -7,6 +7,8 @@ module Views
 
     def content
       game_form do
+        label(style: inline(margin_right: '5px')) { text 'Buy or Sell Shares:' }
+
         select name: data('corporation') do
           game.corporations.each do |corporation|
             next if !corporation.can_buy_share? &&

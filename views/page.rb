@@ -19,10 +19,7 @@ module Views
 
         div style: inline(min_height: '95%') do
           render_nav
-
-          div class: 'container' do
-            render_main
-          end
+          render_main
         end
 
         render_footer
@@ -44,19 +41,23 @@ module Views
           font-family: Helvetica;
           font-weight: lighter;
           width: 100%;
+          margin: 0;
         }
 
-        .container {
+        .wrapper {
           position: relative;
-          padding: 0 2% 0 0;
-          margin: 0 auto;
-          text-align: justify;
-          max-width: #{MAX_W};
+          margin: 0 10px;
+          padding: 5px;
         }
 
         .heading {
           font-weight: bold;
           font-size: 1.1em;
+          margin: 0 5px;
+        }
+
+        .selected {
+          background-color: lightblue;
         }
       CSS
     end

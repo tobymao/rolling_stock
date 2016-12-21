@@ -26,8 +26,12 @@ module Views
 
     def render_price_movement
       div do
-        div "Issued Shares: #{corporation.shares_issued}"
-        div "Shares In Bank: #{corporation.bank_shares.size}"
+        div style: inline(display: 'inline-block', text_align: 'left', margin_right: '25px') do
+          div "President: #{corporation.president.name}"
+          div "Issued Shares: #{corporation.shares_issued}"
+          div "Shares In Bank: #{corporation.bank_shares.size}"
+          div "Market Cap: $#{corporation.market_cap}"
+        end
 
         index = corporation.share_price.index
         double_drop = SharePrice::PRICES[index - 2]
@@ -35,13 +39,16 @@ module Views
         current_price =  SharePrice::PRICES[index]
         single_jump = SharePrice::PRICES[index + 1]
         double_jump = SharePrice::PRICES[index + 2]
-
         num = corporation.shares_issued
-        div "$#{num * single_jump} double jump to $#{double_jump}"
-        div "$#{num * current_price}-$#{num * single_jump - 1} jump to $#{single_jump}"
-        div "$#{num * single_drop}-$#{num * current_price - 1} drop to $#{single_drop}"
-        div "$#{num * single_drop - 1} double drop to $#{double_drop}"
+
+        div style: inline(display: 'inline-block', text_align: 'right') do
+          div "$#{num * single_jump} jump to $#{double_jump}"
+          div "$#{num * current_price}-$#{num * single_jump - 1} jump to $#{single_jump}"
+          div "$#{num * single_drop}-$#{num * current_price - 1} drop to $#{single_drop}"
+          div "$#{num * single_drop - 1} drop to $#{double_drop}"
+        end
       end
     end
+
   end
 end

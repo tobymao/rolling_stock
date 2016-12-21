@@ -27,4 +27,10 @@ class Player
       (@companies.map(&:value).reduce(&:+) || 0) +
       (@shares.map { |s| s.corporation.share_price.price }.reduce(&:+) || 0)
   end
+
+  def can_sell_shares?
+    @shares.any? do |share|
+      shore.corporation.can_sell_share? self
+    end
+  end
 end

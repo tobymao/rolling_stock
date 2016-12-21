@@ -18,7 +18,7 @@ module Views
       game_form do
         span "Issue Share for #{corporation.name}"
         input type: 'hidden', name: data('corporation'), value: corporation.name
-        input type: 'submit', value: 'Issue a Share'
+        input type: 'submit', style: inline(margin_left: '5px'), value: 'Issue a Share'
       end if game.can_act? current_player
     end
   end

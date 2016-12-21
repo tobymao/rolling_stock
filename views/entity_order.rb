@@ -9,7 +9,7 @@ module Views
       entities.each_with_index do |entity, index|
         s = {
           display: 'inline-block',
-          margin_right: '5px',
+          margin: '0 5px 5px 0',
           padding_left: '5px',
         }
 

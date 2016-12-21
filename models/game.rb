@@ -283,7 +283,7 @@ class Game < Base
 
   def finalize_auction
     company = @current_bid.company
-    raise GameException, 'Must buy company for at least face value' if company.value < @current_bid.price
+    raise GameException, 'Must buy company for at least face value' if company.value > @current_bid.price
     @current_bid.player.buy_company company, @current_bid.price
     draw_companies
     players.each &:unpass
@@ -346,8 +346,9 @@ class Game < Base
       end
     else
       price = data['price'].to_i
-      raise GameException, "Not a valid price" unless company.valid_price? price
-      raise GameException, "Already have an offer" if @offers.any? { |o| o.corporation == corporation && o.company == company}
+      raise GameException, 'Not a valid price' unless company.valid_price? price
+      raise GameException, 'Already have an offer' if @offers.any? { |o| o.corporation == corporation && o.company == company}
+      raise GameException, 'Cannot buy own company' if corporation == company.owner
 
       suitors = @corporations.select do |c|
         c.price > corporation.price && c.owner != corporation.owner
@@ -456,7 +457,8 @@ class Game < Base
         99999,
       ].compact.min
 
-      check_phase_change players.reject { |p| p.cash < min && p.shares.empty? }
+      players.select { |p| p.cash < min && !p.can_sell_shares? }.each &:pass
+      check_phase_change players
     end
   end
 
@@ -483,6 +485,6 @@ class Game < Base
 
   def change_phase
     @phase += 1
-    @log << "Round: #{@round} Phase: #{@phase} (#{phase_name})"
+    @log << "-- Round: #{@round} Phase: #{@phase} (#{phase_name}) --"
   end
 end

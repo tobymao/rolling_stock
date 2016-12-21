@@ -8,7 +8,7 @@ module Views
       div do
         render_style
 
-        div style: inline('text-align' => 'center') do
+        div style: inline(text_align: 'center') do
           links.each do |link|
             a link[0], href: link[1], class: 'nav_link'
           end

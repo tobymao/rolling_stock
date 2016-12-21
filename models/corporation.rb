@@ -106,7 +106,7 @@ class Corporation
     swap_share_price prev_share_price
     @cash += price
     @bank_shares << @shares.shift
-    @log << "Corporation #{name} issues a share"
+    @log << "#{name} issues a share"
   end
 
   def income tier
@@ -126,11 +126,12 @@ class Corporation
   end
 
   def pay_dividend amount, players
+    raise GameException, 'Dividend must be positive' if amount < 0
     raise GameException, 'Total dividends must be payable with corporation cash' if (shares_issued * amount) > @cash
 
     @cash -= amount * @bank_shares.size
 
-    dividend_log = String.new "Corporation #{name} pays $#{amount} dividends - "
+    dividend_log = String.new "#{name} pays $#{amount} dividends - "
 
     players.each do |player|
       total = amount * player.shares.count { |share| share.corporation == self }

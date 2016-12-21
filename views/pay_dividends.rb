@@ -16,9 +16,17 @@ module Views
         game_form do
           max_dividend = corporation.cash / corporation.shares_issued
 
-          input type: 'hidden', name: data('corporation'), value: corporation.name
-          input type: 'number', max: max_dividend, name: data('amount'), value: 0
+          divided_props = {
+            type: 'number',
+            style: inline(width: '50px', margin: '0 5px 0 5px'),
+            max: max_dividend,
+            name: data('amount'),
+            value: 0,
+          }
 
+          label 'Pay Dividends to Share Holders'
+          input divided_props
+          input type: 'hidden', name: data('corporation'), value: corporation.name
           input type: 'submit', value: 'Pay Dividends'
         end if game.can_act? current_player
       end

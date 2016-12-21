@@ -14,29 +14,21 @@ module Views
       bid = game.current_bid
 
       game_form props do
-        span 'Price'
         price_props = {
           id: 'bid_price',
           type: 'number',
           name: data('price'),
+          min: 1,
+          style: inline(width: '50px', margin: '0 5px'),
           placeholder: 'Price',
         }
         price_props[:value] = bid.price + 1 if bid
+        label 'Price:'
         input price_props
-
-        span 'Symbol'
-        company_props = {
-          id: 'bid_company',
-          type: 'text',
-          name: data('company'),
-          placeholder: 'Company',
-        }
-        company_props[:value] = bid.company.name if bid
-        input company_props
-
+        input type: 'hidden', id: 'bid_company', name: data('company')
         input type: 'hidden', name: data('player'), value: current_player.id
         input type: 'hidden', name: data('action'), value: 'bid'
-        input type: 'submit', value: 'Make Bid'
+        input id: 'bid_submit', type: 'submit', value: 'Make Bid', disabled: true
       end
     end
   end

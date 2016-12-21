@@ -10,18 +10,20 @@ module Views
         text "Round: #{game.round} Phase: #{game.phase} (#{game.phase_name})"
       end
 
-      widget Log, log: game.log
+      widget Log, log: game.log, active: game.can_act?(current_player)
 
       default = {
         display: 'inline-block',
         vertical_align: 'top',
-        padding: '5px',
         min_width: '360px',
       }
 
-      div style: inline(default) do
+      div style: inline(default), class: 'wrapper' do
         render_action
-        widget Pass, game: game, current_player: current_player
+
+        div do
+          widget Pass, game: game, current_player: current_player
+        end unless game.phase == 9
       end
     end
   end

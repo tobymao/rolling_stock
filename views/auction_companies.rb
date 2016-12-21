@@ -7,25 +7,38 @@ module Views
 
     def render_action
       widget EntityOrder, game: game, entities: game.players_in_order
-      widget Bid, bid: game.current_bid, tier: game.ownership_tier if game.current_bid
 
-      widget Companies, {
+      company_props = {
         companies: game.companies,
-        js_block: js_block,
-        onclick: 'CompanyAuction.onClick(this)',
         tier: game.ownership_tier,
-      } unless game.current_bid
+      }
+
+      unless game.current_bid
+        company_props[:js_block] = js_block
+        company_props[:onclick] = 'CompanyAuction.onClick(this)'
+      end
+
+      widget Companies, company_props
 
       render_controls if game.can_act? current_player
+      render_js if game.current_bid
     end
 
     def render_controls
       widget BidBox, game: game, current_player: current_player
 
-      if (game.corporations.any?(&:can_buy_share?) || !current_player.shares.empty?) &&
-          !game.current_bid
+      if (game.corporations.any?(&:can_buy_share?) || !current_player.shares.empty?) && !game.current_bid
         widget BuyShares, game: game, current_player: current_player
       end
+    end
+
+    def render_js
+      name = game.current_bid.company.name
+      script <<~JS
+        $('[data-company="#{name}"]').addClass('selected')
+        $('#bid_company').attr('value', '#{name}');
+        $('#bid_submit').attr('disabled', false);
+      JS
     end
 
     def js_block
@@ -35,6 +48,9 @@ module Views
             var data = el.dataset;
             $('#bid_price').attr({'min': data.value, 'value': data.value});
             $('#bid_company').attr('value', data.company);
+            $('#bid_submit').attr('disabled', false);
+            $('.selected').removeClass('selected');
+            $(el).toggleClass('selected');
           }
         };
       JS

@@ -9,9 +9,9 @@ module Views
       widget EntityOrder, game: game, entities: game.active_entities
       @corporations = game.corporations.select { |c| c.owned_by? current_player }
 
-      render_offers
       render_corporations
-      render_all_companies
+      render_companies (game.held_companies + game.foreign_investor.companies)
+      render_offers
       render_controls if game.can_act? current_player
     end
 
@@ -54,28 +54,6 @@ module Views
       end
     end
 
-
-    def render_all_companies
-      game.corporations.each do |corporation|
-        next if corporation.companies.size == 1
-        div "#{corporation.name}'s companies"
-        render_companies corporation.companies
-      end
-
-      game.players.each do |player|
-        next if player.companies.empty?
-        div "#{player.name}'s companies"
-        render_companies player.companies
-      end
-
-      foreign_companies = game.foreign_investor.companies
-
-      unless foreign_companies.empty?
-        div "Foreign Investor's companies"
-        render_companies foreign_companies
-      end
-    end
-
     def render_companies companies
       widget Companies, {
         companies: companies,
@@ -98,27 +76,17 @@ module Views
           end
         end unless corporations.empty?
 
-        span 'Price'
-
         price_props = {
           id: 'bid_price',
           type: 'number',
           name: data('price'),
+          min: 1,
+          style: inline(width: '50px', margin: '0 5px 0 5px'),
           placeholder: 'Price',
         }
-
+        label(style: inline(margin_left: '5px')) { text 'Price:' }
         input price_props
-
-        span 'Symbol'
-
-        company_props = {
-          id: 'bid_company',
-          type: 'text',
-          name: data('company'),
-          placeholder: 'Company',
-        }
-
-        input company_props
+        input type: 'hidden', id: 'bid_company', name: data('company')
         input type: 'submit', value: 'Make Offer'
       end unless corporations.empty?
     end
@@ -130,6 +98,9 @@ module Views
             var data = el.dataset;
             $('#bid_price').attr({'min': data.min, 'max': data.max, 'value': data.value});
             $('#bid_company').attr('value', data.company);
+            $('#bid_submit').attr('disabled', false);
+            $('.selected').removeClass('selected');
+            $(el).toggleClass('selected');
           }
         };
       JS

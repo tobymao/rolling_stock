@@ -22,10 +22,8 @@ class ForeignInvestor
     end
   end
 
-  def collect_income tier
-    amount = income(tier) + 5
-    @cash += amount
-    @log << "#{self.name} collects #{amount} income"
+  def income tier
+    super + 5
   end
 
   def purchase_companies available_companies

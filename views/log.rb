@@ -2,6 +2,7 @@ require './views/base'
 
 module Views
   class Log < Base
+    needs :active
     needs :log
 
     def content
@@ -12,9 +13,14 @@ module Views
       )
 
       div style: log_style do
-        log.reverse.each { |line| div line }
-      end
+        div class: 'wrapper' do
+          div style: inline(font_weight: 'bold') do
+            text 'Your Turn'
+          end if active
 
+          log.reverse.each { |line| div line }
+        end
+      end
     end
 
   end

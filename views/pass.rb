@@ -12,13 +12,28 @@ module Views
       render_js
 
       game_form do
+        solo = entities.size == 1
         entities.each do |entity|
-          input type: 'checkbox', name: data(entity.type), value: entity.id, checked: true, onclick: 'Pass.onClick(this)'
+          pass_props = { name: data(entity.type), value: entity.id }
+
+          if solo
+            pass_props[:type] = 'hidden'
+          else
+            pass_props[:type] = 'checkbox'
+            pass_props[:checked] = 'true'
+          end
+
+          input pass_props
           input type: 'hidden', name: data('action'), value: 'pass'
-          label entity.name
+          label(style: inline(margin_right: '5px')) { text entity.name } unless solo
         end
-        button_text = game.can_act?(current_player) ? 'Pass' : 'Pass Out Of Order'
-        input type: 'submit', value: button_text
+
+        submit_props = {
+          type: 'submit',
+          value: game.can_act?(current_player) ? 'Pass' : 'Pass Out Of Order',
+        }
+
+        input submit_props
       end
     end
 
