@@ -129,13 +129,16 @@ class Game < Base
         99999,
       ].compact.min
 
-      active_corporations.reject do |corporation|
+      corporations.select do |corporation|
         min_corp_company = @corporations
           .reject { |c| c.companies.size == 1 && c == corporation }
           .flat_map { |p| p.companies.map &:min_price }
           .min
 
-        corporation.cash < [min_player_company, min_corp_company].compact.min
+        min_price = [min_player_company, min_corp_company].compact.min
+
+        (corporation.active? && corporation.cash >= min_price) ||
+          @offers.any? { |o| o.company.owned_by? corporation }
       end
     when 7
       active_companies
@@ -321,8 +324,6 @@ class Game < Base
   # phase 5
   def foreign_investor_purchase
     @foreign_investor.purchase_companies @companies
-    draw_companies
-    untap_pending_companies
     change_phase
   end
 
@@ -344,6 +345,7 @@ class Game < Base
       offer.suitors.delete corporation
 
       if !offer.foreign_purchase? || offer.suitors.empty?
+        @offers.delete offer
         corporation.buy_company company, offer.price
       end
     when 'decline'
@@ -351,6 +353,7 @@ class Game < Base
 
       if offer.foreign_purchase?
         if offer.suitors.empty?
+          @offers.delete offer
           offer.corporation.buy_company(company, offer.price)
         end
       else
@@ -390,7 +393,6 @@ class Game < Base
     @foreign_investor.close_companies ownership_tier
     entities = @corporations + players + [@foreign_investor]
     entities.each { |entity| entity.collect_income ownership_tier }
-    sort_corporations
     change_phase
   end
 
@@ -406,13 +408,11 @@ class Game < Base
   # phase 10
   def check_end
     @end_game_card = :last_turn if ownership_tier == :penultimate
-    sort_corporations
 
     if ownership_tier == :last_turn || @share_prices.last.nil?
       update(state: :finished)
     else
-      @phase = 1
-      @round += 1
+      change_phase
     end
   end
 
@@ -448,6 +448,10 @@ class Game < Base
     (players + held_companies + @corporations).each &:unpass
   end
 
+  def finalize_purchases
+    ([@foreign_investor] + players + @corporations).each &:finalize_purchases
+  end
+
   def sort_corporations
     @corporations.sort_by!(&:price).reverse!
   end
@@ -479,6 +483,22 @@ class Game < Base
 
   def change_phase
     @phase += 1
+
+    if @phase > 10
+      @phase = 1
+      @round += 1
+    end
+
+    case @phase
+    when 4, 7
+      finalize_purchases
+    when 6
+      finalize_purchases
+      draw_companies
+      untap_pending_companies
+    when 9, 10
+      sort_corporations
+    end
     @log << "-- Round: #{@round} Phase: #{@phase} (#{phase_name}) --"
   end
 end

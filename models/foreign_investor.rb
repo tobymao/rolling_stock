@@ -1,14 +1,8 @@
 require './models/purchaser'
 
-class ForeignInvestor
-  include Purchaser
-
-  attr_reader :companies
-  attr_accessor :cash
-
+class ForeignInvestor < Purchaser
   def initialize log = nil
-    @companies = []
-    @cash = 4
+    super 4
     @log = log || []
   end
 

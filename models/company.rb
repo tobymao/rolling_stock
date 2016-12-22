@@ -77,7 +77,7 @@ class Company
   }
 
   attr_reader :name, :full_name, :tier, :value, :income, :synergies
-  attr_accessor :owner
+  attr_accessor :owner, :recently_sold
 
   def self.all
     @@all ||= Company::COMPANIES.map do |sym, params|
@@ -101,6 +101,10 @@ class Company
     @name
   end
 
+  def can_be_sold?
+    !(owner.is_a?(Corporation) && owner.companies.size == 1)
+  end
+
   def valid_share_price? share_price
     range =
       case @tier
@@ -120,11 +124,11 @@ class Company
         raise
       end
 
-    share_price.price.between?(range[0], range[1])
+    share_price.price.between? range[0], range[1]
   end
 
   def valid_price? price
-    price.between?(min_price, max_price)
+    price.between? min_price, max_price
   end
 
   def cost_of_ownership for_tier

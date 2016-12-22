@@ -9,9 +9,9 @@ module Views
       widget EntityOrder, game: game
       @corporations = game.corporations.select { |c| c.owned_by? current_player }
 
-      render_corporations
-      render_companies (game.held_companies + game.foreign_investor.companies)
       render_offers
+      render_corporations
+      render_companies
       render_controls if game.can_act? current_player
     end
 
@@ -21,7 +21,7 @@ module Views
 
     def render_offers
       offers = game.offers.select do |offer|
-        offer.company.owner == current_player || offer.suitor?(current_player)
+        offer.company.owned_by?(current_player) || offer.suitor?(current_player)
       end
 
       offers.each { |offer| render_offer offer }
@@ -54,7 +54,9 @@ module Views
       end
     end
 
-    def render_companies companies
+    def render_companies
+      companies = (game.held_companies + game.foreign_investor.companies).select &:can_be_sold?
+
       widget Companies, {
         companies: companies,
         tier: game.ownership_tier,

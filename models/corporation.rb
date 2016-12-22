@@ -2,14 +2,13 @@ require './models/passer'
 require './models/purchaser'
 require './models/ownable'
 
-class Corporation
+class Corporation < Purchaser
   include Passer
-  include Purchaser
   include Ownable
 
   CORPORATIONS = %w(Android Bear Eagle Horse Jupiter Orion Saturn Ship Star Wheel).freeze
 
-  attr_reader :name, :president, :companies, :share_price, :cash, :shares, :bank_shares
+  attr_reader :name, :president, :share_price, :shares, :bank_shares
 
   def self.calculate_synergy tier, other_tier
     return 0 unless other_tier
@@ -31,16 +30,16 @@ class Corporation
   end
 
   def initialize name, company, share_price, share_prices, log = nil
+    super 0
     raise GameException, "Share price #{share_price.price} taken by #{share_price.corporation.name}" if share_price.corporation
     raise GameException, "Share price #{share_price.price} not valid" unless share_price.valid_range? company
 
     @name = name
     @president = company.owner
-    @companies = [company]
+    @companies << company
     @share_price = share_price
     @share_price.corporation = self
     @share_prices = share_prices
-    @cash = 0
     @shares = [Share.president(self)].concat 9.times.map { Share.normal(self) }
     @bank_shares = []
     @log = log || []

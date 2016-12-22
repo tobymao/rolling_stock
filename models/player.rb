@@ -1,21 +1,19 @@
 require './models/passer'
 require './models/purchaser'
 
-class Player
+class Player < Purchaser
   include Passer
-  include Purchaser
   include Ownable
 
-  attr_reader :id, :name, :companies, :shares
-  attr_accessor :cash, :order
+  attr_reader :id, :name, :shares
+  attr_accessor :order
 
   def initialize id, name, log = nil
-    @id        = id
-    @name      = name
-    @companies = []
-    @shares    = []
-    @cash      = 30
-    @log       = log || []
+    super 30
+    @id     = id
+    @name   = name
+    @shares = []
+    @log    = log || []
   end
 
   def owner
@@ -29,8 +27,6 @@ class Player
   end
 
   def can_sell_shares?
-    @shares.any? do |share|
-      shore.corporation.can_sell_share? self
-    end
+    @shares.any? { |share| share.corporation.can_sell_share? self }
   end
 end

@@ -1,4 +1,13 @@
-module Purchaser
+class Purchaser
+  attr_reader :companies
+  attr_accessor :cash, :pending_cash
+
+  def initialize cash
+    @cash = cash
+    @pending_cash = 0
+    @companies = []
+  end
+
   def buy_company company, price
     owner = company.owner
     raise "Can't buy own company" if owner == self
@@ -6,9 +15,10 @@ module Purchaser
     raise "Can't sell last company" if owner.is_a?(Corporation) && owner.companies.size == 1
 
     @cash -= price
-    owner.cash += price if owner.respond_to? :cash
+    owner.pending_cash += price if owner.respond_to? :pending_cash
     owner.companies.delete company
 
+    company.recently_sold = true
     company.owner = self
     @companies << company
     @log << "#{name} buys #{company.name} for #{price}"
@@ -29,5 +39,11 @@ module Purchaser
     @companies
       .map { |c| c.income - c.cost_of_ownership(tier) }
       .reduce(&:+) || 0
+  end
+
+  def finalize_purchases
+    @cash += @pending_cash
+    @pending_cash = 0
+    @companies.each { |c| c.recently_sold = false }
   end
 end
