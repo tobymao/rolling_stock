@@ -10,9 +10,9 @@ class Purchaser
 
   def buy_company company, price
     owner = company.owner
-    raise "Can't buy own company" if owner == self
-    raise 'Not enough cash' if @cash < price
-    raise "Can't sell last company" if owner.is_a?(Corporation) && owner.companies.size == 1
+    raise GameException, "Can't buy own company" if owner == self
+    raise GameException, 'Not enough cash' if @cash < price
+    raise GameException, "Company can't be sold. Last company or just sold" unless company.can_be_sold?
 
     @cash -= price
     owner.pending_cash += price if owner.respond_to? :pending_cash
@@ -36,9 +36,7 @@ class Purchaser
   end
 
   def income tier
-    @companies
-      .map { |c| c.income - c.cost_of_ownership(tier) }
-      .reduce(&:+) || 0
+    @companies.map { |c| c.income - c.cost_of_ownership(tier) }.reduce(&:+) || 0
   end
 
   def finalize_purchases

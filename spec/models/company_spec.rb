@@ -5,16 +5,38 @@ describe Company do
   let(:share_price) { SharePrice.initial_market[6] } # 10, 6
   subject { Company.new player, "MM", 'Mars Mining Associates', :purple, 75, 25, ['LHR', 'FRA', 'LE', 'TSI'] }
 
-
-  describe '#initialize' do
-    it 'should provision variables' do
-      expect(subject.name).not_to be_nil
-    end
-  end
-
   describe '#id' do
     it 'should return the name' do
       expect(subject.id).to eq("MM")
+    end
+  end
+
+  describe '#can_be_sold?' do
+    context 'owned by player' do
+      it 'should be true' do
+        expect(subject.can_be_sold?).to be_truthy
+      end
+
+      it 'should be false if sold recently' do
+        subject.recently_sold = true
+        expect(subject.can_be_sold?).to be_falsey
+      end
+    end
+
+    context 'owned by corporation' do
+      let(:corporation) { double('Corporation', is_a?: true)}
+
+      it 'should be true if corporation has more than one company' do
+        allow(corporation).to receive(:companies).and_return([subject, subject])
+        subject.owner = corporation
+        expect(subject.can_be_sold?).to be_truthy
+      end
+
+      it 'should be false if corporation has one company' do
+        allow(corporation).to receive(:companies).and_return([subject])
+        subject.owner = corporation
+        expect(subject.can_be_sold?).to be_falsey
+      end
     end
   end
 

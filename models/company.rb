@@ -102,7 +102,7 @@ class Company
   end
 
   def can_be_sold?
-    !(owner.is_a?(Corporation) && owner.companies.size == 1)
+    !(owner.is_a?(Corporation) && owner.companies.size == 1) && !recently_sold
   end
 
   def valid_share_price? share_price
@@ -121,7 +121,7 @@ class Company
       when :purple
         [28, 45]
       else
-        raise
+        raise GameException, "Invalid share price for #{@tier}"
       end
 
     share_price.price.between? range[0], range[1]
