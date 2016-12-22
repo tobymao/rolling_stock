@@ -6,7 +6,8 @@ module Views
     needs :current_player
 
     def render_action
-      widget EntityOrder, game: game, entities: game.corporations.select(&:can_issue_share?)
+      widget EntityOrder, game: game, entities: game.corporations
+
       corporation = game.acting.first
 
       widget Corporations,

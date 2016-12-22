@@ -3,10 +3,10 @@ require './views/base'
 module Views
   class EntityOrder < Base
     needs :game
-    needs :entities
+    needs entities: nil
 
     def content
-      entities.each_with_index do |entity, index|
+      (entities || game.active_entities).each_with_index do |entity, index|
         s = {
           display: 'inline-block',
           margin: '0 5px 5px 0',

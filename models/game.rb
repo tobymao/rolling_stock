@@ -112,15 +112,35 @@ class Game < Base
     case @phase
     when 1
       active_corporations.select &:can_issue_share?
-    when 6, 9
-      active_corporations
     when 2
       active_player_companies
     when 3
-      # check if player doesn't have enough money to buy anything
-      players.select &:active?
+      min = [
+        @corporations.select(&:can_buy_share?).map { |c| c.next_share_price.price }.min,
+        @companies.map(&:value).min,
+        99999,
+      ].compact.min
+
+      players.select(&:active?).reject { |p| p.cash < min && !p.can_sell_shares? }
+    when 6
+      min_player_company = [
+        players.flat_map { |p| p.companies.map &:min_price }.min,
+        @foreign_investor.companies.map(&:min_price).min,
+        99999,
+      ].compact.min
+
+      active_corporations.reject do |corporation|
+        min_corp_company = @corporations
+          .reject { |c| c.companies.size == 1 && c == corporation }
+          .flat_map { |p| p.companies.map &:min_price }
+          .min
+
+        corporation.cash < [min_player_company, min_corp_company].compact.min
+      end
     when 7
       active_companies
+    when 9
+      active_corporations
     end
   end
 
@@ -170,24 +190,16 @@ class Game < Base
     current_phase = @phase
 
     case @phase
-    when 1
-      check_phase_change @corporations.reject { |c| c.shares.empty? }
-    when 2
-      check_phase_change players.flat_map(&:companies)
+    when 1, 2, 6, 7, 9
+      check_phase_change
     when 3
       check_no_player_purchases
     when 4
       new_player_order
     when 5
       foreign_investor_purchase
-    when 6
-      check_no_company_purchases
-    when 7
-      check_phase_change held_companies
     when 8
       collect_income
-    when 9
-      check_phase_change @corporations.reject { |c| c.cash.zero? }
     when 10
       check_end
     end
@@ -440,8 +452,8 @@ class Game < Base
     @corporations.sort_by!(&:price).reverse!
   end
 
-  def check_phase_change passers
-    return unless passers.all? &:passed?
+  def check_phase_change
+    return unless active_entities.empty?
     unpass_all
     change_phase
   end
@@ -451,26 +463,8 @@ class Game < Base
       eligible = players.reject { |p| p == @current_bid.player || p.cash < @current_bid.price }
       finalize_auction if eligible.all? &:passed?
     else
-      min = [
-        @corporations.select(&:can_buy_share?).map { |c| c.next_share_price.price }.min,
-        @companies.map(&:value).min,
-        99999,
-      ].compact.min
-
-      players.select { |p| p.cash < min && !p.can_sell_shares? }.each &:pass
-      check_phase_change players
+      check_phase_change
     end
-  end
-
-  def check_no_company_purchases
-    min = [
-      players.flat_map { |p| p.companies.map &:min_price }.min,
-      @corporations.reject { |c| c.companies.size == 1 }.flat_map { |p| p.companies.map &:min_price }.min,
-      @foreign_investor.companies.map(&:min_price).min,
-      99999,
-    ].compact.min
-
-    check_phase_change @corporations.reject { |c| c.cash < min }
   end
 
   def check_bankruptcy corporation

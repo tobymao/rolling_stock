@@ -6,7 +6,7 @@ module Views
     needs :game
 
     def render_action
-      widget EntityOrder, game: game, entities: game.active_entities
+      widget EntityOrder, game: game
       @corporations = game.corporations.select { |c| c.owned_by? current_player }
 
       render_corporations
