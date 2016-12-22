@@ -324,6 +324,8 @@ class Game < Base
   # phase 5
   def foreign_investor_purchase
     @foreign_investor.purchase_companies @companies
+    draw_companies
+    untap_pending_companies
     change_phase
   end
 
@@ -482,6 +484,13 @@ class Game < Base
   end
 
   def change_phase
+    case @phase
+    when 3, 5, 6
+      finalize_purchases
+    when 8, 9
+      sort_corporations
+    end
+
     @phase += 1
 
     if @phase > 10
@@ -489,16 +498,6 @@ class Game < Base
       @round += 1
     end
 
-    case @phase
-    when 4, 7
-      finalize_purchases
-    when 6
-      finalize_purchases
-      draw_companies
-      untap_pending_companies
-    when 9, 10
-      sort_corporations
-    end
     @log << "-- Round: #{@round} Phase: #{@phase} (#{phase_name}) --"
   end
 end
