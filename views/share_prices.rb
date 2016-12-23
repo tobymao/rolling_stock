@@ -7,8 +7,10 @@ module Views
     def content
       div(class: 'heading') { text 'Share Prices' }
 
-      share_prices.each do |share_price|
-        render_share_price share_price
+      div class: 'wrapper' do
+        share_prices.each do |share_price|
+          render_share_price share_price
+        end
       end
     end
 
@@ -16,15 +18,20 @@ module Views
       share_style = inline(
         display: 'inline-block',
         margin: '5px',
+        padding: '2px',
         vertical_align: 'top',
         border: 'solid 1px rgba(0,0,0,0.2)',
-        width: '60px',
+        width: '80px',
         height: '40px',
+        position: 'relative',
       )
 
       div style: share_style do
-        div share_price.price
-        div share_price.corporation&.name
+        span share_price.price
+        if corporation = share_price.corporation
+          img style: inline(position: 'absolute', right: 0), src: corporation.image_url
+          div corporation.name
+        end
       end
     end
 

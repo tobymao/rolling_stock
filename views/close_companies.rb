@@ -13,7 +13,7 @@ module Views
     def render_controls
       div do
         companies = game
-          .active_companies
+          .active_entities
           .select { |c| c.owned_by? current_player }
 
         return if companies.empty?
@@ -26,7 +26,7 @@ module Views
     end
 
     def render_check_box company
-      label style: inline(margin_right: '5px') do
+      div style: inline(margin_right: '5px') do
         input type: 'checkbox', name: data('company'), value: company.name
         text company.name
       end

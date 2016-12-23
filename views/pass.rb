@@ -8,13 +8,27 @@ module Views
     def content
       entities = game.active_entities.select { |e| e.owned_by? current_player }
       return if entities.empty?
+      solo = entities.size == 1
+      can_act = game.can_act? current_player
+
+      pass_text =
+        if can_act
+          solo ? 'Pass your turn' : 'Select entities to pass'
+        else
+          solo ? 'Pass your turn early' : 'Select entities to pass early'
+        end
+
+      div pass_text
 
       render_js
 
       game_form do
-        solo = entities.size == 1
         entities.each do |entity|
-          pass_props = { name: data(entity.type), value: entity.id }
+          pass_props = {
+            name: data(entity.type),
+            value: entity.id,
+            onclick: 'Pass.onClick(this)',
+          }
 
           if solo
             pass_props[:type] = 'hidden'
@@ -23,17 +37,21 @@ module Views
             pass_props[:checked] = 'true'
           end
 
-          input pass_props
-          input type: 'hidden', name: data('action'), value: 'pass'
-          label(style: inline(margin_right: '5px')) { text entity.name } unless solo
+          div do
+            input pass_props
+            input type: 'hidden', name: data('action'), value: 'pass'
+            label(style: inline(margin_right: '5px')) { text entity.name } unless solo
+          end
         end
 
         submit_props = {
           type: 'submit',
-          value: game.can_act?(current_player) ? 'Pass' : 'Pass Out Of Order',
+          value: can_act ? 'Pass' : 'Pass Out Of Order',
         }
 
-        input submit_props
+        div do
+          input submit_props
+        end
       end
     end
 

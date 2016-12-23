@@ -57,7 +57,7 @@ class Company
     'BSR' => ['Baltic Sea Rail', :green, 40, 10, ['DSB', 'PKP', 'DR', 'SJ', 'HH']],
     'E' => ['Eurotunnel', :green, 43, 10, ['NS', 'B', 'SNCF', 'BR', 'HA', 'HR', 'LHR', 'CDG']],
 
-    'MAD' => ['Madrid-Barajas Airport', :blue, 45, 15, ['RENFRE', 'FR', 'VP', 'LE']],
+    'MAD' => ['Madrid-Barajas Airport', :blue, 45, 15, ['RENFE', 'FR', 'VP', 'LE']],
     'HA' => ['Haven van Antwerpen', :blue, 47, 15, ['NS', 'B', 'SNCF', 'E', 'RU', 'AL']],
     'HH' => ['Hamburger Hafen', :blue, 48, 15, ['DSB', 'PKP', 'DR', 'BSR']],
     'HR' => ['Haven van Rotterdam', :blue, 49, 15, ['NS', 'B', 'DR', 'E', 'RU', 'AL']],

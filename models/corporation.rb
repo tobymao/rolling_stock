@@ -23,7 +23,7 @@ class Corporation < Purchaser
     when :green
       4
     when :blue
-      [:green, :yellow].include? other_tier ? 4 : 8
+      [:green, :yellow].include?(other_tier) ? 4 : 8
     when :purple
       other_tier == :blue ? 8 : 16
     end
@@ -102,10 +102,10 @@ class Corporation < Purchaser
 
   def issue_share
     raise GameException, 'Cannot issue share' unless can_issue_share?
+    @log << "#{name} issues a share and receives $#{prev_share_price.price}"
     swap_share_price prev_share_price
     @cash += price
     @bank_shares << @shares.shift
-    @log << "#{name} issues a share"
   end
 
   def income tier
@@ -165,6 +165,10 @@ class Corporation < Purchaser
     @share_prices.slice((index + 1)..-1).find &:unowned?
   end
 
+  def image_url
+    "/images/#{name.downcase}-20.png"
+  end
+
   private
   def issue_initial_shares
     company = @companies.first
@@ -182,7 +186,7 @@ class Corporation < Purchaser
   end
 
   def swap_share_price new_price
-    @log << "#{name} changes share price #{price} to #{new_price.price}"
+    @log << "#{name} changes share price $#{price} to $#{new_price.price}"
     new_price.corporation = self
     @share_price.corporation = nil
     @share_price = new_price
@@ -193,12 +197,22 @@ class Corporation < Purchaser
   end
 
   def adjust_share_price
+    old_index = index
+
     if above_valuation?
       swap_share_price next_share_price
-      swap_share_price next_share_price if above_valuation?
+
+      if (index - old_index == 1) && above_valuation?
+        @log.pop
+        swap_share_price next_share_price
+      end
     else
       swap_share_price prev_share_price
-      swap_share_price prev_share_price unless above_valuation?
+
+      if (old_index - index == 1) && !above_valuation?
+        @log.pop
+        swap_share_price prev_share_price
+      end
     end
   end
 end

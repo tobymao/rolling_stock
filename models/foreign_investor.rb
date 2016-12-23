@@ -6,6 +6,10 @@ class ForeignInvestor < Purchaser
     @log = log || []
   end
 
+  def owner
+    self
+  end
+
   def name
     'Foreign Investor'
   end

@@ -21,7 +21,6 @@ module Views
 
       company_style = container_style.merge(
         width: '300px',
-        min_height: '100px',
         font_size: '0.8em',
       )
 
@@ -58,9 +57,9 @@ module Views
       set = show_synergies ? company.owner.companies.map(&:name) : []
 
       groups.each do |k, v|
-        div style: inline(text_align: 'left') do
+        div style: inline(display: 'flex', text_align: 'left') do
           income_style = inline(
-            margin: '0 5px',
+            margin: '2px 2px',
             display: 'inline-block',
             font_weight: 'bold',
           )
@@ -69,19 +68,21 @@ module Views
             text "+$#{k}"
           end
 
-          v.each do |synergy|
-            syn_style = inline(
-              background_color: synergy.color,
-              padding: '1px 5px',
-              font_size: '0.8em',
-              display: 'inline-block',
-              margin: '4px 2px',
-              border_radius: '3px',
-              border: set.include?(synergy.name) ? 'solid 2px rgba(0,0,0,1.0)' : 'solid 1px rgba(0,0,0,0.2)',
-            )
+          div style: inline(display: 'inline-block') do
+            v.each do |synergy|
+              syn_style = inline(
+                background_color: synergy.color,
+                padding: '1px 5px',
+                font_size: '0.8em',
+                display: 'inline-block',
+                margin: '2px 2px',
+                border_radius: '3px',
+                border: set.include?(synergy.name) ? 'solid 2px rgba(0,0,0,1.0)' : 'solid 1px rgba(0,0,0,0.2)',
+              )
 
-            div style: syn_style do
-              text "#{synergy.name} [#{synergy.value}]"
+              div style: syn_style do
+                text "#{synergy.name} [#{synergy.value}]"
+              end
             end
           end
         end

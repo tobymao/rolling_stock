@@ -16,6 +16,7 @@ module Views
 
     def render_headers corporation
       div style: inline(headers_style.merge(background_color: 'lightblue')) do
+        img style: inline(vertical_align: 'top'), src: corporation.image_url
         render_header corporation.name, 'Corp', true
         render_header "$#{corporation.cash}", 'Cash'
         render_header "$#{corporation.book_value}", 'Value'
@@ -25,28 +26,44 @@ module Views
     end
 
     def render_price_movement
-      div do
-        div style: inline(display: 'inline-block', text_align: 'left', margin_right: '25px') do
-          div "President: #{corporation.president.name}"
-          div "Issued Shares: #{corporation.shares_issued}"
-          div "Shares In Bank: #{corporation.bank_shares.size}"
-          div "Market Cap: $#{corporation.market_cap}"
+      div style: inline(text_align: 'left') do
+        block_style = inline(
+          display: 'inline-block',
+          margin_left: '24px',
+          text_align: 'left',
+          width: '40%',
+        )
+
+        div style: block_style do
+          render_footer 'President', corporation.president.name.upcase
+          render_footer 'Issued Shares', corporation.shares_issued
+          render_footer 'Shares In Bank', corporation.bank_shares.size
+          render_footer 'Market Cap', corporation.market_cap
+          render_footer 'Info', 'Price', inline(font_size: '11px')
         end
 
         index = corporation.share_price.index
         double_drop = SharePrice::PRICES[index - 2]
         single_drop = SharePrice::PRICES[index - 1]
-        current_price =  SharePrice::PRICES[index]
+        current_price = SharePrice::PRICES[index]
         single_jump = SharePrice::PRICES[index + 1]
         double_jump = SharePrice::PRICES[index + 2]
         num = corporation.shares_issued
 
-        div style: inline(display: 'inline-block', text_align: 'right') do
-          div "$#{num * single_jump} jump to $#{double_jump}"
-          div "$#{num * current_price}-$#{num * single_jump - 1} jump to $#{single_jump}"
-          div "$#{num * single_drop}-$#{num * current_price - 1} drop to $#{single_drop}"
-          div "$#{num * single_drop - 1} drop to $#{double_drop}"
+        div style: block_style do
+          render_footer "$#{num * single_jump} - ∞", "$#{double_jump}"
+          render_footer "$#{num * current_price}-$#{num * single_jump - 1}", "$#{single_jump}"
+          render_footer "$#{num * single_drop}-$#{num * current_price - 1}", "$#{single_drop}"
+          render_footer "$0 - $#{num * single_drop - 1}", "$#{double_drop}"
+          render_footer 'Value', 'Price', inline(font_size: '11px')
         end
+      end
+    end
+
+    def render_footer left, right, footer_style = ''
+      div style: footer_style do
+        div(style: inline(display: 'inline-block', text_align: 'left')) { text left }
+        div(style: inline(display: 'inline-block', text_align: 'right', float: 'right')) { text right }
       end
     end
 

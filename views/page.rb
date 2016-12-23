@@ -8,6 +8,7 @@ module Views
       html do
         head do
           link rel: 'shortcut icon', type: 'image/png', href: '/images/favicon.ico'
+          link rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Inconsolata|Raleway'
           script src: 'https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js'
           render_head
           render_style
@@ -38,8 +39,9 @@ module Views
     def render_style
       style <<~CSS
         body {
-          font-family: Helvetica;
+          font-family: 'Raleway', sans-serif;
           font-weight: lighter;
+          font-size: 14px;
           width: 100%;
           margin: 0;
         }
@@ -52,8 +54,9 @@ module Views
 
         .heading {
           font-weight: bold;
-          font-size: 1.1em;
+          font-size: 1.3em;
           margin: 0 5px;
+          text-decoration: underline;
         }
 
         .selected {

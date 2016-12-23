@@ -7,10 +7,9 @@ module Views
     def container_style
       {
         display: 'inline-block',
-        min_height: '200px',
         width: '350px',
         border: 'solid thin rgba(0,0,0,0.66)',
-        margin: '10px 10px',
+        margin: '2px',
         vertical_align: 'top',
         text_align: 'center',
         position: 'relative',
@@ -22,6 +21,7 @@ module Views
         background_color: 'lightgrey',
         padding: '5px',
         text_align: 'center',
+        font_size: '18px',
       }
     end
 
@@ -43,7 +43,7 @@ module Views
           end
         end
 
-        div { text label_text }
+        div(style: inline(font_size: '11px')) { text label_text }
       end
     end
 

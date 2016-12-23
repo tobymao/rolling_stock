@@ -17,7 +17,6 @@ module Views
         header: false
 
       game_form do
-        span "Issue Share for #{corporation.name}"
         input type: 'hidden', name: data('corporation'), value: corporation.name
         input type: 'submit', style: inline(margin_left: '5px'), value: 'Issue a Share'
       end if game.can_act? current_player

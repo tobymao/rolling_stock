@@ -8,14 +8,17 @@ module Views
     def content
       div(class: 'heading') { text 'Foreign Investor' }
 
-      div style: inline(container_style) do
-        render_headers investor
-        render_companies investor
+      div class: 'wrapper' do
+        div style: inline(container_style) do
+          render_headers investor
+          render_companies investor
+        end
       end
     end
 
     def render_headers investor
       div style: inline(headers_style.merge(background_color: 'lightgreen')) do
+        render_header 'Foreign Investor', 'Player'
         render_header "$#{investor.cash}", 'Cash'
         render_header "$#{investor.income tier}", 'Income'
       end

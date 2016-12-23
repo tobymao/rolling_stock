@@ -9,7 +9,7 @@ module Views
     def content
       div(class: 'heading') { text 'Corporations' } if header
 
-      div do
+      div class: 'wrapper' do
         corporations.each do |corporation|
           widget Corporation, corporation: corporation, tier: tier
         end

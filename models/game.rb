@@ -20,6 +20,15 @@ class Game < Base
     10 => 'Check Game End',
   }.freeze
 
+  PHASE_DESCRIPTION = {
+    1 => 'Issue a share of your corporation',
+    2 => 'Choose a company and IPO price to form a corporation',
+    3 => 'Select a company to auction or buy and sell shares',
+    6 => 'Select a company and offer a price to purchase it',
+    7 => 'Select companies you want to close',
+    9 => 'Select the amount of dividends to pay each share',
+  }
+
   attr_reader(
     :share_prices,
     :available_corporations,
@@ -76,7 +85,7 @@ class Game < Base
     @_players ||= User
       .where(id: users.to_a)
       .map { |user| Player.new(user.id, user.name, @log) }
-      .each_with_index { |p, i| p.order = i }
+      .each_with_index { |p, i| p.order = i + 1 }
       .sort_by(&:order)
   end
 
@@ -106,6 +115,10 @@ class Game < Base
 
   def phase_name
     PHASE_NAME[@phase]
+  end
+
+  def phase_description
+    PHASE_DESCRIPTION[@phase]
   end
 
   def active_entities
@@ -316,7 +329,7 @@ class Game < Base
   # phase 4
   def new_player_order
     players.sort_by!(&:cash).reverse!
-    players.each_with_index { |p, i| p.order = i }
+    players.each_with_index { |p, i| p.order = i + 1 }
     @log << "New player order: #{players.map &:name}"
     change_phase
   end
@@ -475,7 +488,7 @@ class Game < Base
 
   def check_bankruptcy corporation
     return unless corporation.is_bankrupt?
-    @corporations.drop corporation
+    @corporations.delete corporation
     @available_corporations << corporation.name
     players.each do |player|
       player.shares.reject! { |share| share.corporation == corporation }

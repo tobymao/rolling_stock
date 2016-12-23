@@ -12,10 +12,14 @@ module Views
 
     def content
       div(class: 'heading') { text 'Available Companies' }
-      widget Companies, companies: companies, tier: tier
+      div class: 'wrapper' do
+        widget Companies, companies: companies, tier: tier
+      end
 
       div(class: 'heading') { text 'Pending Companies' }
-      widget Companies, companies: pending_companies, tier: tier
+      div class: 'wrapper' do
+        widget Companies, companies: pending_companies, tier: tier
+      end
 
       deck_text = String.new 'Deck'
       tiers = ::Company::OWNERSHIP_TIERS[tier]
@@ -28,7 +32,9 @@ module Views
 
       div(class: 'heading') { text deck_text }
 
-      render_deck
+      div class: 'wrapper' do
+        render_deck
+      end
     end
 
     def render_deck

@@ -23,16 +23,28 @@ module Views
 
     def render_game
       tier = game.ownership_tier
+
+      div class: 'heading' do
+        text "Round: #{game.round} Phase: #{game.phase} (#{game.phase_name})"
+      end
+
+      widget Log, log: game.log, active: game.can_act?(@current_player)
+
       render_action_widget
+
       widget Players, players: game.players_in_order, tier: tier, current_player: @current_player
+
       widget Corporations, corporations: game.corporations, tier: tier
+
       widget ForeignInvestor, investor: game.foreign_investor, tier: tier
+
       widget Deck, {
         companies: game.companies,
         pending_companies: game.pending_companies,
         company_deck: game.company_deck,
         tier: tier,
       }
+
       widget SharePrices, share_prices: game.share_prices
     end
 

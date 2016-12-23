@@ -10,6 +10,8 @@ module Views
         overflow_y: 'scroll',
         height: '200px',
         background_color: 'lightgray',
+        font_family: "'Inconsolata', monospace",
+        margin: '5px 0',
       )
 
       div style: log_style do
