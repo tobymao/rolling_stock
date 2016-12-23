@@ -71,7 +71,7 @@ class Corporation < Purchaser
   end
 
   def is_bankrupt?
-    price.zero?
+    price.zero? || @companies.empty?
   end
 
   def buy_share player
@@ -136,6 +136,7 @@ class Corporation < Purchaser
       total = amount * player.shares.count { |share| share.corporation == self }
       @cash -= total
       player.cash += total
+      next if total == 0
       dividend_log << " #{player.name} receives #{total}"
     end
     @log << dividend_log
@@ -173,11 +174,11 @@ class Corporation < Purchaser
   def issue_initial_shares
     company = @companies.first
     value = company.value
-    num_shares = (value / price) + 1
-    seed = value - num_shares * price
+    num_shares = (value / price.to_f).ceil
+    seed = num_shares * price - value
 
-    @cash = -seed
-    @president.cash + seed
+    @cash = seed
+    @president.cash -= seed
     @cash += num_shares * price
 
     @president.shares.concat @shares.shift(num_shares)

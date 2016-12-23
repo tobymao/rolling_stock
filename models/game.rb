@@ -488,18 +488,21 @@ class Game < Base
 
   def check_bankruptcy corporation
     return unless corporation.is_bankrupt?
+    @log << "#{corporation.name} becomes bankrupt"
     @corporations.delete corporation
     @available_corporations << corporation.name
     players.each do |player|
       player.shares.reject! { |share| share.corporation == corporation }
     end
-    @share_prices[corporation.share_price.index] = corporation.share_price
+    corporation.share_price.corporation = nil
   end
 
   def change_phase
     case @phase
     when 3, 5, 6
       finalize_purchases
+    when 7
+      @corporations.each { |c| check_bankruptcy c }
     when 8, 9
       sort_corporations
     end
