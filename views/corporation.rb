@@ -51,10 +51,10 @@ module Views
         num = corporation.shares_issued
 
         div style: block_style do
-          render_footer "$#{num * single_jump} - ∞", "$#{double_jump}"
-          render_footer "$#{num * current_price}-$#{num * single_jump - 1}", "$#{single_jump}"
-          render_footer "$#{num * single_drop}-$#{num * current_price - 1}", "$#{single_drop}"
-          render_footer "$0 - $#{num * single_drop - 1}", "$#{double_drop}"
+          render_footer "$#{num * single_jump} - ∞", "$#{double_jump}" if double_jump
+          render_footer "$#{num * current_price}-$#{num * single_jump - 1}", "$#{single_jump}" if single_jump
+          render_footer "$#{num * single_drop}-$#{num * current_price - 1}", "$#{single_drop}" if single_drop
+          render_footer "$0 - $#{num * single_drop - 1}", "$#{double_drop}" if double_drop
           render_footer 'Value', 'Price', inline(font_size: '11px')
         end
       end

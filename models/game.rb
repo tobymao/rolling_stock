@@ -186,7 +186,7 @@ class Game < Base
   end
 
   def can_act? player
-    acting.any? { |e| e.owned_by? player } ||
+    acting&.any? { |e| e.owned_by? player } ||
       @offers.find { |o| o.company.owned_by? player }
   end
 
@@ -422,9 +422,11 @@ class Game < Base
 
   # phase 10
   def check_end
-    @end_game_card = :last_turn if ownership_tier == :penultimate
+    @end_game_card = :last_turn if (ownership_tier == :penultimate && @companies.empty?)
 
-    if ownership_tier == :last_turn || @share_prices.last.nil?
+    if ownership_tier == :last_turn || @share_prices.last.corporation
+      scores = players.sort_by(&:value).reverse.map { |p| "#{p.name} ($#{p.value})" }
+      @log << "Game over. #{scores.join ', '}"
       update(state: :finished)
     else
       change_phase
@@ -436,18 +438,24 @@ class Game < Base
   def setup_deck
     if deck.size.zero?
       groups = Company.all.values.group_by &:tier
+      new_deck = []
 
       Company::TIERS.each do |tier|
         num_cards = players.size + 1
         num_cards = 6 if tier == :orange && players.size == 4
         num_cards = 8 if tier == :orange && players.size == 5
-        @company_deck.concat(groups[tier].shuffle.take num_cards)
+
+        group = groups[tier]
+        largest = group.sort_by!(&:value).pop
+        group.shuffle!.pop(group.size - num_cards + 1)
+        group << largest
+        new_deck.concat group.shuffle!
       end
 
-      update deck: @company_deck.map(&:name)
-    else
-      @company_deck = deck.map { |sym| Company.new self, sym, *Company::COMPANIES[sym], @log }
+      update deck: new_deck.map(&:name)
     end
+
+    @company_deck = deck.map { |sym| Company.new self, sym, *Company::COMPANIES[sym], @log }
   end
 
   def draw_companies

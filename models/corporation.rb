@@ -126,7 +126,7 @@ class Corporation < Purchaser
 
   def pay_dividend amount, players
     raise GameException, 'Dividend must be positive' if amount < 0
-    raise GameException, 'Total dividends must be payable with corporation cash' if (shares_issued * amount) > @cash
+    raise GameException, 'Total dividends must be payable with corporation cash and must not exceed 1/3 share price per share' if amount > max_dividend
 
     @cash -= amount * @bank_shares.size
 
@@ -136,12 +136,15 @@ class Corporation < Purchaser
       total = amount * player.shares.count { |share| share.corporation == self }
       @cash -= total
       player.cash += total
-      next if total == 0
-      dividend_log << " #{player.name} receives #{total}"
+      dividend_log << " #{player.name} receives #{total}" if total > 0
     end
     @log << dividend_log
 
     adjust_share_price
+  end
+
+  def max_dividend
+    [price / 3, @cash / shares_issued].min
   end
 
   def book_value
@@ -187,7 +190,7 @@ class Corporation < Purchaser
   end
 
   def swap_share_price new_price
-    @log << "#{name} changes share price $#{price} to $#{new_price.price}"
+    @log << "#{name} changes share price from $#{price} to $#{new_price.price}"
     new_price.corporation = self
     @share_price.corporation = nil
     @share_price = new_price
@@ -204,14 +207,12 @@ class Corporation < Purchaser
       swap_share_price next_share_price
 
       if (index - old_index == 1) && above_valuation?
-        @log.pop
         swap_share_price next_share_price
       end
     else
       swap_share_price prev_share_price
 
       if (old_index - index == 1) && !above_valuation?
-        @log.pop
         swap_share_price prev_share_price
       end
     end

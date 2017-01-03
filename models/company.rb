@@ -21,7 +21,7 @@ class Company
     purple: 6,
     penultimate: 10,
     last_turn: 16,
-  }
+  }.freeze
 
   COMPANIES = {
     'BME' => ['Bergisch-Märkische Eisenbahn-Gesellschaft', :red, 1, 1, ['KME', 'BD', 'HE', 'PR']],
@@ -70,11 +70,11 @@ class Company
     'RCC' => ['Ring Construction Corporation', :purple, 71, 25, ['RU', 'AL', 'TSI']],
     'MM' => ['Mars Mining Associates', :purple, 75, 25, ['LHR', 'FRA', 'LE', 'TSI']],
     'VP' => ['Venus Prospectors', :purple, 80, 25, ['MAD', 'LHR', 'CDG', 'LE', 'TSI']],
-    'RU' => ['Resources Unlimited', :purple, 85, 25, ['HA', 'LHR', 'CDG', 'LE', 'TSI']],
+    'RU' => ['Resources Unlimited', :purple, 85, 25, ['HA', 'HH', 'HR', 'OPC', 'RCC', 'TSI']],
     'AL' => ['Asteroid League', :purple, 86, 25, ['HA', 'HH', 'HR', 'OPC', 'RCC', 'TSI']],
     'LE' => ['Lunar Enterprises', :purple, 90, 25, ['MAD', 'LHR', 'CDG', 'FRA', 'MM', 'VP', 'TSI']],
     'TSI' => ['Trans-Space Inc.', :purple, 100, 25, ['OPC', 'RCC', 'MM', 'VP', 'AL', 'LE' ]],
-  }
+  }.freeze
 
   attr_reader :name, :full_name, :tier, :value, :income, :synergies
   attr_accessor :owner, :recently_sold
@@ -82,7 +82,7 @@ class Company
   def self.all
     @@all ||= Company::COMPANIES.map do |sym, params|
       [sym, Company.new(self, sym, *params).freeze]
-    end.to_h
+    end.to_h.freeze
   end
 
   def initialize owner, name, full_name, tier, value, income, synergies, log = nil

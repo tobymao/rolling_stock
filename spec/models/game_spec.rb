@@ -65,7 +65,7 @@ describe Game do
       end
 
       it 'should change to finished if any corporation share price is 100' do
-        subject.share_prices[31] = nil
+        subject.share_prices[31].corporation = subject
         subject.check_end
         expect(subject.state).to eq('finished')
       end

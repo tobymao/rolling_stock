@@ -7,6 +7,12 @@ describe Corporation do
   let(:company) { Company.new player, *(['BME'].concat Company::COMPANIES['BME']) }
   subject { Corporation.new 'Bear', company, share_price, market }
 
+  # don't really want lazy eval here
+  # if player evals before corp, cash will be wrong
+  before :each do
+    subject
+  end
+
   describe '#buy_company' do
     let(:company_to_buy) { Company.new player, *(['BSE'].concat Company::COMPANIES['BSE']) }
 
@@ -74,8 +80,23 @@ describe Corporation do
       expect { subject.pay_dividend 100, [player] }.to raise_error(GameException)
     end
 
+    it 'should not pay out more than 1/3 share price' do
+      expect { subject.pay_dividend 4, [player] }.to raise_error(GameException)
+    end
+
     it 'should increase player cash' do
-      expect { subject.pay_dividend 1, [player] }.to change { player.cash }.by(1)
+      expect { subject.pay_dividend 3, [player] }.to change { player.cash }.by(3)
+    end
+  end
+
+  describe '#max_dividend' do
+    it 'is 1/3 ceil of share price' do
+      expect(subject.max_dividend).to eq(3)
+    end
+
+    it 'is not more than total cash' do
+      subject.cash = 5
+      expect(subject.max_dividend).to eq(2)
     end
   end
 

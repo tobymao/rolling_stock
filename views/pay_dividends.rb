@@ -14,12 +14,10 @@ module Views
 
       div do
         game_form do
-          max_dividend = corporation.cash / corporation.shares_issued
-
           divided_props = {
             type: 'number',
             style: inline(width: '50px', margin: '0 5px 0 5px'),
-            max: max_dividend,
+            max: corporation.max_dividend,
             name: data('amount'),
             value: 0,
           }
