@@ -58,10 +58,12 @@ module Views
         end
 
         games.each do |game|
-          td game.id
-          td game.user.name
-          td game.users.size
-          td { a 'Join Game', href: app.path(game) }
+          tr do
+            td game.id
+            td game.user.name
+            td game.users.size
+            td { a 'Join Game', href: app.path(game) }
+          end
         end
       end
     end

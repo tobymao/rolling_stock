@@ -216,11 +216,17 @@ class RollingStock < Roda
   def notify_game game
     Thread.new do
       games = {}
-
-      sync { ROOMS[game.id].dup }.each do |connection, user|
+      room = sync { ROOMS[game.id].dup }
+      room.each do |connection, user|
         next if user&.id == current_user.id
         html = games[user&.id || 0] ||= widget(Views::Game, game: game, current_user: user)
         connection.send html
+      end
+
+      unnotified = game.users - room.map { |_, user| user.id }
+
+      User.where(id: unnotified).all.each do |user|
+        send_mail game, user if game.can_act? game.player_by_user(user)
       end
     end
   end
@@ -228,6 +234,27 @@ class RollingStock < Roda
   def widget klass, needs = {}
     needs[:app] = self
     klass.new(**needs).to_html
+  end
+
+  def send_mail game, user
+    uri = URI.parse("https://api.sparkpost.com/api/v1/transmissions")
+    req = Net::HTTP::Post.new uri
+    req.content_type = 'application/json'
+    req['Authorization'] = ENV['SPARK_POST_KEY']
+    req.body = JSON.dump(
+      'content' => {
+        'from' => 'no-reply@rollingstock.net',
+        'subject' => "Your Turn - Game #{game.id} - Round #{game.round} - Phase #{game.phase}",
+        'html' => "<a href=#{request.base_url + path(game)}>Make your move</>",
+      },
+      'recipients' => [
+        { address: user.email }
+      ]
+    )
+
+    response = Net::HTTP.start uri.hostname, uri.port, use_ssl: true do |http|
+      http.request req
+    end
   end
 
 end
