@@ -7,16 +7,29 @@ module Views
 
     def render_main
       div class: 'wrapper' do
-        render_new_game if app.current_user
-        render_join_games
-        render_active_games
+        block_style = inline(
+          border_top: '1px solid black',
+          padding_top: '10px',
+          margin_bottom: '10px',
+        )
+
+        div style: block_style do
+          render_new_game
+        end if app.current_user
+
+        div style: block_style do
+          render_table new_games, 'New Games'
+        end unless new_games.empty?
+
+        div style: block_style do
+          render_table active_games, 'Active Games'
+        end unless active_games.empty?
       end
     end
 
     def render_new_game
-      hr
-      div style: inline(table_style.merge('font-weight': 'bold', 'width': '200px')) do
-        text 'New Game'
+      div class: 'heading' do
+        text 'Create Game'
       end
 
       form action: '/game', method: 'post' do
@@ -25,87 +38,33 @@ module Views
       end
     end
 
-    def render_join_games
-      hr
-      div style: inline(table_style.merge('font-weight': 'bold', 'width': '200px')) do
-        text 'Current Games'
+    def render_table games, heading
+      div class: 'heading' do
+        text heading
       end
 
-      div do
-        span style: inline(table_style.merge('font-weight': 'bold')) do
-          text "Game Id"
-        end
-
-        span style: inline(table_style.merge('font-weight': 'bold')) do
-          text 'Name'
-        end
-
-        span style: inline(table_style) do
-          text ''
-        end
-      end
-
-      new_games.each do |game|
-        div do
-          span style: inline(table_style) do
-            text game.id.to_s
-          end
-
-          span style: inline(table_style) do
-            text game.user.name
-          end
-
-          span style: inline(table_style) do
-            a 'Join Game', href: app.path(game)
-          end
-        end
-      end
-    end
-
-    def table_style
-      {
+      table_style = inline(
         padding: '3px',
-        width: '100px',
-        display: 'inline-block',
-      }
+        width: '320px',
+        text_align: 'right',
+      )
+
+      table style: table_style do
+        tr do
+          th 'Game Id'
+          th 'Creator'
+          th 'Players'
+          th 'Join'
+        end
+
+        games.each do |game|
+          td game.id
+          td game.user.name
+          td game.users.size
+          td { a 'Join Game', href: app.path(game) }
+        end
+      end
     end
 
-    def render_active_games
-      hr
-      div style: inline(table_style.merge('font-weight': 'bold', 'width': '200px')) do
-        text 'Active Games'
-      end
-
-      div do
-        span style: inline(table_style.merge('font-weight': 'bold')) do
-          text "Game Id"
-        end
-
-        span style: inline(table_style.merge('font-weight': 'bold')) do
-          text 'Name'
-        end
-
-        span style: inline(table_style) do
-          text ''
-        end
-      end
-
-      active_games.each do |game|
-        div do
-          span style: inline(table_style) do
-            text game.id.to_s
-          end
-
-          span style: inline(table_style) do
-            text game.user.name
-          end
-
-          span style: inline(table_style) do
-            a 'Join Game', href: app.path(game)
-          end
-        end
-      end
-
-    end
   end
 end
