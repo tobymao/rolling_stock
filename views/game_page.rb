@@ -62,9 +62,14 @@ module Views
           },
         }
 
-        GameConnection.start(
-          ["ws://", window.location.hostname, ":", window.location.port, "#{app.path(game)}"].join('')
-        );
+        GameConnection.start([
+          "ws://",
+          window.location.hostname,
+          ":",
+          window.location.port,
+          "#{app.path(game)}",
+          'ws'
+        ].join(''));
       JS
     end
   end

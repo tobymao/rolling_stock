@@ -83,7 +83,7 @@ class RollingStock < Roda
         game = Game[id]
         game.load
 
-        r.get do
+        r.on 'ws' do
           r.websocket do |ws|
             ws.on :message do |event|
             end
@@ -97,7 +97,9 @@ class RollingStock < Roda
 
             sync { room << [ws, current_user] }
           end
+        end
 
+        r.get do
           widget Views::GamePage, game: game
         end
 
