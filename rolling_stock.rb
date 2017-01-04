@@ -58,12 +58,6 @@ class RollingStock < Roda
     MUTEX.synchronize { yield }
   end
 
-  #Thread.new do
-  #  DB.listen 'game', loop: true do |_, _, msg|
-  #    puts "** received notification #{msg}"
-  #  end
-  #end
-
   route do |r|
     r.root do
       games = Game.eager(:user).where(state: ['new', 'active']).all
@@ -84,28 +78,25 @@ class RollingStock < Roda
       end
 
       r.on ':id' do |id|
+        id = id.to_i
         room = sync { ROOMS[id] }
         game = Game[id]
         game.load
 
         r.get do
-           r.websocket do |ws|
-             ws.on :message do |event|
-               puts "received ping"
-               #sync{ room.dup }.each do |connection|
-               #  puts "** sending data ** "
-               #end
-             end
+          r.websocket do |ws|
+            ws.on :message do |event|
+            end
 
-             ws.on :close do |event|
-               sync do
-                 room.delete [ws, current_user]
-                 ROOMS[id].delete id if room.empty?
-               end
-             end
+            ws.on :close do |event|
+              sync do
+                room.delete [ws, current_user]
+                ROOMS[id].delete id if room.empty?
+              end
+            end
 
-             sync { room << [ws, current_user] }
-           end
+            sync { room << [ws, current_user] }
+          end
 
           widget Views::GamePage, game: game
         end
@@ -114,7 +105,7 @@ class RollingStock < Roda
           r.is 'join' do
             game.users << current_user.id
             game.save
-            update_connections room, game
+            notify_game game
             r.redirect path(game)
           end
 
@@ -137,8 +128,7 @@ class RollingStock < Roda
               action.append_turn action_data
             end
 
-            update_connections room, game
-
+            notify_game game
             r.redirect path(game)
           end
 
@@ -147,7 +137,7 @@ class RollingStock < Roda
           r.is 'start' do
             game.update state: 'active', users: game.users.shuffle
             game.start_game
-            update_connections room, game
+            notify_game game
             r.redirect path(game)
           end
         end
@@ -223,13 +213,15 @@ class RollingStock < Roda
     end
   end
 
-  def update_connections room, game
-    games = {}
+  def notify_game game
+    Thread.new do
+      games = {}
 
-    sync { room.dup }.each do |connection, user|
-      next if user == current_user
-      html = games[user || 'none'] ||= widget(Views::Game, game: game, current_user: user)
-      connection.send html
+      sync { ROOMS[game.id].dup }.each do |connection, user|
+        next if user&.id == current_user.id
+        html = games[user&.id || 0] ||= widget(Views::Game, game: game, current_user: user)
+        connection.send html
+      end
     end
   end
 
@@ -237,4 +229,5 @@ class RollingStock < Roda
     needs[:app] = self
     klass.new(**needs).to_html
   end
+
 end

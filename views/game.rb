@@ -11,7 +11,7 @@ module Views
     end
 
     def render_new
-      div do
+      div class: 'wrapper' do
         game.players.each do |player|
           div player.name
         end
