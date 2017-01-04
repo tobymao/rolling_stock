@@ -1,7 +1,7 @@
-set :application, 'bg_blitz'
+set :application, 'rolling_tock'
 set :rvm1_ruby_version, 'ruby-2.3.1'
-set :repo_url, 'git@github.com:tobymao/bg_blitz.git'
-set :deploy_to, '/home/deploy/apps/bg_blitz'
+set :repo_url, 'git@github.com:tobymao/rolling_stock.git'
+set :deploy_to, '/home/deploy/apps/rolling_stock'
 set :current_dir, "#{fetch(:deploy_to)}/current"
 set :tmp_dir, "#{fetch(:deploy_to)}/tmp"
 set :default_env, { 'RACK_ENV' => 'production' }
