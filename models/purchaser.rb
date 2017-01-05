@@ -21,7 +21,7 @@ class Purchaser
     company.recently_sold = true
     company.owner = self
     @companies << company
-    @log << "#{name} buys #{company.name} for #{price}"
+    @log << "#{name} buys #{company.name} for $#{price}"
   end
 
   def close_company company

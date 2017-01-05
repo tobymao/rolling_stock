@@ -98,7 +98,7 @@ module Views
         var BuyCompanies = {
           onClick: function(el) {
             var data = el.dataset;
-            $('#bid_price').attr({'min': data.min, 'max': data.max, 'value': data.value});
+            $('#bid_price').attr({ 'min': data.min, 'max': data.max, 'value': data.max });
             $('#bid_company').attr('value', data.company);
             $('#bid_submit').attr('disabled', false);
             $('.selected').removeClass('selected');

@@ -65,6 +65,7 @@ class Game < Base
     @company_deck = []
     @current_bid = nil
     @offers = []
+    @passes = []
     @foreign_investor = ForeignInvestor.new @log
     @round = 1
     @phase = 1
@@ -82,11 +83,16 @@ class Game < Base
   end
 
   def players
-    @_players ||= User
-      .where(id: users.to_a)
-      .map { |user| Player.new(user.id, user.name, @log) }
-      .each_with_index { |p, i| p.order = i + 1 }
-      .sort_by(&:order)
+    @_players ||=
+      begin
+        user_ids = users.to_a
+
+        User
+          .where(id: user_ids)
+          .map { |user| Player.new(user.id, user.name, @log) }
+          .each{ |player| player.order = user_ids.find_index(player.id) + 1 }
+          .sort_by(&:order)
+      end
   end
 
   def players_in_order
@@ -142,7 +148,7 @@ class Game < Base
         99999,
       ].compact.min
 
-      corporations.select do |corporation|
+      corps = corporations.select do |corporation|
         min_corp_company = @corporations
           .reject { |c| c.companies.size == 1 && c == corporation }
           .flat_map { |p| p.companies.map &:min_price }
@@ -150,9 +156,10 @@ class Game < Base
 
         min_price = [min_player_company, min_corp_company].compact.min
 
-        (corporation.active? && corporation.cash >= min_price) ||
-          @offers.any? { |o| o.company.owned_by? corporation }
+        corporation.active? && corporation.cash >= min_price
       end
+
+      (@offers.map { |o| o.company.owner } + corps).uniq
     when 7
       active_companies
     when 9
@@ -182,12 +189,18 @@ class Game < Base
       active_entities.slice(0..0)
     when 6, 7
       active_entities
+    else
+      []
     end
   end
 
-  def can_act? player
-    acting&.any? { |e| e.owned_by? player } ||
-      @offers.find { |o| o.company.owned_by? player }
+  def can_act? entity
+    if entity.is_a? Player
+      acting.any? { |e| e.owned_by? entity } ||
+        @offers.find { |o| o.company.owned_by? entity }
+    else
+      acting.include? entity
+    end
   end
 
   def held_companies
@@ -241,14 +254,29 @@ class Game < Base
       raise GameException, 'No one to pass' if entities.empty?
 
       entities.each do |entity|
-        raise GameException, 'Already passed' if entity.passed?
-        entity.pass
+        if can_act? entity.owner
+          pass_entity entity
+        else
+          @passes << entity
+        end
       end
     else
       send "process_phase_#{@phase}", data
     end
 
+    @passes.each do |entity|
+      pass_entity(entity) if can_act? entity
+    end
+
+    @passes.reject! &:passed?
+
     step
+  end
+
+  def pass_entity entity
+    raise GameException, 'Already passed' if entity.passed?
+    entity.pass
+    @log << "#{entity.name} passes"
   end
 
   # phase 1
@@ -328,7 +356,13 @@ class Game < Base
 
   # phase 4
   def new_player_order
-    players.sort_by!(&:cash).reverse!
+    index = 0
+
+    players.sort_by! do |player|
+      index += 1
+      [-player.cash, index]
+    end
+
     players.each_with_index { |p, i| p.order = i + 1 }
     @log << "New player order: #{players.map &:name}"
     change_phase
@@ -344,7 +378,6 @@ class Game < Base
 
   # phase 6
   # corporations buy companies
-  # todo: don't allow multi movement of cash and companies
   def process_phase_6 data
     corporation = @corporations.find { |c| c.name == data['corporation'] }
     companies = held_companies + @foreign_investor.companies
@@ -365,6 +398,7 @@ class Game < Base
       end
     when 'decline'
       offer.suitors.delete corporation
+      @log << "#{corporation.name} declines to buy #{company.name} for $#{offer.price}"
 
       if offer.foreign_purchase?
         if offer.suitors.empty?

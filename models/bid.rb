@@ -9,6 +9,6 @@ class Bid
     @company = company
     @price   = price
     @log     = log || []
-    @log << "#{player.name} bids #{@price} for #{@company.name}"
+    @log << "#{player.name} bids $#{@price} for #{@company.name}"
   end
 end
