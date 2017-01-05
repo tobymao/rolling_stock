@@ -122,15 +122,15 @@ class RollingStock < Roda
 
             data = r['data']
 
-            r.halt 403 if game.round != data['round'].to_i || game.phase != data['phase'].to_i
+            if game.round == data['round'].to_i && game.phase == data['phase'].to_i
+              data['actions'].each do |action_data|
+                game.process_action_data action_data
+                action.append_turn action_data
+              end
 
-            data['actions'].each do |action_data|
-              # maybe check round and phase here
-              game.process_action_data action_data
-              action.append_turn action_data
+              notify_game game
             end
 
-            notify_game game
             r.redirect path(game)
           end
 

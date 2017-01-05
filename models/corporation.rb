@@ -42,6 +42,7 @@ class Corporation < Purchaser
     @share_prices = share_prices
     @shares = [Share.president(self)].concat 9.times.map { Share.normal(self) }
     @bank_shares = []
+    @shares_count = Hash.new { |k, v| k[v] = 0 }
     @log = log || []
 
     company.owner.companies.delete company
@@ -80,12 +81,16 @@ class Corporation < Purchaser
     swap_share_price next_share_price
     player.cash -= price
     player.shares << @bank_shares.pop
+    @shares_count[player] += 1
     @log << "#{player.name} buys share of #{name} for $#{price}"
+    change_president
   end
 
   def can_sell_share? player
-    share = player.shares.last
-    share && !share.president?
+    player_shares = player.corporation_shares(self)
+    share = player_shares.last
+    return false unless share
+    !share.president? || @shares_count[player] == @shares_count.reject { |k, _| k == player }.values.max
   end
 
   def sell_share player
@@ -93,7 +98,22 @@ class Corporation < Purchaser
     swap_share_price prev_share_price
     player.cash += price
     @bank_shares << player.shares.pop
+    @shares_count[player] -= 1
     @log << "#{player.name} sells share of #{name} for $#{price}"
+    change_president
+  end
+
+  def change_president
+    max = @shares_count.values.max
+    holders = @shares_count.select { |_, count| count == max }.keys.sort_by &:order
+
+    unless holders.include? @president
+      @president.corporation_shares(self).each { |s| s.president = false }
+      player = holders.find { |p| @president.order < p.order } || holders.first
+      player.corporation_shares(self).first.president = true
+      @president = player
+      @log << "#{@president.name} becomes president of #{name}"
+    end
   end
 
   def can_issue_share?
@@ -186,6 +206,7 @@ class Corporation < Purchaser
     @cash += num_shares * price
 
     @president.shares.concat @shares.shift(num_shares)
+    @shares_count[@president] += num_shares
     @bank_shares.concat @shares.shift(num_shares)
     @log << "#{owner.name} forms corporation #{name} with #{company.name} at $#{price} - #{num_shares} shares issued."
   end

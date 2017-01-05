@@ -29,4 +29,8 @@ class Player < Purchaser
   def can_sell_shares?
     @shares.any? { |share| share.corporation.can_sell_share? self }
   end
+
+  def corporation_shares corporation
+    @shares.select { |s| s.corporation == corporation }
+  end
 end

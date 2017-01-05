@@ -1,5 +1,5 @@
 class Share
-  attr_accessor :corporation
+  attr_accessor :corporation, :president
 
   def self.president corporation
     new corporation, true

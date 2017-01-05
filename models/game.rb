@@ -421,13 +421,15 @@ class Game < Base
       raise GameException, 'Cannot buy own company' if corporation == company.owner
 
       suitors = @corporations.select do |c|
-        c.price > corporation.price && c.owner != corporation.owner
+        c.price > corporation.price &&
+          c.owner != corporation.owner &&
+          c.owner.cash >= price
       end if owner.is_a? ForeignInvestor
 
       if suitors && suitors.empty?
         raise GameException, 'Foreign Investor purchase must be max price' if price != company.max_price
         corporation.buy_company company, price
-      elsif corporation.owner != owner
+      elsif !corporation.owned_by? owner
         @offers << Offer.new(corporation, company, price, suitors, @log)
       else
         corporation.buy_company company, price
