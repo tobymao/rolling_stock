@@ -5,6 +5,7 @@ describe Corporation do
   let(:market) { SharePrice.initial_market }
   let(:share_price) { market[6] }
   let(:company) { Company.new player, *(['BME'].concat Company::COMPANIES['BME']) }
+  let(:company2) { Company.new player, *(['MHE'].concat Company::COMPANIES['MHE']) }
   subject { Corporation.new 'Bear', company, share_price, market }
 
   # don't really want lazy eval here
@@ -38,9 +39,9 @@ describe Corporation do
     end
   end
 
-  describe '#is_bankrupt' do
+  describe '#bankrupt' do
     it 'company is not bankrupt' do
-      expect(subject.is_bankrupt?).to eq(false)
+      expect(subject.bankrupt?).to eq(false)
     end
   end
 
@@ -59,7 +60,12 @@ describe Corporation do
   end
 
   describe '#close_company' do
+    it 'raises if last company' do
+      expect { subject.close_company company }.to raise_error(GameException)
+    end
+
     it 'removes the company from the corporation.' do
+      subject.companies << company2
       expect { subject.close_company company }.to change { subject.companies.size }.by(-1)
     end
   end

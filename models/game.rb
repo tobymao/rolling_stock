@@ -167,7 +167,12 @@ class Game < Base
 
       (@offers.map { |o| o.company.owner } + corps).uniq
     when 7
-      active_companies
+      regular_companies = active_companies.reject { |c| c.auto_close?(@phase, ownership_tier) }
+      poor_companies = @corporations
+        .select { |c| c.negative_income?(ownership_tier) && c.companies.size > 1 }
+        .flat_map &:companies
+
+      (regular_companies + poor_companies).uniq
     when 9
       active_corporations
     end
@@ -536,7 +541,7 @@ class Game < Base
   end
 
   def check_bankruptcy corporation
-    return unless corporation.is_bankrupt?
+    return unless corporation.bankrupt?
     @log << "#{corporation.name} becomes bankrupt"
     @corporations.delete corporation
     @available_corporations << corporation.name
@@ -550,9 +555,8 @@ class Game < Base
     case @phase
     when 3, 5, 6
       finalize_purchases
-    when 7
+    when 7, 8, 9
       @corporations.each { |c| check_bankruptcy c }
-    when 8, 9
       sort_corporations
     end
 

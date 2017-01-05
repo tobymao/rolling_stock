@@ -25,6 +25,12 @@ class Purchaser
   end
 
   def close_company company
+    raise GameException, "#{name} does not own #{company.name}" unless @companies.include? company
+
+    if company.owner.is_a?(Corporation) && company.owner.companies.size == 1
+      raise GameException, "Can't close last company"
+    end
+
     @companies.delete company
     @log << "#{name} closes #{company.name}"
   end

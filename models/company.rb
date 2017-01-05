@@ -101,6 +101,20 @@ class Company
     @name
   end
 
+  def pending_closure? phase, ownership_tier
+    phase == 7 &&
+      owner.is_a?(Corporation) &&
+      owner.negative_income?(ownership_tier) &&
+      owner.companies.size > 1
+  end
+
+  def auto_close? phase, ownership_tier
+    phase == 7 &&
+      owner.is_a?(Corporation) &&
+      owner.negative_income?(ownership_tier) &&
+      owner.companies.size == 1
+  end
+
   def can_be_sold?
     !(owner.is_a?(Corporation) && owner.companies.size == 1) && !recently_sold
   end

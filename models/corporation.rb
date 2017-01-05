@@ -71,8 +71,12 @@ class Corporation < Purchaser
     !@bank_shares.empty?
   end
 
-  def is_bankrupt?
-    price.zero? || @companies.empty?
+  def bankrupt?
+    price.zero? || @companies.empty? || @cash < 0
+  end
+
+  def negative_income? tier
+    @cash + income(tier) < 0
   end
 
   def buy_share player

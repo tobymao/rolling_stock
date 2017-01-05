@@ -17,6 +17,7 @@ module Views
           divided_props = {
             type: 'number',
             style: inline(width: '50px', margin: '0 5px 0 5px'),
+            min: 0,
             max: corporation.max_dividend,
             name: data('amount'),
             value: 0,
