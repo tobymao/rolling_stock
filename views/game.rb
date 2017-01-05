@@ -22,6 +22,8 @@ module Views
     end
 
     def render_game
+      flash_title if game.can_act? @current_player
+
       tier = game.ownership_tier
 
       div class: 'heading' do
@@ -81,6 +83,28 @@ module Views
 
     def render_action klass
       widget klass, game: game, current_player: @current_player
+    end
+
+    def flash_title
+      script <<~JS
+        var Game = {
+          flash: function() {
+            var self = this;
+
+            setTimeout(function(){
+              document.title = "Your Turn - #{game.phase_name}";
+
+              setTimeout(function(){
+                document.title = self.title;
+                self.flash();
+              }, 2000);
+            }, 2000);
+          }
+        }
+
+        Game.title = document.title;
+        Game.flash();
+      JS
     end
   end
 end

@@ -22,6 +22,7 @@ module Views
           text str
         end
       end
+
     end
 
   end
