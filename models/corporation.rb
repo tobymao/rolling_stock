@@ -179,6 +179,7 @@ class Corporation < Purchaser
     value = company.value
     num_shares = (value / price.to_f).ceil
     seed = num_shares * price - value
+    raise GameException, "You don't have enough money to form at that share price" if @president.cash < seed
 
     @cash = seed
     @president.cash -= seed

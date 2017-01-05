@@ -7,7 +7,7 @@ module Views
     def render_main
       path = create ? '/user' : '/login'
 
-      form action: path, method: 'post' do
+      form class: 'wrapper', action: path, method: 'post' do
         rawtext app.csrf_tag
 
         div do

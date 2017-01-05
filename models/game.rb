@@ -134,13 +134,19 @@ class Game < Base
     when 2
       active_player_companies
     when 3
-      min = [
-        @corporations.select(&:can_buy_share?).map { |c| c.next_share_price.price }.min,
-        @companies.map(&:value).min,
-        99999,
-      ].compact.min
+      active_players = players.select &:active?
 
-      players.select(&:active?).reject { |p| p.cash < min && !p.can_sell_shares? }
+      if @current_bid
+        active_players.reject { |p| p.cash <= @current_bid.price }
+      else
+        min = [
+          @corporations.select(&:can_buy_share?).map { |c| c.next_share_price.price }.min,
+          @companies.map(&:value).min,
+          99999,
+        ].compact.min
+
+        active_players.reject { |p| p.cash < min && !p.can_sell_shares? }
+      end
     when 6
       min_player_company = [
         players.flat_map { |p| p.companies.map &:min_price }.min,
@@ -520,9 +526,8 @@ class Game < Base
   end
 
   def check_no_player_purchases
-    if @current_bid
-      eligible = players.reject { |p| p == @current_bid.player || p.cash < @current_bid.price }
-      finalize_auction if eligible.all? &:passed?
+    if @current_bid && active_entities.reject { |p| p == @current_bid.player }.empty?
+      finalize_auction
     else
       check_phase_change
     end
