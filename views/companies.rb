@@ -12,12 +12,13 @@ module Views
       div do
         script js_block if js_block
 
-        companies.each do |c|
-          widget Company,
+        companies.sort_by(&:value).reverse.each do |c|
+          widget Company, {
             company: c,
             tier: tier,
             onclick: onclick,
-            show_synergies: show_synergies
+            show_synergies: show_synergies,
+          }
         end
       end
     end

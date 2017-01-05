@@ -239,6 +239,8 @@ class RollingStock < Roda
   end
 
   def send_mail game, user
+    return unless PRODUCTION
+
     uri = URI.parse("https://api.sparkpost.com/api/v1/transmissions")
     req = Net::HTTP::Post.new uri
     req.content_type = 'application/json'
