@@ -29,18 +29,21 @@ module Views
       header_style = inline(
         display: 'inline-block',
         text_align: 'right',
-        margin: '0 10px',
+        margin: '0 5px',
       )
+
+      value_style = {
+        max_width: '130px',
+        white_space: 'nowrap',
+        overflow: 'hidden',
+        text_overflow: 'ellipsis',
+      }
+
+      value_style[:font_weight] = 'bold' if bold
 
       div style: header_style do
         Array(values).each do |v|
-          if bold
-            div style: inline('font-weight': 'bold') do
-              text v
-            end
-          else
-            div { text v }
-          end
+          div(style: inline(value_style)) { text v }
         end
 
         div(style: inline(font_size: '11px')) { text label_text }
