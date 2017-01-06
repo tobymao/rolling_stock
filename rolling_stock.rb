@@ -104,6 +104,8 @@ class RollingStock < Roda
         end
 
         r.post do
+          authenticate r.path unless current_user
+
           r.is 'join' do
             game.users << current_user.id
             game.save
