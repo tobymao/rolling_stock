@@ -17,7 +17,11 @@ module Views
 
       pass_text =
         if can_act
-          solo ? 'Pass your turn' : 'Select entities to pass'
+          if solo
+            game.current_bid ? 'Leave auction' : 'Pass your turn'
+          else
+            'Select entities to pass'
+          end
         else
           solo ? 'Pass your turn early' : 'Select entities to pass early'
         end

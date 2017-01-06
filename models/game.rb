@@ -286,7 +286,7 @@ class Game < Base
   def pass_entity entity
     raise GameException, 'Already passed' if entity.passed?
     entity.pass
-    @log << "#{entity.name} passes"
+    @log << "#{entity.name} #{@current_bid ? 'leaves auction' : 'passes'}"
   end
 
   # phase 1
