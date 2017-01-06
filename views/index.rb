@@ -66,7 +66,7 @@ module Views
 
       if game.can_act? game.player_by_user(app.current_user)
         game_style[:background_color] = 'lightsalmon'
-      end if game.state == 'active'
+      end if game.state == 'active' && app.current_user
 
       div style: inline(game_style) do
         join_text = game.state == 'active' ? 'Enter Game' : 'Join Game'
