@@ -8,7 +8,7 @@ module Views
     def content
       entities = game
         .active_entities
-        .select { |e| e.owned_by? current_player }
+        .select { |e| e.owned_by?(current_player) && !game.passes.include?(e) }
         .reject { |e| e.respond_to?(:pending_closure?) && e.pending_closure?(game.phase, game.ownership_tier) }
 
       return if entities.empty?

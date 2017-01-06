@@ -38,6 +38,7 @@ class Game < Base
     :company_deck,
     :current_bid,
     :offers,
+    :passes,
     :foreign_investor,
     :round,
     :phase,
