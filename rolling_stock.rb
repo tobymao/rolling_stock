@@ -37,6 +37,7 @@ class RollingStock < Roda
   plugin :status_handler
   plugin :halt
   plugin :path
+  plugin :flash
   plugin :websockets, adapter: :thin
 
   status_handler 403 do
@@ -100,7 +101,7 @@ class RollingStock < Roda
         end
 
         r.get do
-          widget Views::GamePage, game: game
+          widget Views::GamePage, game: game, error: flash[:game_error]
         end
 
         r.post do
@@ -124,13 +125,25 @@ class RollingStock < Roda
 
             data = r['data']
 
-            if game.round == data['round'].to_i && game.phase == data['phase'].to_i
-              data['actions'].each do |action_data|
-                game.process_action_data action_data
-                action.append_turn action_data
-              end
+            begin
+              if game.round == data['round'].to_i && game.phase == data['phase'].to_i
+                actions = data['actions']
+                raise GameException, "Can't process empty actions" unless actions
 
-              notify_game game
+                actions.each do |action_data|
+                  game.process_action_data action_data
+                end
+
+                actions.each do |action_data|
+                  action.append_turn action_data
+                end
+
+                notify_game game
+              else
+                raise GameException, "Round and phase don't match"
+              end
+            rescue GameException => error
+              flash[:game_error] = error.message
             end
 
             r.redirect path(game)

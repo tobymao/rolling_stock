@@ -3,9 +3,22 @@ require './views/page'
 module Views
   class GamePage < Page
     needs :game
+    needs error: nil
 
     def render_main
       render_js
+
+      error_style = inline(
+        background_color: 'lightsalmon',
+        text_align: 'center',
+        font_weight: 'bold',
+        font_size: '18px',
+        padding: '5px',
+      )
+
+      div style: error_style do
+        text error
+      end if error
 
       div id: 'game_container' do
         widget Game, game: game, current_user: app.current_user
