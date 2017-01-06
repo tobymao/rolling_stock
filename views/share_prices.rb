@@ -22,15 +22,30 @@ module Views
         vertical_align: 'top',
         border: 'solid 1px rgba(0,0,0,0.2)',
         width: '80px',
-        height: '40px',
+        height: '50px',
         position: 'relative',
       )
 
       div style: share_style do
         span share_price.price
         if corporation = share_price.corporation
-          img style: inline(position: 'absolute', right: 0), src: corporation.image_url
+          img style: inline(position: 'absolute', right: '2px'), src: corporation.image_url
           div corporation.name
+        end
+
+        div style: inline(position: 'absolute', bottom: 0, vertical_align: 'bottom') do
+          ::Company::TIERS.each do |tier|
+            if ::Company.valid_share_price_for_tier? share_price, tier
+              range_style = inline(
+                background_color: ::Company::color_for_tier(tier),
+                width: '80px',
+                height: '5px',
+                margin_bottom: '1px',
+              )
+
+              div(style: range_style) { '' }
+            end
+          end
         end
       end
     end

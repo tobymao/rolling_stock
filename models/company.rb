@@ -85,6 +85,45 @@ class Company
     end.to_h.freeze
   end
 
+  def self.valid_share_price_for_tier? share_price, tier
+    range =
+      case tier
+      when :red
+        [10, 14]
+      when :orange
+        [10, 20]
+      when :yellow
+        [10, 26]
+      when :green
+        [15, 34]
+      when :blue
+        [22, 45]
+      when :purple
+        [28, 45]
+      else
+        raise GameException, "Invalid tier #{tier} - for share price $#{share_price.price}"
+      end
+
+    share_price.price.between? range[0], range[1]
+  end
+
+  def self.color_for_tier tier
+    case tier
+    when :red
+      'indianred'
+    when :orange
+      'orange'
+    when :yellow
+      ' #FFFF33'
+    when :green
+      'lightgreen'
+    when :blue
+      'lightblue'
+    when :purple
+      'mediumpurple'
+    end
+  end
+
   def initialize owner, name, full_name, tier, value, income, synergies, log = nil
     @name      = name
     @full_name = full_name
@@ -120,25 +159,7 @@ class Company
   end
 
   def valid_share_price? share_price
-    range =
-      case @tier
-      when :red
-        [10, 14]
-      when :orange
-        [10, 20]
-      when :yellow
-        [10, 26]
-      when :green
-        [15, 34]
-      when :blue
-        [22, 45]
-      when :purple
-        [28, 45]
-      else
-        raise GameException, "Invalid share price for #{@tier}"
-      end
-
-    share_price.price.between? range[0], range[1]
+    self.class.valid_share_price_for_tier? share_price, @tier
   end
 
   def valid_price? price
@@ -175,19 +196,6 @@ class Company
   end
 
   def color
-    case @tier
-    when :red
-      'indianred'
-    when :orange
-      'orange'
-    when :yellow
-      ' #FFFF33'
-    when :green
-      'lightgreen'
-    when :blue
-      'lightblue'
-    when :purple
-      'mediumpurple'
-    end
+    self.class.color_for_tier @tier
   end
 end
