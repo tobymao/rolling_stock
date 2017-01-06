@@ -133,19 +133,28 @@ class Corporation < Purchaser
   end
 
   def income tier
-    total = super
+    super + synergy_income(tier)
+  end
 
-    synergies = @companies.map { |c| [c.name, c.tier] }.to_h
+  def synergy_income tier
+    set = @companies.to_set
 
-    @companies.each do |company|
-      company.synergies.each do |synergy|
-        total += self.class.calculate_synergy company.tier, synergies[synergy]
+    if @cached_tier != tier || @cached_companies != set
+      @cached_companies = set
+      @cached_tier = tier
+
+      @total = 0
+      synergies = @companies.map { |c| [c.name, c.tier] }.to_h
+      @companies.each do |company|
+        company.synergies.each do |synergy|
+          @total += self.class.calculate_synergy company.tier, synergies[synergy]
+        end
+
+        synergies.delete company.name
       end
-
-      synergies.delete company.name
     end
 
-    total
+    @total
   end
 
   def pay_dividend amount, players
