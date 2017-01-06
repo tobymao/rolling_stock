@@ -8,7 +8,7 @@ class Offer
     @price       = price
     @suitors     = suitors || []
     @log         = log || []
-    @log << "#{corporation.name} offers ##{price} for #{company.name}"
+    @log << "#{corporation.name} offers $#{price} for #{company.name}"
   end
 
   def suitor? owner
