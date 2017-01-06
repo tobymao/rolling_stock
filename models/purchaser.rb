@@ -38,7 +38,7 @@ class Purchaser
   def collect_income tier
     amount = income(tier)
     @cash += amount
-    @log << "#{name} collects #{amount} income"
+    @log << "#{name} collects $#{amount} income"
   end
 
   def income tier

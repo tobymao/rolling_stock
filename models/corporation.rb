@@ -160,7 +160,7 @@ class Corporation < Purchaser
       total = amount * player.shares.count { |share| share.corporation == self }
       @cash -= total
       player.cash += total
-      dividend_log << " #{player.name} receives #{total}" if total > 0
+      dividend_log << " #{player.name} receives $#{total}" if total > 0
     end
     @log << dividend_log
 
