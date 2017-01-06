@@ -83,13 +83,11 @@ class Game < Base
     process_actions
   end
 
-  def players
+  def players all_users = nil
     @_players ||=
       begin
         user_ids = users.to_a
-
-        User
-          .where(id: user_ids)
+        (all_users&.select { |u| user_ids.include? u.id } || User.where(id: user_ids))
           .map { |user| Player.new(user.id, user.name, @log) }
           .each{ |player| player.order = user_ids.find_index(player.id) + 1 }
           .sort_by(&:order)

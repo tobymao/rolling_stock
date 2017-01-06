@@ -17,13 +17,19 @@ module Views
           render_new_game
         end if app.current_user
 
+        yours, active = active_games.partition { |g| g.users.include? app.current_user&.id }
+
         div style: block_style do
-          render_table new_games, 'New Games'
+          render_games 'Your Games', yours
+        end unless yours.empty?
+
+        div style: block_style do
+          render_games 'New Games', new_games
         end unless new_games.empty?
 
         div style: block_style do
-          render_table active_games, 'Active Games'
-        end unless active_games.empty?
+          render_games 'Active Games', active
+        end unless active.empty?
       end
     end
 
@@ -38,32 +44,44 @@ module Views
       end
     end
 
-    def render_table games, heading
+    def render_games heading, games
       div class: 'heading' do
         text heading
       end
 
-      table_style = inline(
-        padding: '3px',
-        width: '320px',
-        text_align: 'right',
-      )
+      games.each do |game|
+        render_game game
+      end
+    end
 
-      table style: table_style do
-        tr do
-          th 'Game Id'
-          th 'Creator'
-          th 'Players'
-          th 'Join'
+    def render_game game
+      game_style = {
+        margin: '5px',
+        display: 'inline-block',
+        padding: '5px',
+        border: 'solid thin lightgrey',
+        max_width: '320px',
+        vertical_align: 'top',
+      }
+
+      if game.can_act? game.player_by_user(app.current_user)
+        game_style[:background_color] = 'lightsalmon'
+      end if game.state == 'active'
+
+      div style: inline(game_style) do
+        join_text = game.state == 'active' ? 'Enter Game' : 'Join Game'
+        a "#{join_text} #{game.id}", href: app.path(game)
+        div "Owner: #{game.user.name}"
+        div "Created: #{game.pp_created_at} "
+        div "Last Move: #{game.pp_updated_at}"
+        div style: inline(white_space: 'nowrap', overflow: 'hidden', text_overflow: 'ellipsis') do
+          text "Players: #{game.players.map(&:name).join(', ')}"
         end
 
-        games.each do |game|
-          tr do
-            td game.id
-            td game.user.name
-            td game.users.size
-            td { a 'Join Game', href: app.path(game) }
-          end
+        if game.state == 'active'
+          div "Round: #{game.round} Phase: #{game.phase}"
+          acting = game.players.select { |p| game.can_act? p }
+          div "Acting: #{acting.map(&:name).join(', ')}"
         end
       end
     end

@@ -61,7 +61,19 @@ class RollingStock < Roda
 
   route do |r|
     r.root do
-      games = Game.eager(:user).where(state: ['new', 'active']).all
+      games = Game
+        .eager([:user, :actions])
+        .where(state: ['new', 'active'])
+        .order(:id)
+        .all
+
+      users = User.where(id: games.flat_map(&:users).uniq).all
+
+      games.each do |game|
+        game.players users
+      end
+
+      games.select { |g| g.state == 'active' }.each &:load
 
       data = {
         new_games: games.select(&:new_game?),
