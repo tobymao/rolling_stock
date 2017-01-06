@@ -84,7 +84,7 @@ module Views
       ]
 
       if app.current_user
-        links.concat [[app.current_user.name, '/'], ['Logout', '/logout']]
+        links << ["Logout", '/logout']
       else
         links.concat [['Login', '/login'], ['Sign Up', '/signup']]
       end
@@ -112,8 +112,8 @@ module Views
         )
 
         div do
-          a 'About', href: '/about', style: ls
-          a 'Contact', href: '/contact', style: ls
+          a 'Github', href: 'https://github.com/tobymao/rolling_stock', style: ls
+          a 'Issues', href: 'https://github.com/tobymao/rolling_stock/issues', style: ls
         end
       end
     end
