@@ -40,10 +40,12 @@ module Views
     def render_deck
       div style: inline(margin: '10px 0 10px 0') do
         company_deck.each do |company|
-          span style: inline(
+          div style: inline(
+            display: 'inline-block',
             background_color: company.color,
             padding: '4px',
-            border: '0.1em solid black',
+            border: '1px solid black',
+            height: '20px',
             margin: '4px',
           )
         end

@@ -43,7 +43,7 @@ module Views
                 margin_bottom: '1px',
               )
 
-              div(style: range_style) { '' }
+              div style: range_style
             end
           end
         end

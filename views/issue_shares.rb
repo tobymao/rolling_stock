@@ -10,11 +10,11 @@ module Views
 
       corporation = game.acting.first
 
-      widget Corporations,
+      widget Corporations, {
         game: game,
         corporations: [corporation],
         tier: game.ownership_tier,
-        header: false
+      }
 
       game_form do
         input type: 'hidden', name: data('corporation'), value: corporation.name

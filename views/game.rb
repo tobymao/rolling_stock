@@ -36,7 +36,13 @@ module Views
 
       widget Players, players: game.players_in_order, tier: tier, current_player: @current_player
 
-      widget Corporations, corporations: game.corporations, tier: tier
+      div class: 'heading' do
+        text 'Corporations'
+      end
+
+      div class: 'wrapper' do
+        widget Corporations, corporations: game.corporations, tier: tier
+      end
 
       widget ForeignInvestor, investor: game.foreign_investor, tier: tier
 

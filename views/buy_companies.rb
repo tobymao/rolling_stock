@@ -16,7 +16,7 @@ module Views
     end
 
     def render_corporations
-      widget Corporations, corporations: @corporations, tier: game.ownership_tier, header: false
+      widget Corporations, corporations: @corporations, tier: game.ownership_tier
     end
 
     def render_offers
