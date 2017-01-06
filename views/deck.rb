@@ -38,7 +38,7 @@ module Views
     end
 
     def render_deck
-      div style: inline(margin: '10px 0 10px 0') do
+      div do
         company_deck.each do |company|
           div style: inline(
             display: 'inline-block',
