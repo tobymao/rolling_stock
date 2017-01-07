@@ -219,12 +219,13 @@ class RollingStock < Roda
   end
 
   def current_user
-    @current_user ||=
-      begin
-        token = request.cookies['auth_token']
-        session = Session.find token: token
-        session.user if session&.valid?
-      end
+    unless defined?(@current_user)
+      token = request.cookies['auth_token']
+      session = Session.find token: token
+      @current_user = session&.valid? ? session.user : nil
+    end
+
+    @current_user
   end
 
   def login_user user

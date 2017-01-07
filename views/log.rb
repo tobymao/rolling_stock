@@ -28,7 +28,7 @@ module Views
         input type: 'text', name: data('message'), style: inline(width: 'calc(100% - 65px)', margin_right: '5px')
         input type: 'hidden', name: data('player'), value: current_player.id
         input type: 'submit', value: 'Send'
-      end
+      end if current_player
     end
 
   end
