@@ -20,6 +20,20 @@ module Views
         text error
       end if error
 
+      update_style = inline(
+        background_color: 'lightgreen',
+        text_align: 'center',
+        font_weight: 'bold',
+        font_size: '18px',
+        padding: '5px',
+        cursor: 'pointer',
+        display: 'none',
+      )
+
+      div id: 'update', style: update_style, onclick: 'GamePage.update()' do
+        text 'Game Updated (click to refresh)'
+      end
+
       div id: 'game_container' do
         widget Game, game: game, current_user: app.current_user
       end
@@ -27,6 +41,26 @@ module Views
 
     def render_js
       script <<~JS
+        var GamePage = {
+          html: "",
+          changed: false,
+
+          update: function() {
+            $('#game_container').html(this.html);
+            $("[name='_csrf']").attr('value', "#{app.csrf_token}");
+            $('#update').hide();
+            this.changed = false;
+            this.html = "";
+            this.watch();
+          },
+
+          watch: function() {
+            $('form').change(function() { GamePage.changed = true; });
+          },
+        }
+
+        $(document).ready(GamePage.watch);
+
         var GameConnection = {
           start: function(url) {
             console.log(url);
@@ -40,6 +74,17 @@ module Views
             this.socket.addEventListener('error', function(event){ return self._onError(); });
           },
 
+          default: function() {
+            this.start([
+              "ws://",
+              window.location.hostname,
+              ":",
+              window.location.port,
+              "#{app.path(game)}",
+              'ws'
+            ].join(''));
+          },
+
           _onOpen: function() {
             this.open = true;
             console.log("Websocket open");
@@ -47,7 +92,9 @@ module Views
           },
 
           _onClose: function() {
+            var self = this;
             this.open = false;
+            setTimeout(function() { self.default() }, 10000);
             console.log("Websocket closed");
           },
 
@@ -56,9 +103,8 @@ module Views
           },
 
           _onMessage: function(msg) {
-            $('#game_container').html(msg);
-            $("[name='_csrf']").attr('value', "#{app.csrf_token}");
-            console.log("Updating");
+            GamePage.html = msg;
+            GamePage.changed ? $('#update').show() : GamePage.update();
           },
 
           ping: function() {
@@ -70,19 +116,11 @@ module Views
             if (!this.open) {
                 return;
             }
-            console.log("Sending to game server:", obj);
             this.socket.send(JSON.stringify(obj));
           },
         }
 
-        GameConnection.start([
-          "ws://",
-          window.location.hostname,
-          ":",
-          window.location.port,
-          "#{app.path(game)}",
-          'ws'
-        ].join(''));
+        GameConnection.default();
       JS
     end
   end

@@ -139,6 +139,7 @@ class RollingStock < Roda
 
             begin
               if game.round == data['round'].to_i && game.phase == data['phase'].to_i
+                was_active = game.can_act? game.player_by_user(current_user)
                 actions = data['actions']
                 raise GameException, "Can't process empty actions" unless actions
 
@@ -150,9 +151,10 @@ class RollingStock < Roda
                   action.append_turn action_data
                 end
 
-                game.touch
-
-                notify_game game
+                if was_active
+                  game.touch
+                  notify_game game
+                end
               else
                 raise GameException, "Round and phase don't match"
               end
