@@ -270,6 +270,9 @@ class Game < Base
           @passes << entity
         end
       end
+    elsif msg = data['message']
+      player = player_by_id data['player'].to_i
+      @log << "#{player.name}: #{msg}"
     else
       send "process_phase_#{@phase}", data
     end

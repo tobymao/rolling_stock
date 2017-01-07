@@ -30,7 +30,7 @@ module Views
         text "Round: #{game.round} Phase: #{game.phase} (#{game.phase_name})"
       end
 
-      widget Log, log: game.log, active: game.can_act?(@current_player)
+      widget Log, game: game, current_player: @current_player
 
       render_action_widget
 
