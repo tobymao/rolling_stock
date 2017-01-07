@@ -72,8 +72,8 @@ module Views
         join_text = game.state == 'active' ? 'Enter Game' : 'Join Game'
         a "#{join_text} #{game.id}", href: app.path(game)
         div "Owner: #{game.user.name}"
-        div "Created: #{game.pp_created_at} "
-        div "Last Move: #{game.pp_updated_at}"
+        div "Created At: #{game.created_at} "
+        div "Last Move: #{game.updated_at}"
         div style: inline(white_space: 'nowrap', overflow: 'hidden', text_overflow: 'ellipsis') do
           text "Players: #{game.players.map(&:name).join(', ')}"
         end

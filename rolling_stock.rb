@@ -150,6 +150,8 @@ class RollingStock < Roda
                   action.append_turn action_data
                 end
 
+                game.touch
+
                 notify_game game
               else
                 raise GameException, "Round and phase don't match"
