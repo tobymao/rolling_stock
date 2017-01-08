@@ -85,9 +85,16 @@ describe Game do
       end
     end
 
-    describe '#bid_company' do
+    describe '#process_phase_3' do
       it 'should not allow player to bid beyond cash on hand' do
-        expect { subject.bid_company player, company, 40 }.to raise_error(GameException)
+        data = {
+          'player'  => player.id.to_s,
+          'price'   => '40',
+          'action'  => 'bid',
+          'company' => company.name,
+        }
+        allow(subject).to receive(:players).and_return([player])
+        expect { subject.process_phase_3 data }.to raise_error(GameException)
       end
     end
 

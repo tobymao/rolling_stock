@@ -43,6 +43,7 @@ class Game < Base
     :round,
     :phase,
     :log,
+    :name,
   )
 
   def self.empty_game user
@@ -65,12 +66,14 @@ class Game < Base
     @pending_companies = []
     @company_deck = []
     @current_bid = nil
+    @max_bids = {}
     @offers = []
     @passes = []
     @foreign_investor = ForeignInvestor.new @log
     @round = 1
     @phase = 1
     @end_game_card = :penultimate
+    @name = 'the bank'
 
     start_game unless new_game?
   end
@@ -232,6 +235,7 @@ class Game < Base
     when 1, 2, 6, 7, 9
       check_phase_change
     when 3
+      automate_max_bids
       check_no_player_purchases
     when 4
       new_player_order
@@ -324,7 +328,26 @@ class Game < Base
       company = @companies.find { |c| c.name == data['company'] }
       players.each &:unpass unless @current_bid
       price = data['price'].to_i
-      bid_company player, company, price
+      raise GameException, 'You cannot bid more than you have' if price > player.cash
+
+      @max_bids[player] = price if data['max']
+
+      if @current_bid
+        raise GameException, 'Must bid on same company' if @current_bid.company != company
+        raise GameException, 'Bid must be greater than previous' if price < @current_bid.price
+      else
+        raise GameException, 'Bid must be face value or higher' if price < company.value
+        @auction_starter = player
+      end
+
+      max = @max_bids[player]
+
+      if max && max > (@current_bid&.price || 0)
+        price = company.value
+        price = @current_bid.price + 1 if @current_bid
+      end
+
+      @current_bid = Bid.new player, company, price, @log
     when 'buy'
       corporation.buy_share player
       player.unpass
@@ -337,29 +360,6 @@ class Game < Base
     end
 
     restart_order player
-  end
-
-  def bid_company player, company, price
-    if @current_bid
-      raise GameException, 'Must bid on same company' if @current_bid.company != company
-      raise GameException, 'Bid must be greater than previous' if price < @current_bid.price
-    else
-      @auction_starter = player
-    end
-
-    @current_bid = Bid.new player, company, price, @log
-  end
-
-  def finalize_auction
-    company = @current_bid.company
-    raise GameException, 'Must buy company for at least face value' if company.value > @current_bid.price
-    @current_bid.player.buy_company company, @current_bid.price
-    draw_companies
-    players.each &:unpass
-    restart_order @auction_starter
-    @auction_starter = nil
-    @current_bid = nil
-    check_no_player_purchases
   end
 
   def restart_order player
@@ -534,12 +534,36 @@ class Game < Base
     change_phase
   end
 
+  def automate_max_bids
+    while player = active_entities.first
+      max = @max_bids[player]
+      break if !max || player == @current_bid.player
+
+      company = @current_bid.company
+      price = @current_bid.price
+
+      if max > price
+        @current_bid = Bid.new player, company, price + 1, @log
+        restart_order player
+      else
+        @max_bids.delete(player)
+        pass_entity player
+      end
+    end
+  end
+
   def check_no_player_purchases
     if @current_bid && active_entities.reject { |p| p == @current_bid.player }.empty?
-      finalize_auction
-    else
-      check_phase_change
+      @current_bid.player.buy_company @current_bid.company, @current_bid.price
+      draw_companies
+      players.each &:unpass
+      restart_order @auction_starter
+      @max_bids.clear
+      @auction_starter = nil
+      @current_bid = nil
     end
+
+    check_phase_change
   end
 
   def check_bankruptcy corporation

@@ -11,7 +11,7 @@ class Purchaser
   def buy_company company, price
     owner = company.owner
     raise GameException, "Can't buy own company" if owner == self
-    raise GameException, 'Not enough cash' if @cash < price
+    raise GameException, "You don't have enough money to buy at that price" if @cash < price
     raise GameException, "Company can't be sold. Last company or just sold" unless company.can_be_sold?
 
     @cash -= price
@@ -21,7 +21,7 @@ class Purchaser
     company.recently_sold = true
     company.owner = self
     @companies << company
-    @log << "#{name} buys #{company.name} for $#{price}"
+    @log << "#{name} buys #{company.name} for $#{price} from #{owner&.name}"
   end
 
   def close_company company

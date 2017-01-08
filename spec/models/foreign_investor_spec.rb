@@ -14,7 +14,7 @@ describe ForeignInvestor do
 
   describe '#purchase_companies' do
     it "should buy only one company if it has 5 dollars" do
-      game = double('Game', companies: [company1, company2])
+      game = double('Game', companies: [company1, company2], name: '')
       company1.owner = game
       company2.owner = game
       subject.cash = 3
@@ -22,7 +22,7 @@ describe ForeignInvestor do
     end
 
     it 'should not buy anything if it does not have enough money.' do
-      game = double('Game', companies: [company1, company2])
+      game = double('Game', companies: [company1, company2], name: '')
       company1.owner = game
       company2.owner = game
       subject.cash = 0
@@ -30,7 +30,7 @@ describe ForeignInvestor do
     end
 
     it ' should buy the cheapest company even when out of order' do
-      game = double('Game', companies: [company2, company1] )
+      game = double('Game', companies: [company2, company1], name: '')
       company1.owner = game
       company2.owner = game
       subject.cash = 3
