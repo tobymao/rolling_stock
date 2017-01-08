@@ -66,10 +66,10 @@ module Views
 
       if game.can_act? game.player_by_user(app.current_user)
         game_style[:background_color] = 'lightsalmon'
-      end if game.state == 'active' && app.current_user
+      end if game.active? && app.current_user
 
       div style: inline(game_style) do
-        join_text = game.state == 'active' ? 'Enter Game' : 'Join Game'
+        join_text = game.active? ? 'Enter Game' : 'Join Game'
         a "#{join_text} #{game.id}", href: app.path(game)
         div "Owner: #{game.user.name}"
         div "Created At: #{game.created_at} "
@@ -78,7 +78,7 @@ module Views
           text "Players: #{game.players.map(&:name).join(', ')}"
         end
 
-        if game.state == 'active'
+        if game.active?
           div "Round: #{game.round} Phase: #{game.phase}"
           acting = game.players.select { |p| game.can_act? p }
           div "Acting: #{acting.map(&:name).join(', ')}"

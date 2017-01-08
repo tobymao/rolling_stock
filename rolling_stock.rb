@@ -73,7 +73,7 @@ class RollingStock < Roda
         game.players users
       end
 
-      games.select { |g| g.state == 'active' }.each &:load
+      games.select(&:active?).each &:load
 
       data = {
         new_games: games.select(&:new_game?),
