@@ -1,6 +1,8 @@
 require './models/purchaser'
 
 class ForeignInvestor < Purchaser
+  include Ownable
+
   def initialize log = nil
     super 4
     @log = log || []
