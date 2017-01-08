@@ -41,6 +41,15 @@ module Views
 
     def render_js
       script <<~JS
+        var init = function() {
+          GamePage.watch();
+          $('form').submit(function() {
+            $('input[type=submit]', this).attr('disabled', 'disabled');
+          });
+        }
+
+        $(document).ready(init);
+
         var GamePage = {
           html: "",
           changed: false,
@@ -58,8 +67,6 @@ module Views
             $('form').change(function() { GamePage.changed = true; });
           },
         }
-
-        $(document).ready(GamePage.watch);
 
         var GameConnection = {
           start: function(url) {

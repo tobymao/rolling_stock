@@ -143,13 +143,14 @@ class RollingStock < Roda
                 actions = data['actions']
                 raise GameException, "Can't process empty actions" unless actions
 
-                actions.each do |action_data|
-                  game.process_action_data action_data
+                actions.each do |action|
+                  action.each do |k, v|
+                    raise GameException, "Can't process blank fields" if k.blank? || v.blank?
+                  end
                 end
 
-                actions.each do |action_data|
-                  action.append_turn action_data
-                end
+                actions.each { |action_data| game.process_action_data action_data }
+                actions.each { |action_data| action.append_turn action_data }
 
                 if was_active
                   game.touch
