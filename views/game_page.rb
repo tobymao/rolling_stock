@@ -43,9 +43,6 @@ module Views
       script <<~JS
         var init = function() {
           GamePage.watch();
-          $('form').submit(function() {
-            $('input[type=submit]', this).attr('disabled', 'disabled');
-          });
         }
 
         $(document).ready(init);

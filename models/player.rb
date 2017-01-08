@@ -22,6 +22,7 @@ class Player < Purchaser
 
   def value
     @cash +
+      @pending_cash +
       (@companies.map(&:value).reduce(&:+) || 0) +
       (@shares.map { |s| s.corporation.share_price.price }.reduce(&:+) || 0)
   end

@@ -181,7 +181,7 @@ class Corporation < Purchaser
   end
 
   def book_value
-    @cash + @companies.reduce(0) { |p, c| c.value + p }
+    @cash + @pending_cash + @companies.reduce(0) { |p, c| c.value + p }
   end
 
   def market_cap

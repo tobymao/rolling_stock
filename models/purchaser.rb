@@ -8,6 +8,12 @@ class Purchaser
     @companies = []
   end
 
+  def pp_cash
+    str = String.new "$#{@cash}"
+    str << " ($#{@pending_cash})" if @pending_cash > 0
+    str
+  end
+
   def buy_company company, price
     owner = company.owner
     raise GameException, "Can't buy own company" if owner == self
