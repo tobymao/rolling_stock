@@ -23,12 +23,6 @@ module Views
           game.log.reverse.each { |line| div line }
         end
       end
-
-      game_form style: inline(width: 'calc(100% - 20px)'), class: 'wrapper' do
-        input type: 'text', name: data('message'), style: inline(width: 'calc(100% - 65px)', margin_right: '5px')
-        input type: 'hidden', name: data('player'), value: current_player.id
-        input type: 'submit', value: 'Send'
-      end if current_player
     end
 
   end

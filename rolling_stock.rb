@@ -279,15 +279,15 @@ class RollingStock < Roda
     req.body = JSON.dump(
       'content' => {
         'from' => 'no-reply@rollingstock.net',
-        'subject' => "Your Turn - Game #{game.id} - Round #{game.round} - Phase #{game.phase}",
-        'html' => "<a href=#{request.base_url + path(game)}>Make your move</>",
+        'subject' => "Rolling Stock Game #{game.id} - Round #{game.round} - Phase #{game.phase} - Your Turn",
+        'html' => widget(Views::GameMail, game: game, current_user: user),
       },
       'recipients' => [
         { address: user.email }
       ]
     )
 
-    response = Net::HTTP.start uri.hostname, uri.port, use_ssl: true do |http|
+    Net::HTTP.start uri.hostname, uri.port, use_ssl: true do |http|
       http.request req
     end
   end

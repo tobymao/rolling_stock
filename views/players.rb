@@ -6,11 +6,7 @@ module Views
     needs :players
 
     def content
-      div class: 'heading' do
-        text 'Players'
-      end
-
-      div class: 'wrapper' do
+      div do
         players.each do |player|
           render_player player
         end

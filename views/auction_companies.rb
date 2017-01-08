@@ -6,7 +6,7 @@ module Views
     needs :current_player
 
     def render_action
-      widget EntityOrder, game: game, entities: game.players_in_order
+      widget EntityOrder, game: game, entities: game.players
 
       company_props = {
         companies: game.companies,

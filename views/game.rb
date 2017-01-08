@@ -31,14 +31,17 @@ module Views
       end
 
       widget Log, game: game, current_player: @current_player
+      widget LogChat, game: game, current_player: @current_player
 
       render_action_widget
 
-      widget Players, players: game.players_in_order, tier: tier, current_player: @current_player
+      div(class: 'heading') { text 'Players' }
 
-      div class: 'heading' do
-        text 'Corporations'
+      div class: 'wrapper' do
+        widget Players, players: game.players, tier: tier, current_player: @current_player
       end
+
+      div(class: 'heading') { text 'Corporations' }
 
       div class: 'wrapper' do
         widget Corporations, corporations: game.corporations, tier: tier
