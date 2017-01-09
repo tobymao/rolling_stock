@@ -59,7 +59,7 @@ class Company
 
     'MAD' => ['Madrid-Barajas Airport', :blue, 45, 15, ['RENFE', 'FR', 'VP', 'LE']],
     'HA' => ['Haven van Antwerpen', :blue, 47, 15, ['NS', 'B', 'SNCF', 'E', 'RU', 'AL']],
-    'HH' => ['Hamburger Hafen', :blue, 48, 15, ['DSB', 'PKP', 'DR', 'BSR']],
+    'HH' => ['Hamburger Hafen', :blue, 48, 15, ['DSB', 'PKP', 'DR', 'BSR', 'RU', 'AL']],
     'HR' => ['Haven van Rotterdam', :blue, 49, 15, ['NS', 'B', 'DR', 'E', 'RU', 'AL']],
     'LHR' => ['London Heathrow Airport', :blue, 54, 15, ['BR', 'E', 'FR', 'MM', 'VP', 'LE']],
     'CDG' => ['Aéroport Paris-Charles-de-Gaulle', :blue, 56, 15, ['SNCF', 'SBB', 'E', 'FR', 'VP', 'LE']],
@@ -73,7 +73,7 @@ class Company
     'RU' => ['Resources Unlimited', :purple, 85, 25, ['HA', 'HH', 'HR', 'OPC', 'RCC', 'TSI']],
     'AL' => ['Asteroid League', :purple, 86, 25, ['HA', 'HH', 'HR', 'OPC', 'RCC', 'TSI']],
     'LE' => ['Lunar Enterprises', :purple, 90, 25, ['MAD', 'LHR', 'CDG', 'FRA', 'MM', 'VP', 'TSI']],
-    'TSI' => ['Trans-Space Inc.', :purple, 100, 25, ['OPC', 'RCC', 'MM', 'VP', 'AL', 'LE' ]],
+    'TSI' => ['Trans-Space Inc.', :purple, 100, 25, ['OPC', 'RCC', 'MM', 'VP', 'RU', 'AL', 'LE' ]],
   }.freeze
 
   attr_reader :name, :full_name, :tier, :value, :income, :synergies
