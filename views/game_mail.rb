@@ -9,7 +9,7 @@ module Views
       current_player = game.player_by_id current_user.id
       tier = game.ownership_tier
 
-      a "Go To Game #{game.id}", href: current_path
+      a "Go To Game #{game.id}", href: "#{app.request.base_url}#{app.path(game)}"
       br
       widget Log, game: game, current_player: current_player
       widget Players, players: game.players, tier: tier, current_player: current_player
