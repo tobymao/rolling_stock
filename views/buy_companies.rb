@@ -58,12 +58,14 @@ module Views
     def render_companies
       companies = (game.held_companies + game.foreign_investor.companies).select &:can_be_sold?
 
-      widget Companies, {
-        companies: companies,
-        tier: game.ownership_tier,
-        onclick: 'BuyCompanies.onClick(this)',
-        js_block: js_block,
-      }
+      div id: 'companies' do
+        widget Companies, {
+          companies: companies,
+          tier: game.ownership_tier,
+          onclick: 'BuyCompanies.onClick(this)',
+          js_block: js_block,
+        }
+      end
     end
 
     def render_controls
@@ -72,10 +74,16 @@ module Views
         .map(&:corporation)
 
       game_form do
-        select name: data('corporation') do
+        select id: 'corp_selector', name: data('corporation') do
           corporations.each do |corporation|
-            name = corporation.name
-            option(value: name) { text name }
+            props = {
+              data: {
+                value: corporation.name,
+                companies: JSON.dump(corporation.companies.map(&:name)),
+                cash: corporation.cash,
+              },
+            }
+            option(props) { text corporation.name }
           end
         end unless corporations.empty?
 
@@ -100,12 +108,35 @@ module Views
           onClick: function(el) {
             var data = el.dataset;
             $('#bid_price').attr({ 'min': data.min, 'max': data.max, 'value': data.max });
-            $('#bid_company').attr('value', data.company);
+            $('#bid_company').attr('value', data.name);
             $('#bid_submit').attr('disabled', false);
             $('.selected').removeClass('selected');
             $(el).toggleClass('selected');
-          }
-        };
+          },
+
+          toggleCompanies: function() {
+            var data = $('#corp_selector option:selected').data();
+            var cash = data['cash'];
+            var companies = data['companies'];
+            $('#companies .company').each(function(index, company) {
+              var cData = company.dataset;
+
+              if (cash < cData.min || $.inArray(cData.name, companies) > -1) {
+                $(company).hide();
+              } else {
+                $(company).show();
+              }
+            });
+          },
+        }
+
+        $(document).ready(function() {
+          BuyCompanies.toggleCompanies();
+
+          $('#corp_selector').on('change', function() {
+            BuyCompanies.toggleCompanies();
+          });
+        });
       JS
     end
   end

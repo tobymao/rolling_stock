@@ -16,7 +16,7 @@ module Views
 
       div style: log_style do
         div class: 'wrapper' do
-          div style: inline(font_weight: 'bold') do
+          div do
             text 'Your Turn'
           end if game.can_act? current_player
 

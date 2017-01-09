@@ -10,8 +10,6 @@ module Views
 
     def content
       div do
-        script js_block if js_block
-
         companies.sort_by(&:value).reverse.each do |c|
           widget Company, {
             company: c,
@@ -20,6 +18,8 @@ module Views
             show_synergies: show_synergies,
           }
         end
+
+        script js_block if js_block
       end
     end
 

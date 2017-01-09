@@ -47,7 +47,7 @@ module Views
           onClick: function(el) {
             var data = el.dataset;
             $('#bid_price').attr({'min': data.value, 'value': data.value});
-            $('#bid_company').attr('value', data.company);
+            $('#bid_company').attr('value', data.name);
             $('#bid_submit').attr('disabled', false);
             $('.selected').removeClass('selected');
             $(el).toggleClass('selected');

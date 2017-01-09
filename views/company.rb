@@ -11,8 +11,9 @@ module Views
 
     def content
       props = {
+        class: 'company',
         data: {
-          company: company.name,
+          name: company.name,
           value: company.value,
           min: company.owner.is_a?(::ForeignInvestor) ? company.max_price : company.min_price,
           max: company.max_price,
@@ -65,13 +66,7 @@ module Views
 
       groups.each do |k, v|
         div style: inline(display: 'flex', text_align: 'left') do
-          income_style = inline(
-            margin: '2px 2px',
-            display: 'inline-block',
-            font_weight: 'bold',
-          )
-
-          div style: income_style do
+          div style: inline(margin: '2px 2px', display: 'inline-block') do
             text "+$#{k}"
           end
 
