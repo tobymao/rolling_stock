@@ -2,7 +2,6 @@ PRODUCTION = ENV['RACK_ENV'] == 'production'
 
 require 'roda'
 require 'fortitude'
-require 'ruby-prof'
 require './models.rb'
 
 FOLDERS = %w[views models]
@@ -13,6 +12,7 @@ end
 
 unless PRODUCTION
   require 'better_errors'
+  require 'ruby-prof'
 end
 
 class RollingStock < Roda
