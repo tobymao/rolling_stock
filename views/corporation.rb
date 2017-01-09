@@ -17,7 +17,7 @@ module Views
     def render_headers corporation
       div style: inline(headers_style.merge(background_color: 'lightblue')) do
         img style: inline(vertical_align: 'top'), src: corporation.image_url
-        render_header corporation.name, 'Corp', true
+        render_header corporation.name, 'Corporation'
         render_header corporation.pp_cash, 'Cash'
         render_header "$#{corporation.book_value}", 'Value'
         render_header "$#{corporation.share_price.price}", 'Price'

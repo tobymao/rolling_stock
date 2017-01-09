@@ -10,25 +10,6 @@ class Corporation < Purchaser
 
   attr_reader :name, :president, :share_price, :shares, :bank_shares
 
-  def self.calculate_synergy tier, other_tier
-    return 0 unless other_tier
-
-    case tier
-    when :red
-      1
-    when :orange
-      other_tier == :red ? 1 : 2
-    when :yellow
-      other_tier == :orange ? 2 : 4
-    when :green
-      4
-    when :blue
-      [:green, :yellow].include?(other_tier) ? 4 : 8
-    when :purple
-      other_tier == :blue ? 8 : 16
-    end
-  end
-
   def initialize name, company, share_price, share_prices, log = nil
     super 0
     raise GameException, "Share price #{share_price.price} taken by #{share_price.corporation.name}" if share_price.corporation
@@ -133,25 +114,17 @@ class Corporation < Purchaser
   end
 
   def income tier
-    super + synergy_income(tier)
+    super + synergy_income
   end
 
-  def synergy_income tier
-    set = @companies.to_set
+  def synergy_income
+    keys = @companies.map(&:name).sort!
 
-    if @cached_tier != tier || @cached_companies != set
-      @cached_companies = set
-      @cached_tier = tier
-
+    if @cached_keys != keys
+      @cached_keys = keys
       @total = 0
-      synergies = @companies.map { |c| [c.name, c.tier] }.to_h
-      @companies.each do |company|
-        company.synergies.each do |synergy|
-          @total += self.class.calculate_synergy company.tier, synergies[synergy]
-        end
-
-        synergies.delete company.name
-      end
+      synergies = @companies.map { |c| [c.name, c] }.to_h
+      @companies.each { |company| @total += company.synergy_income synergies }
     end
 
     @total

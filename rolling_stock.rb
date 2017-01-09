@@ -2,6 +2,7 @@ PRODUCTION = ENV['RACK_ENV'] == 'production'
 
 require 'roda'
 require 'fortitude'
+require 'ruby-prof'
 require './models.rb'
 
 FOLDERS = %w[views models]
@@ -93,8 +94,6 @@ class RollingStock < Roda
       r.on ':id' do |id|
         id = id.to_i
         room = sync { ROOMS[id] }
-        game = Game[id]
-        game.load
 
         r.on 'ws' do
           r.websocket do |ws|
@@ -111,6 +110,9 @@ class RollingStock < Roda
             sync { room << [ws, current_user] }
           end
         end
+
+        game = Game[id]
+        game.load
 
         r.get do
           widget Views::GamePage, game: game, error: flash[:game_error]

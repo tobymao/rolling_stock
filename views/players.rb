@@ -23,7 +23,7 @@ module Views
 
     def render_headers player
       div style: inline(headers_style) do
-        render_header player.name.upcase, 'Player', true
+        render_header player.name.upcase, 'Player', truncate: true
         render_header player.pp_cash, 'Cash'
         render_header "$#{player.value}", 'Value'
         render_header "$#{player.income(tier)}", 'Income'

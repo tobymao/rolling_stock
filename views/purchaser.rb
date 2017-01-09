@@ -25,25 +25,23 @@ module Views
       }
     end
 
-    def render_header values, label_text = nil, bold = false
+    def render_header values, label_text = nil, title = false, truncate: false
       header_style = inline(
         display: 'inline-block',
         text_align: 'right',
         margin: '0 5px',
       )
 
-      value_style = {
+      value_style = inline(
         max_width: '130px',
         white_space: 'nowrap',
         overflow: 'hidden',
         text_overflow: 'ellipsis',
-      }
+      ) if truncate
 
-      value_style[:font_weight] = 'bold' if bold
-
-      div style: header_style do
+      div title: title, style: header_style do
         Array(values).each do |v|
-          div(style: inline(value_style)) { text v }
+          div(style: value_style) { text v }
         end
 
         div(style: inline(font_size: '11px')) { text label_text }

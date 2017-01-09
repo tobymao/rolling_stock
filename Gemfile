@@ -24,4 +24,5 @@ group :development, :test do
   gem 'better_errors'
   gem 'rerun'
   gem 'rack-test'
+  gem 'ruby-prof'
 end

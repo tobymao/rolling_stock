@@ -140,6 +140,39 @@ class Company
     @name
   end
 
+  def synergy_income companies
+    keys = companies.keys.sort!
+
+    if @cached_keys != keys
+      @cached_keys = keys
+      @total = 0
+      @synergies.each do |synergy|
+        sc = companies[synergy]
+        @total += synergy_by_tier sc.tier if sc && sc.value < @value
+      end
+    end
+    @total
+  end
+
+  def synergy_by_tier other_tier
+    return 0 unless other_tier
+
+    case @tier
+    when :red
+      1
+    when :orange
+      other_tier == :red ? 1 : 2
+    when :yellow
+      other_tier == :orange ? 2 : 4
+    when :green
+      4
+    when :blue
+      [:green, :yellow].include?(other_tier) ? 4 : 8
+    when :purple
+      other_tier == :blue ? 8 : 16
+    end
+  end
+
   def pending_closure? phase, ownership_tier
     phase == 7 &&
       owner.is_a?(Corporation) &&
