@@ -318,11 +318,11 @@ class Game < Base
     corporation = @corporations.find { |c| c.name == data['corporation'] }
     raise GameException, 'Not your turn' unless can_act? player
     raise GameException, 'You must bid or pass' if @current_bid && action != 'bid'
+    players.each &:unpass unless @current_bid
 
     case action
     when 'bid'
       company = @companies.find { |c| c.name == data['company'] }
-      players.each &:unpass unless @current_bid
       price = data['price'].to_i
       raise GameException, 'You cannot bid more than you have' if price > player.cash
 
@@ -346,11 +346,9 @@ class Game < Base
       @current_bid = Bid.new player, company, price, @log
     when 'buy'
       corporation.buy_share player
-      player.unpass
     when 'sell'
       corporation.sell_share player
       check_bankruptcy corporation
-      player.unpass
     else
       raise GameException, 'Unspecified action'
     end
