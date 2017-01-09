@@ -43,7 +43,7 @@ module Views
       synergies = company.owner.companies.map { |c| [c.name, c] }.to_h
       income = company.income
       coo = company.cost_of_ownership tier
-      synergy_income = company.synergy_income synergies
+      synergy_income = (company.owner.is_a? ::Corporation) ? company.synergy_income(synergies) : 0
       true_income = income - coo + synergy_income
       income_title = "$#{income} (Base) + $#{synergy_income} (Synergies) - $#{coo} (Cost of ownership)"
 
