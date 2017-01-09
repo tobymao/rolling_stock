@@ -7,7 +7,7 @@ module Views
     def container_style
       {
         display: 'inline-block',
-        width: '350px',
+        width: '335px',
         border: 'solid thin rgba(0,0,0,0.66)',
         margin: '2px',
         vertical_align: 'top',
