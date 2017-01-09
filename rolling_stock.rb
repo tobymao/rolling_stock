@@ -53,8 +53,10 @@ class RollingStock < Roda
     "/game/#{game.id}/#{paths.join('/')}"
   end
 
-  MUTEX = Mutex.new
-  ROOMS = Hash.new { |h, k| h[k] = [] }
+  MUTEX            = Mutex.new
+  ROOMS            = Hash.new { |h, k| h[k] = [] }
+  NOTIFIED         = {}
+  NOTIFY_THRESHOLD = 60 * 60 * 2 # 2 hours
 
   def sync
     MUTEX.synchronize { yield }
@@ -131,6 +133,8 @@ class RollingStock < Roda
           r.halt 403 unless game.users.to_a.include? current_user.id
 
           r.is 'action' do
+            sync { NOTIFIED.delete [game.id, current_user.id] }
+
             action = Action.find_or_create(
               game_id: id,
               round: game.round,
@@ -247,7 +251,6 @@ class RollingStock < Roda
     end
   end
 
-  # todo email users on message
   def notify_game game
     Thread.new do
       games = {}
@@ -261,7 +264,14 @@ class RollingStock < Roda
       unnotified = game.users - room.map { |_, user| user.id }
 
       User.where(id: unnotified).all.each do |user|
-        send_mail game, user if game.can_act? game.player_by_user(user)
+        key = [game.id, user.id]
+        last_notified = sync { NOTIFIED[key] }
+
+        if game.can_act?(game.player_by_user(user)) &&
+            (!last_notified || (Time.now - last_notified) > NOTIFY_THRESHOLD)
+          sync { NOTIFIED[key] = Time.now }
+          send_mail game, user
+        end
       end
     end
   end
