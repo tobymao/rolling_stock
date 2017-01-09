@@ -104,7 +104,7 @@ module Views
       )
 
       div style: footer_style do
-        rawtext '&copy; Toby Mao 2016.'
+        rawtext '&copy; Toby Mao 2017.'
 
         ls = inline(
           margin: '0.5em',
