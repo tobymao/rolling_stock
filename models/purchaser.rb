@@ -48,7 +48,15 @@ class Purchaser
   end
 
   def income tier
-    @companies.map { |c| c.income - c.cost_of_ownership(tier) }.reduce(&:+) || 0
+    base_income - cost_of_ownership(tier)
+  end
+
+  def base_income
+    @companies.map { |c| c.income }.reduce(&:+) || 0
+  end
+
+  def cost_of_ownership tier
+    @companies.map { |c| c.cost_of_ownership tier }.reduce(&:+) || 0
   end
 
   def finalize_purchases

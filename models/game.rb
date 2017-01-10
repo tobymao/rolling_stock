@@ -405,14 +405,16 @@ class Game < Base
       end
     when 'decline'
       offer.suitors.delete corporation
-      @log << "#{corporation.name} declines to buy #{company.name} for $#{offer.price}"
 
       if offer.foreign_purchase?
+        @log << "#{corporation.name} declines to buy #{company.name} from the Foreign Investor"
+
         if offer.suitors.empty?
           @offers.delete offer
           offer.corporation.buy_company(company, offer.price)
         end
       else
+        @log << "#{company.owner.name} declines to sell #{company.name} for $#{offer.price}"
         @offers.delete offer
       end
     else

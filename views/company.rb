@@ -41,18 +41,15 @@ module Views
     def render_headers company
       header_style = inline(headers_style.merge(background_color: company.color))
 
-      synergies = company.owner.companies.map { |c| [c.name, c] }.to_h
       income = company.income
       coo = company.cost_of_ownership tier
-      synergy_income = (company.owner.is_a? ::Corporation) ? company.synergy_income(synergies) : 0
-      true_income = income - coo + synergy_income
-      income_title = "$#{income} (Base) + $#{synergy_income} (Synergies) - $#{coo} (Cost of ownership)"
+      income_title = "$#{income} (Base) - $#{coo} (Cost of ownership)"
 
       div style: header_style do
         render_header company.name, 'Company', company.full_name
-        render_header "$#{company.value}", 'Value'
-        render_header "($#{company.min_price}-$#{company.max_price})", 'Range'
-        render_header "$#{true_income}", 'Income', income_title
+        render_header "$#{company.value}", 'Value', 'Base value of the company (min price in company auction)'
+        render_header "($#{company.min_price}-$#{company.max_price})", 'Range', 'The min and max price you can sell this company for'
+        render_header "$#{income - coo}", 'Income', income_title
       end
     end
 
