@@ -8,6 +8,7 @@ module Views
     needs :tier
     needs show_synergies: false
     needs onclick: false
+    needs show_owner: false
 
     def content
       props = {
@@ -35,6 +36,7 @@ module Views
       div props do
         render_headers company
         render_synergies
+        div { text "Owned by #{company.owner.name}" } if show_owner
       end
     end
 

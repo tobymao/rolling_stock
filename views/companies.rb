@@ -7,6 +7,7 @@ module Views
     needs show_synergies: false
     needs onclick: nil
     needs js_block: nil
+    needs show_owner: false
 
     def content
       div do
@@ -16,6 +17,7 @@ module Views
             tier: tier,
             onclick: onclick,
             show_synergies: show_synergies,
+            show_owner: show_owner,
           }
         end
 

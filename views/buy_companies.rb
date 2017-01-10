@@ -64,6 +64,7 @@ module Views
           tier: game.ownership_tier,
           onclick: 'BuyCompanies.onClick(this)',
           js_block: js_block,
+          show_owner: true,
         }
       end
     end
