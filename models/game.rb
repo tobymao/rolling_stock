@@ -414,7 +414,7 @@ class Game < Base
           offer.corporation.buy_company(company, offer.price)
         end
       else
-        @log << "#{company.owner.name} declines to sell #{company.name} for $#{offer.price}"
+        @log << "#{company.owner.name} declines to sell #{company.name} to #{corporation.name} for $#{offer.price}"
         @offers.delete offer
       end
     else
