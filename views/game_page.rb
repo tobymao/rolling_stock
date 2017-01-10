@@ -43,6 +43,15 @@ module Views
       script <<~JS
         var init = function() {
           GamePage.watch();
+
+          // prevents double taps and also submits the value
+          $('form :submit').click(function() {
+            $(this).prop("disabled", true).closest('form').append($('<input/>', {
+              type: 'hidden',
+              name: this.name,
+              value: this.value,
+            })).submit();
+          });
         }
 
         $(document).ready(init);
