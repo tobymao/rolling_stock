@@ -18,7 +18,7 @@ module Views
       div id: 'log', style: log_style do
         div class: 'wrapper' do
           lines = game.log
-          lines = lines.take 10 if email
+          lines = lines.last 10 if email
           lines.each { |line| div line }
           div { text '-- Your Turn --' } if game.can_act? current_player
         end
