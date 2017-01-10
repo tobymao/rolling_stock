@@ -53,10 +53,9 @@ class RollingStock < Roda
     "/game/#{game.id}/#{paths.join('/')}"
   end
 
-  MUTEX            = Mutex.new
-  ROOMS            = Hash.new { |h, k| h[k] = [] }
-  NOTIFIED         = {}
-  NOTIFY_THRESHOLD = 60 * 60 * 2 # 2 hours
+  MUTEX    = Mutex.new
+  ROOMS    = Hash.new { |h, k| h[k] = [] }
+  NOTIFIED = {}
 
   def sync
     MUTEX.synchronize { yield }
@@ -147,17 +146,19 @@ class RollingStock < Roda
               if game.round == data['round'].to_i && game.phase == data['phase'].to_i
                 actions = data['actions']
                 raise GameException, "Can't process empty actions" unless actions
+                contains_message = false
 
                 actions.each do |action|
                   action.each do |k, v|
                     raise GameException, "Can't process blank fields" if k.blank? || v.blank?
+                    contains_message = true if k == 'message'
                   end
                 end
 
                 actions.each { |action_data| game.process_action_data action_data }
                 actions.each { |action_data| action.append_turn action_data }
 
-                notify_game game
+                notify_game game, contains_message
                 game.touch
               else
                 raise GameException, "Round and phase don't match"
@@ -251,8 +252,8 @@ class RollingStock < Roda
     end
   end
 
-  def notify_game game
-    Thread.new do
+  def notify_game o_game, contains_message = false
+    Thread.new o_game do |game|
       games = {}
       room = sync { ROOMS[game.id].dup }
       room.each do |connection, user|
@@ -267,10 +268,11 @@ class RollingStock < Roda
         key = [game.id, user.id]
         last_notified = sync { NOTIFIED[key] }
 
-        if game.can_act?(game.player_by_user(user)) &&
-            (!last_notified || (Time.now - last_notified) > NOTIFY_THRESHOLD)
+        if contains_message
+          send_mail game, user, 'Received Message'
+        elsif game.can_act?(game.player_by_user(user)) && !last_notified
           sync { NOTIFIED[key] = Time.now }
-          send_mail game, user
+          send_mail game, user, 'Your Turn'
         end
       end
     end
@@ -281,7 +283,7 @@ class RollingStock < Roda
     klass.new(**needs).to_html
   end
 
-  def send_mail game, user
+  def send_mail game, user, msg
     return unless PRODUCTION
 
     uri = URI.parse("https://api.sparkpost.com/api/v1/transmissions")
@@ -291,7 +293,7 @@ class RollingStock < Roda
     req.body = JSON.dump(
       'content' => {
         'from' => 'no-reply@rollingstock.net',
-        'subject' => "Rolling Stock Game #{game.id} - Round #{game.round} - Phase #{game.phase} - Your Turn",
+        'subject' => "Rolling Stock Game #{game.id} - Round #{game.round} - Phase #{game.phase} - #{msg}",
         'html' => widget(Views::GameMail, game: game, current_user: user),
       },
       'recipients' => [
