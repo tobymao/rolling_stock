@@ -49,7 +49,7 @@ module Views
 
           div do
             input pass_props
-            input type: 'hidden', name: data('action'), value: 'pass', disabled: !entity_active
+            input type: 'hidden', name: data('action'), value: 'pass', disabled: !(solo || entity_active)
             label(style: inline(margin_right: '5px')) { text entity.name } unless solo
           end
         end
