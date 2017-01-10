@@ -136,13 +136,13 @@ class Corporation < Purchaser
 
     @cash -= amount * @bank_shares.size
 
-    dividend_log = String.new "#{name} pays $#{amount} dividends - "
+    dividend_log = String.new "#{name} pays $#{amount} dividends"
 
     players.each do |player|
       total = amount * player.shares.count { |share| share.corporation == self }
       @cash -= total
       player.cash += total
-      dividend_log << " #{player.name} receives $#{total}" if total > 0
+      dividend_log << " - #{player.name} receives $#{total}" if total > 0
     end
     @log << dividend_log
 

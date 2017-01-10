@@ -32,6 +32,8 @@ module Views
 
       game_form do
         entities.each do |entity|
+          entity_active = game.can_act? entity
+
           pass_props = {
             name: data(entity.type),
             value: entity.id,
@@ -42,12 +44,12 @@ module Views
             pass_props[:type] = 'hidden'
           else
             pass_props[:type] = 'checkbox'
-            pass_props[:checked] = 'true'
+            pass_props[:checked] = 'true' if entity_active
           end
 
           div do
             input pass_props
-            input type: 'hidden', name: data('action'), value: 'pass'
+            input type: 'hidden', name: data('action'), value: 'pass', disabled: !entity_active
             label(style: inline(margin_right: '5px')) { text entity.name } unless solo
           end
         end
