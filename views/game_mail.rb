@@ -10,8 +10,17 @@ module Views
       tier = game.ownership_tier
 
       a "Go To Game #{game.id}", href: "#{app.request.base_url}#{app.path(game)}"
-      br
-      widget Log, game: game, current_player: current_player
+
+      log_style = inline(
+        background_color: 'lightgray',
+        padding: '5px',
+        margin: '10px 0',
+      )
+
+      div style: log_style do
+        widget Log, game: game, current_player: current_player, email: true
+      end
+
       widget Players, players: game.players, tier: tier, current_player: current_player
     end
 

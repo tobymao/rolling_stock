@@ -4,6 +4,7 @@ module Views
   class Log < Base
     needs :game
     needs :current_player
+    needs email: false
 
     def content
       log_style = inline(
@@ -12,17 +13,20 @@ module Views
         background_color: 'lightgray',
         font_family: "'Inconsolata', monospace",
         margin: '5px 0',
-      )
+      ) unless email
 
-      div style: log_style do
+      div id: 'log', style: log_style do
         div class: 'wrapper' do
-          div do
-            text 'Your Turn'
-          end if game.can_act? current_player
-
-          game.log.reverse.each { |line| div line }
+          lines = game.log
+          lines = lines.take 10 if email
+          lines.each { |line| div line }
+          div { text '-- Your Turn --' } if game.can_act? current_player
         end
       end
+
+      script <<~JS
+        $('#log').scrollTop($('#log')[0].scrollHeight);
+      JS
     end
 
   end

@@ -371,7 +371,7 @@ class Game < Base
     end
 
     players.each_with_index { |p, i| p.order = i + 1 }
-    @log << "New player order: #{players.map &:name}"
+    @log << "New player order: #{players.map(&:name).join(', ')}"
     change_phase
   end
 
