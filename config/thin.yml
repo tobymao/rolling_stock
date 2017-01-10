@@ -4,7 +4,7 @@ environment: production
 address: localhost
 port: 3002
 timeout: 30
-wait: 30
+wait: 10
 log: /home/deploy/apps/rolling_stock/shared/log/thin.log
 pid: /home/deploy/apps/rolling_stock/shared/pids/thin.pid
 socket: /tmp/rolling_stock-thin.sock
