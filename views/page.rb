@@ -8,7 +8,7 @@ module Views
       html do
         head do
           link rel: 'shortcut icon', type: 'image/png', href: '/images/favicon.ico'
-          link rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Inconsolata|Raleway:400,700'
+          link rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Inconsolata:400,700|Raleway:400,700'
           script src: 'https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js'
           render_head
           render_style
