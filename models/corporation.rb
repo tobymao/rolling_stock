@@ -10,6 +10,18 @@ class Corporation < Purchaser
 
   attr_reader :name, :president, :share_price, :shares, :bank_shares
 
+  def self.initial_shares_info company, share_price
+    value = company.value
+    num_shares = (value / share_price.to_f).ceil
+    seed = num_shares * share_price - value
+
+    {
+      num_shares: num_shares,
+      seed: seed,
+      cash: num_shares * share_price + seed,
+    }
+  end
+
   def initialize name, company, share_price, share_prices, log = nil
     super 0
     raise GameException, "Share price #{share_price.price} taken by #{share_price.corporation.name}" if share_price.corporation
@@ -182,14 +194,15 @@ class Corporation < Purchaser
   private
   def issue_initial_shares
     company = @companies.first
-    value = company.value
-    num_shares = (value / price.to_f).ceil
-    seed = num_shares * price - value
+    info = self.class.initial_shares_info company, price
+    seed = info[:seed]
+    num_shares = info[:num_shares]
+    cash = info[:cash]
+
     raise GameException, "You don't have enough money to form at that share price" if @president.cash < seed
 
-    @cash = seed
     @president.cash -= seed
-    @cash += num_shares * price
+    @cash = cash
 
     @president.shares.concat @shares.shift(num_shares)
     @shares_count[@president] += num_shares
