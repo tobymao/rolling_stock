@@ -7,6 +7,12 @@ module Views
 
     def render_main
       div class: 'wrapper' do
+        div style: inline(font_size: '20px') do
+          div "I'm going to reset the database after I finish game 2"
+          div "All games will be lost after that... sorry!"
+          br
+        end
+
         block_style = inline(
           border_top: '1px solid black',
           padding_top: '10px',
