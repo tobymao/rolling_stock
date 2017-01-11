@@ -7,7 +7,7 @@ module Views
 
     def content
       div do
-        players.each do |player|
+        players.sort_by(&:order).each do |player|
           render_player player
         end
       end

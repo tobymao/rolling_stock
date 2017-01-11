@@ -38,7 +38,7 @@ module Views
       div(class: 'heading') { text 'Players' }
 
       div class: 'wrapper' do
-        widget Players, players: game.players.sort_by(&:order), tier: tier, current_player: @current_player
+        widget Players, players: game.players, tier: tier, current_player: @current_player
       end
 
       div(class: 'heading') { text 'Corporations' }

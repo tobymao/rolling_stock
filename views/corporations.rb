@@ -7,7 +7,7 @@ module Views
 
     def content
       div do
-        corporations.each do |corporation|
+        corporations.sort_by(&:price).reverse.each do |corporation|
           widget Corporation, corporation: corporation, tier: tier
         end
       end
