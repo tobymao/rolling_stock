@@ -82,6 +82,7 @@ class Game < Base
     setup_deck
     draw_companies
     untap_pending_companies
+    players.each { |p| p.cash = 25 } if players.size > 5
     step
     process_actions
   end
@@ -491,9 +492,13 @@ class Game < Base
         num_cards = 8 if tier == :orange && players.size == 5
 
         group = groups[tier]
-        largest = group.sort_by!(&:value).pop
-        group.shuffle!.pop(group.size - num_cards + 1)
-        group << largest
+
+        if players.size < 6
+          largest = group.sort_by!(&:value).pop
+          group.shuffle!.pop(group.size - num_cards + 1)
+          group << largest
+        end
+
         new_deck.concat group.shuffle!
       end
 
