@@ -178,6 +178,11 @@ class RollingStock < Roda
             notify_game game
             r.redirect path(game)
           end
+
+          r.is 'delete' do
+            game.destroy
+            r.redirect '/'
+          end
         end
       end
     end

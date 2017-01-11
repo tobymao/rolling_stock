@@ -38,10 +38,7 @@ module Views
         text 'Create Game'
       end
 
-      form action: '/game', method: 'post' do
-        rawtext app.csrf_tag
-        input type: 'submit', value: 'Create Game'
-      end
+      widget NewGame
     end
 
     def render_games heading, games

@@ -12,12 +12,17 @@ module Views
 
     def render_new
       div class: 'wrapper' do
-        game.players.each do |player|
-          div player.name
+        div(class: 'heading') { text "Game #{game.id} Waiting for players..." }
+
+        div style: inline(margin: '5px') do
+          game.players.each { |player| div player.name }
         end
 
         render_join_button if !game.players.include?(@current_player) && game.new_game?
-        render_start_button if game.user == current_user
+        if game.user == current_user
+          render_start_button
+          render_delete_button
+        end
       end
     end
 
@@ -67,9 +72,16 @@ module Views
     end
 
     def render_start_button
-      form action: app.path(game, 'start'), method: 'post' do
+      form style: inline(margin_top: '10px'), action: app.path(game, 'start'), method: 'post' do
         rawtext app.csrf_tag
-        input type: 'submit', value: 'Start Game'
+        input type: 'submit', value: 'Start Playing'
+      end
+    end
+
+    def render_delete_button
+      form action: app.path(game, 'delete'), method: 'post' do
+        rawtext app.csrf_tag
+        input type: 'submit', value: 'Delete Game'
       end
     end
 
