@@ -44,7 +44,7 @@ module Views
         end
 
         index = corporation.share_price.index
-        double_drop = SharePrice::PRICES[index - 2]
+        double_drop = SharePrice::PRICES[index - 2] if index > 1
         single_drop = SharePrice::PRICES[index - 1]
         current_price = SharePrice::PRICES[index]
         single_jump = SharePrice::PRICES[index + 1]
