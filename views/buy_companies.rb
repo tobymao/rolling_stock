@@ -119,7 +119,6 @@ module Views
             var data = $('#corp_selector option:selected').data();
             if (!data) { return; }
 
-            return !data;
             var cash = data['cash'];
             var companies = data['companies'];
             $('#companies .company').each(function(index, company) {
