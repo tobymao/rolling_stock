@@ -6,7 +6,7 @@ module Views
     needs error: nil
 
     def render_main
-      render_js
+      render_js unless game.check_point
 
       error_style = inline(
         background_color: 'lightsalmon',

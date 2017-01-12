@@ -27,7 +27,7 @@ class Game < Base
     6 => 'Select a company and offer a price to purchase it',
     7 => 'Select companies you want to close',
     9 => 'Select the amount of dividends to pay each share',
-  }
+  }.freeze
 
   attr_reader(
     :share_prices,
@@ -44,6 +44,7 @@ class Game < Base
     :phase,
     :log,
     :name,
+    :check_point,
   )
 
   def self.empty_game user
@@ -57,7 +58,7 @@ class Game < Base
     )
   end
 
-  def load
+  def load round = nil, phase = nil
     @log = []
     @share_prices = SharePrice.initial_market
     @available_corporations = Corporation::CORPORATIONS.dup
@@ -74,6 +75,7 @@ class Game < Base
     @phase = 1
     @end_game_card = :penultimate
     @name = 'the bank'
+    @check_point = [round.to_i, phase.to_i] if round && phase
 
     start_game unless new_game?
   end
@@ -124,6 +126,27 @@ class Game < Base
 
   def phase_description
     PHASE_DESCRIPTION[@phase]
+  end
+
+  def sorted_actions
+    actions.sort_by { |a| [a.round, a.phase] }
+  end
+
+  def next
+    action = sorted_actions
+      .reject { |a| a.round < @round }
+      .find { |a| a.round > @round || a.phase > @phase }
+
+    action ? [action.round, action.phase] : nil
+  end
+
+  def prev
+    action = sorted_actions
+      .reject { |a| a.round > @round }
+      .reverse
+      .find { |a| a.round < @round || a.phase < @phase }
+
+    action ? [action.round, action.phase] : nil
   end
 
   def active_entities
@@ -246,8 +269,9 @@ class Game < Base
   end
 
   def process_actions
-    actions.sort_by { |action| [action.round, action.phase] }.each do |action|
+    sorted_actions.each do |action|
       raise GameException, 'Invalid action for phase' if action.phase != @phase
+      break if @check_point && @round == @check_point[0] && @phase == @check_point[1]
       action.turns.each { |turn| process_action_data turn }
     end
   end

@@ -6,7 +6,7 @@ module Views
     needs :current_user
 
     def content
-      @current_player = game.player_by_id current_user&.id
+      @current_player = game.player_by_id current_user&.id unless game.check_point
       game.new_game? ? render_new : render_game
     end
 
@@ -30,6 +30,8 @@ module Views
       flash_title if game.can_act? @current_player
 
       tier = game.ownership_tier
+
+      render_check_point
 
       div class: 'heading' do
         text "Round: #{game.round} Phase: #{game.phase} (#{game.phase_name})"
@@ -62,6 +64,26 @@ module Views
       }
 
       widget SharePrices, share_prices: game.share_prices
+    end
+
+    def render_check_point
+      div class: 'wrapper' do
+        if p = game.prev
+          check_point_link 'Prev Phase', "#{app.path(game)}?round=#{p[0]}&phase=#{p[1]}"
+        end
+
+        if n = game.next
+          check_point_link 'Next Phase', "#{app.path(game)}?round=#{n[0]}&phase=#{n[1]}"
+        end
+
+        if game.check_point
+          check_point_link 'Current Phase', app.path(game)
+        end
+      end
+    end
+
+    def check_point_link str, path
+      a str, href: path, style: inline(margin_left: '10px')
     end
 
     def render_join_button

@@ -113,7 +113,7 @@ class RollingStock < Roda
         end
 
         game = Game[id]
-        game.load
+        game.load r['round'], r['phase']
 
         r.get do
           widget Views::GamePage, game: game, error: flash[:game_error]
