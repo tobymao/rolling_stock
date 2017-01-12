@@ -234,6 +234,7 @@ class Game < Base
     when 3
       automate_max_bids
       check_no_player_purchases
+      end_game if @share_prices.last.corporation
     when 4
       new_player_order
     when 5
@@ -471,9 +472,7 @@ class Game < Base
     @end_game_card = :last_turn if (ownership_tier == :penultimate && @companies.empty?)
 
     if ownership_tier == :last_turn || @share_prices.last.corporation
-      scores = players.sort_by(&:value).reverse.map { |p| "#{p.name} ($#{p.value})" }
-      @log << "Game over. #{scores.join ', '}"
-      update(state: :finished)
+      end_game
     else
       change_phase
     end
@@ -576,6 +575,12 @@ class Game < Base
       player.shares.reject! { |share| share.corporation == corporation }
     end
     corporation.share_price.corporation = nil
+  end
+
+  def end_game
+    scores = players.sort_by(&:value).reverse.map { |p| "#{p.name} ($#{p.value})" }
+    @log << "Game over. #{scores.join ', '}"
+    update state: :finished
   end
 
   def change_phase
