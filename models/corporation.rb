@@ -68,10 +68,6 @@ class Corporation < Purchaser
     price.zero? || @companies.empty? || @cash < 0
   end
 
-  def negative_income? tier
-    @cash + income(tier) < 0
-  end
-
   def buy_share player
     raise GameException, 'Cannot buy share. None available' unless can_buy_share?
     raise GameException, 'Player does not have enough money to buy a share.' if player.cash < next_share_price.price

@@ -6,10 +6,13 @@ module Views
     needs :current_player
 
     def content
-      entities = game
-        .active_entities
-        .select { |e| e.owned_by?(current_player) && !game.passes.include?(e) }
-        .reject { |e| e.respond_to?(:pending_closure?) && e.pending_closure?(game.phase, game.ownership_tier) }
+      entities = game.active_entities.select do |entity|
+        entity.owned_by?(current_player) && !game.passes.include?(entity)
+      end
+
+      entities.reject! do |entity|
+        entity.respond_to?(:pending_closure?) && entity.pending_closure?(game.ownership_tier)
+      end if game.phase == 7
 
       return if entities.empty?
       solo = entities.size == 1

@@ -55,6 +55,10 @@ class Purchaser
     @companies.map { |c| c.income }.reduce(&:+) || 0
   end
 
+  def negative_income? tier
+    (@cash + income(tier)) < 0
+  end
+
   def cost_of_ownership tier
     @companies.map { |c| c.cost_of_ownership tier }.reduce(&:+) || 0
   end

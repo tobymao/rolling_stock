@@ -173,18 +173,16 @@ class Company
     end
   end
 
-  def pending_closure? phase, ownership_tier
-    phase == 7 &&
-      owner.is_a?(Corporation) &&
-      owner.negative_income?(ownership_tier) &&
-      owner.companies.size > 1
+  def pending_closure? ownership_tier
+    owner.negative_income?(ownership_tier) && owner.companies.size > 1
   end
 
-  def auto_close? phase, ownership_tier
-    phase == 7 &&
-      owner.is_a?(Corporation) &&
-      owner.negative_income?(ownership_tier) &&
-      owner.companies.size == 1
+  def auto_close? ownership_tier
+    owner.negative_income?(ownership_tier) && owner.companies.size == 1
+  end
+
+  def close
+    owner.close_company self
   end
 
   def can_be_sold?

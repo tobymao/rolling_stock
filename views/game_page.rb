@@ -76,7 +76,6 @@ module Views
 
         var GameConnection = {
           start: function(url) {
-            console.log(url);
             var self = this;
             this.socket = new WebSocket(url);
             this.messageHandlers = {};
@@ -100,7 +99,6 @@ module Views
 
           _onOpen: function() {
             this.open = true;
-            console.log("Websocket open");
             this.ping();
           },
 

@@ -166,12 +166,9 @@ class Game < Base
 
       (@offers.map { |o| o.company.owner } + corps).uniq
     when 7
-      regular_companies = active_companies.reject { |c| c.auto_close?(@phase, ownership_tier) }
-      poor_companies = @corporations
-        .select { |c| c.negative_income?(ownership_tier) && c.companies.size > 1 }
-        .flat_map &:companies
-
-      (regular_companies + poor_companies).uniq
+      held_companies
+        .reject { |c| c.auto_close? ownership_tier }
+        .select { |c| c.active? || c.pending_closure?(ownership_tier) }
     when 9
       active_corporations
     end
@@ -236,13 +233,13 @@ class Game < Base
       check_no_player_purchases
       end_game if @share_prices.last.corporation
     when 4
-      new_player_order
+      process_phase_4
     when 5
-      foreign_investor_purchase
+      process_phase_5
     when 8
-      collect_income
+      process_phase_8
     when 10
-      check_end
+      process_phase_10
     end
 
     step if @phase != current_phase
@@ -364,7 +361,8 @@ class Game < Base
   end
 
   # phase 4
-  def new_player_order
+  # new player order
+  def process_phase_4
     index = 0
 
     players.sort_by! do |player|
@@ -378,7 +376,8 @@ class Game < Base
   end
 
   # phase 5
-  def foreign_investor_purchase
+  # foreign investor purchase
+  def process_phase_5
     @foreign_investor.purchase_companies @companies
     draw_companies
     untap_pending_companies
@@ -443,22 +442,24 @@ class Game < Base
   end
 
   # phase 7
-  # todo check if you can close other people's company
-  # solve this buy passing current_user into external action
+  # close companies
   def process_phase_7 data
     company = held_companies.find { |c| c.name == data['company'] }
-    company.owner.close_company company
+    company.close
   end
 
   # phase 8
-  def collect_income
+  # collect income
+  def process_phase_8
     @foreign_investor.close_companies ownership_tier
+    player_companies.each { |c| c.close if c.auto_close?(ownership_tier) }
     entities = @corporations + players + [@foreign_investor]
     entities.each { |entity| entity.collect_income ownership_tier }
     change_phase
   end
 
   # phase 9
+  # pay dividends
   def process_phase_9 data
     corporation = @corporations.find { |c| c.name == data['corporation'] }
     raise GameException, 'Not corporation turn' unless acting.include? corporation
@@ -468,7 +469,8 @@ class Game < Base
   end
 
   # phase 10
-  def check_end
+  # check end
+  def process_phase_10
     @end_game_card = :last_turn if (ownership_tier == :penultimate && @companies.empty?)
 
     if ownership_tier == :last_turn || @share_prices.last.corporation
