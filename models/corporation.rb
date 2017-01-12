@@ -207,6 +207,7 @@ class Corporation < Purchaser
   end
 
   def swap_share_price new_price
+    return unless new_price
     @log << "#{name} changes share price from $#{price} to $#{new_price.price}"
     new_price.corporation = self
     @share_price.corporation = nil
