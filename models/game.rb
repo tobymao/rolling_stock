@@ -495,13 +495,13 @@ class Game < Base
   # phase 10
   # check end
   def process_phase_10
-    @end_game_card = :last_turn if (ownership_tier == :penultimate && @companies.empty?)
-
     if ownership_tier == :last_turn || @share_prices.last.corporation
       end_game
     else
       change_phase
     end
+    
+    @end_game_card = :last_turn if (ownership_tier == :penultimate && @companies.empty?)
   end
 
   private
