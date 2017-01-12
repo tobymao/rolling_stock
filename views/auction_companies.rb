@@ -35,7 +35,7 @@ module Views
     def render_js
       name = game.current_bid.company.name
       script <<~JS
-        $('[data-company="#{name}"]').addClass('selected');
+        $('[data-name="#{name}"]').addClass('selected');
         $('#bid_company').attr('value', '#{name}');
         $('#bid_submit').attr('disabled', false);
       JS
