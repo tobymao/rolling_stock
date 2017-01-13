@@ -13,6 +13,7 @@ module Views
           render_head
           render_style
           render_analytics
+          render_global_js
           meta name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0'
           meta name: 'apple-mobile-web-app-capable', content: 'yes'
           meta charset: 'UTF-8'
@@ -65,6 +66,62 @@ module Views
       CSS
     end
     static :render_style
+
+    def render_global_js
+      script <<~JS
+        var Connection = function(url) {
+          this.url = url;
+          this.open = false;
+          this.handler = null;
+          this.start();
+        };
+
+        Connection.prototype.start = function() {
+          var self = this;
+          this.socket = new WebSocket(this.url);
+          this.socket.addEventListener('message', function(event){ return self._onMessage(event.data); });
+          this.socket.addEventListener('open', function(event){ return self._onOpen(); });
+          this.socket.addEventListener('close', function(event){ return self._onClose(); });
+          this.socket.addEventListener('error', function(event){ return self._onError(); });
+        }
+
+        Connection.prototype._onOpen = function() {
+          this.open = true;
+          this.ping();
+        };
+
+        Connection.prototype._onClose = function() {
+          var self = this;
+          this.open = false;
+          setTimeout(function() { self.start() }, 5000);
+          console.log("Websocket closed");
+        };
+
+        Connection.prototype._onError = function() {
+          console.error("Websocket error");
+        };
+
+        Connection.prototype._onMessage = function(msg) {
+          this.handler(msg);
+        };
+
+        Connection.prototype.ping = function() {
+          this.send({"kind": "ping"});
+          setTimeout(this.ping.bind(this), 20000);
+        };
+
+        Connection.prototype.send = function(obj) {
+          if (!this.open) { return; }
+          this.socket.send(JSON.stringify(obj));
+        };
+
+        var BaseSocketURL = "ws://" + window.location.hostname;
+
+        if (window.location.port > 0) {
+          BaseSocketURL += ":" + window.location.port;
+        }
+      JS
+    end
 
     def render_analytics
       #script <<~JS

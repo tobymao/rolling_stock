@@ -63,18 +63,9 @@ class RollingStock < Roda
 
   route do |r|
     r.root do
-      games = Game
-        .eager([:user, :actions])
-        .where(state: ['new', 'active'])
-        .order(:id)
-        .all
-
+      games = Game.eager([:user, :actions]).where(state: ['new', 'active']).order(:id).all
       users = User.where(id: games.flat_map(&:users).uniq).all
-
-      games.each do |game|
-        game.players users
-      end
-
+      games.each { |game| game.players users }
       games.select(&:active?).each &:load
 
       data = {
@@ -83,6 +74,29 @@ class RollingStock < Roda
       }
 
       widget Views::Index, data
+    end
+
+    r.on 'chat' do
+      room = sync { ROOMS['main'] }
+
+      r.websocket do |ws|
+        ws.on :message do |event|
+          next unless current_user
+
+          data = JSON.parse event.data
+
+          if data['kind'] == 'message'
+            html = widget Views::ChatLine, user: current_user, message: data['payload']
+            sync { room.dup }.each { |socket| socket.send html }
+          end
+        end
+
+        ws.on :close do |event|
+          sync { room.delete ws }
+        end
+
+        sync { room << ws }
+      end
     end
 
     r.on 'game' do

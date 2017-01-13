@@ -6,12 +6,16 @@ module Views
     needs :active_games
 
     def render_main
+      @current_user = app.current_user
+
       div class: 'wrapper' do
         div style: inline(font_size: '20px') do
           div "I'm going to reset the database after I finish game 2"
           div "All games will be lost after that... sorry!"
           br
         end
+
+        widget Chat, current_user: @current_user
 
         block_style = inline(
           border_top: '1px solid black',
@@ -21,9 +25,9 @@ module Views
 
         div style: block_style do
           render_new_game
-        end if app.current_user
+        end if @current_user
 
-        yours, active = active_games.partition { |g| g.users.include? app.current_user&.id }
+        yours, active = active_games.partition { |g| g.users.include? @current_user&.id }
 
         div style: block_style do
           render_games 'Your Games', yours
@@ -67,9 +71,9 @@ module Views
         vertical_align: 'top',
       }
 
-      if game.can_act? game.player_by_user(app.current_user)
+      if game.can_act? game.player_by_user(@current_user)
         game_style[:background_color] = 'lightsalmon'
-      end if game.active? && app.current_user
+      end if game.active? && @current_user
 
       div style: inline(game_style) do
         join_text = game.active? ? 'Enter Game' : 'Join Game'

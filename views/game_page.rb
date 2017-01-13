@@ -62,7 +62,7 @@ module Views
 
           update: function() {
             $('#game_container').html(this.html);
-            $("[name='_csrf']").attr('value', "#{app.csrf_token}");
+            $("[name='_csrf']").attr('value', '#{app.csrf_token}');
             $('#update').hide();
             this.changed = false;
             this.html = "";
@@ -74,64 +74,12 @@ module Views
           },
         }
 
-        var GameConnection = {
-          start: function(url) {
-            var self = this;
-            this.socket = new WebSocket(url);
-            this.messageHandlers = {};
-            this.open = false;
-            this.socket.addEventListener('message', function(event){ return self._onMessage(event.data); });
-            this.socket.addEventListener('open', function(event){ return self._onOpen(); });
-            this.socket.addEventListener('close', function(event){ return self._onClose(); });
-            this.socket.addEventListener('error', function(event){ return self._onError(); });
-          },
+        var connection = new Connection(BaseSocketURL + '/game/#{game.id}/ws');
 
-          default: function() {
-            this.start([
-              "ws://",
-              window.location.hostname,
-              ":",
-              window.location.port,
-              "#{app.path(game)}",
-              'ws'
-            ].join(''));
-          },
-
-          _onOpen: function() {
-            this.open = true;
-            this.ping();
-          },
-
-          _onClose: function() {
-            var self = this;
-            this.open = false;
-            setTimeout(function() { self.default() }, 10000);
-            console.log("Websocket closed");
-          },
-
-          _onError: function() {
-            console.error("Websocket error");
-          },
-
-          _onMessage: function(msg) {
-            GamePage.html = msg;
-            GamePage.changed ? $('#update').show() : GamePage.update();
-          },
-
-          ping: function() {
-            this.send({"kind": "ping"});
-            setTimeout(this.ping.bind(this), 20000);
-          },
-
-          send: function(obj) {
-            if (!this.open) {
-                return;
-            }
-            this.socket.send(JSON.stringify(obj));
-          },
-        }
-
-        GameConnection.default();
+        connection.handler = function(msg) {
+          GamePage.html = msg;
+          GamePage.changed ? $('#update').show() : GamePage.update();
+        };
       JS
     end
   end
