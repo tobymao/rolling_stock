@@ -58,30 +58,30 @@ describe Game do
       subject.load
     end
 
-    describe '#check_end' do
+    describe '#process_phase_10' do
       it 'should not change to finished if no conditions met' do
-        subject.check_end
+        subject.process_phase_10
         expect(subject.state).not_to eq('finished')
       end
 
       it 'should change to finished if any corporation share price is 100' do
         subject.share_prices[31].corporation = subject
-        subject.check_end
+        subject.process_phase_10
         expect(subject.state).to eq('finished')
       end
 
       it 'should change to finished if game end card' do
         allow(subject).to receive(:ownership_tier).and_return(:last_turn)
-        subject.check_end
+        subject.process_phase_10
         expect(subject.state).to eq('finished')
       end
     end
 
-    describe '#collect_income' do
+    describe '#process_phase_8' do
       it 'should increase cash for corporations and players' do
         player.companies << company
         allow(subject).to receive(:players).and_return([player])
-        expect { subject.collect_income }.to change { player.cash }.by 1
+        expect { subject.process_phase_8 }.to change { player.cash }.by 1
       end
     end
 
