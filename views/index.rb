@@ -4,6 +4,7 @@ module Views
   class Index < Page
     needs :new_games
     needs :active_games
+    needs :messages
 
     def render_main
       @current_user = app.current_user
@@ -15,7 +16,7 @@ module Views
           br
         end
 
-        widget Chat, current_user: @current_user
+        widget Chat, current_user: @current_user, messages: messages
 
         block_style = inline(
           border_top: '1px solid black',

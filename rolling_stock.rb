@@ -55,6 +55,7 @@ class RollingStock < Roda
 
   MUTEX    = Mutex.new
   ROOMS    = Hash.new { |h, k| h[k] = [] }
+  MESSAGES = []
   NOTIFIED = {}
 
   def sync
@@ -71,6 +72,7 @@ class RollingStock < Roda
       data = {
         new_games: games.select(&:new_game?),
         active_games: games.select(&:active?),
+        messages: sync { MESSAGES.dup },
       }
 
       widget Views::Index, data
@@ -86,7 +88,12 @@ class RollingStock < Roda
           data = JSON.parse event.data
 
           if data['kind'] == 'message'
-            html = widget Views::ChatLine, user: current_user, message: data['payload']
+            message = data['payload']
+            sync do
+              MESSAGES << message
+              MESSAGES.shift(MESSAGES.size - 20) if MESSAGES.size > 20
+            end
+            html = widget Views::ChatLine, user: current_user, message: message
             sync { room.dup }.each { |socket| socket.send html }
           end
         end

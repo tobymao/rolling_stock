@@ -3,6 +3,7 @@ require './views/base'
 module Views
   class Chat < Base
     needs :current_user
+    needs :messages
 
     def content
       chat_style = inline(
@@ -15,7 +16,9 @@ module Views
 
       div id: 'chat', style: chat_style do
         div class: 'wrapper' do
-          div id: 'messages'
+          div id: 'messages' do
+            messages.each { |message| div message }
+          end
         end
       end
 
