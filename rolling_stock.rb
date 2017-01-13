@@ -90,7 +90,7 @@ class RollingStock < Roda
           if data['kind'] == 'message'
             message = data['payload']
             sync do
-              MESSAGES << message
+              MESSAGES << [current_user, message]
               MESSAGES.shift(MESSAGES.size - 20) if MESSAGES.size > 20
             end
             html = widget Views::ChatLine, user: current_user, message: message

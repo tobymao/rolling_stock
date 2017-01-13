@@ -17,7 +17,7 @@ module Views
       div id: 'chat', style: chat_style do
         div class: 'wrapper' do
           div id: 'messages' do
-            messages.each { |message| div message }
+            messages.each { |user, message| widget ChatLine, user: user, message: message }
           end
         end
       end
