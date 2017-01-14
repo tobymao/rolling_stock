@@ -76,6 +76,7 @@ class Game < Base
     @end_game_card = :penultimate
     @name = 'the bank'
     @check_point = [round.to_i, phase.to_i] if round && phase
+    @ended = false
 
     start_game unless new_game?
   end
@@ -496,11 +497,11 @@ class Game < Base
   # check end
   def process_phase_10
     if ownership_tier == :last_turn || @share_prices.last.corporation
-      end_game
+      end_game unless @ended
     else
       change_phase
     end
-    
+
     @end_game_card = :last_turn if (ownership_tier == :penultimate && @companies.empty?)
   end
 
@@ -604,6 +605,7 @@ class Game < Base
   end
 
   def end_game
+    @ended = true
     scores = players.sort_by(&:value).reverse.map { |p| "#{p.name} ($#{p.value})" }
     @log << "Game over. #{scores.join ', '}"
     update state: :finished
