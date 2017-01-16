@@ -254,9 +254,9 @@ class Game < Base
     when 1, 2, 6, 7, 9
       check_phase_change
     when 3
-      automate_max_bids
       check_no_player_purchases
       end_game if @share_prices.last.corporation
+      process_max_bids
     when 4
       process_phase_4
     when 5
@@ -554,11 +554,11 @@ class Game < Base
     change_phase
   end
 
-  def automate_max_bids
-    while player = active_entities.first
-      max = @max_bids[player]
-      break if !max || player == @current_bid.player
+  def process_max_bids
+    player = active_entities.first
+    max = @max_bids[player]
 
+    if max && player != @current_bid.player
       company = @current_bid.company
       price = @current_bid.price
 
@@ -569,6 +569,8 @@ class Game < Base
         @max_bids.delete(player)
         pass_entity player
       end
+
+      step
     end
   end
 
