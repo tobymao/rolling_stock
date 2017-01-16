@@ -121,7 +121,7 @@ class Game < Base
   end
 
   def acting_players
-    active_entities.map(&:player).uniq
+    active_entities.map(&:player).compact.uniq
   end
 
   def player_by_user user
