@@ -12,7 +12,14 @@ module Views
 
         label do
           input type: 'checkbox', name: 'open_deck'
-          text 'Open Deck (not implemented yet)'
+          text 'Open Deck'
+        end
+
+        br
+
+        label do
+          input type: 'checkbox', name: 'default_close', checked: true
+          text 'Default auto skip phase 7 (close companies)'
         end
 
         div do

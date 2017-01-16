@@ -6,6 +6,18 @@ module Views
     needs :current_player
 
     def content
+      div do
+        render_passes
+      end unless game.phase == 9
+
+      div do
+        render_skips
+      end
+
+      render_js
+    end
+
+    def render_passes
       entities = game.active_entities
       entities << current_player if game.phase == 3
       entities.select! { |entity| entity.owned_by? current_player }
@@ -43,31 +55,12 @@ module Views
             checked: (active || autopassed),
             onclick: 'Pass.onClick(this)',
             disabled: (solo && active),
-            data: {
-              autopassed: autopassed,
-            }
-          }
-
-          pass_type_props = {
-            name: data('action'),
-            value: (active ? 'pass' : 'autopass'),
-            type: 'hidden',
-            class: 'pass_input',
-            disabled: !active,
-          }
-
-          entity_props = {
-            name: data(entity.type),
-            value: entity.id,
-            type: 'hidden',
-            class: 'pass_input',
-            disabled: !active,
           }
 
           div do
             input checkbox_props
-            input pass_type_props
-            input entity_props
+            render_input 'action', (active ? 'pass' : 'autopass'), !active
+            render_input entity.type, entity.id, !active
 
             label style: inline(margin_left: '5px') do
               text "#{entity.name}#{autopassed ? ' (passing)' : ''}"
@@ -77,8 +70,41 @@ module Views
 
         input type: 'submit', value: (can_act ? 'Pass' : 'Save Pass Setting')
       end
+    end
 
-      render_js
+    def render_skips
+      div onclick: 'Pass.expand(this)', style: inline(cursor: 'pointer') do
+        text 'Automatically skip checked phases [+]'
+      end
+
+      game_form id: 'skip_form' do
+        ::Game::PHASE_DESCRIPTION.keys.sort.each do |phase|
+          skipped = game.skips.include? [current_player, phase]
+
+          div class: 'skip_row', style: (skipped ? '' : inline(display: 'none')) do
+            checkbox_props = {
+              type: 'checkbox',
+              checked: skipped,
+              onclick: 'Pass.onClick(this)',
+            }
+
+            input checkbox_props
+            render_input 'action', 'skip', true
+            render_input 'phase', phase, true
+            render_input current_player.type, current_player.id, true
+
+            label style: inline(margin_left: '5px') do
+              text "Phase #{phase} - #{::Game::PHASE_NAME[phase]}#{skipped ? ' (skipped)' : ''}"
+            end
+          end
+        end
+
+        input type: 'submit', value: 'Save Skip Settings'
+      end
+    end
+
+    def render_input name, value, disabled
+      input name: data(name), value: value, disabled: disabled, type: 'hidden', class: 'pass_input'
     end
 
     def render_js
@@ -88,7 +114,12 @@ module Views
             $(el).siblings('.pass_input').attr('disabled', function(_, attr) {
               return !attr
             });
-          }
+          },
+
+          expand: function(el) {
+            $(el).text('Automatically skip checked phases');
+            $('#skip_form .skip_row:hidden').show();
+          },
         }
       JS
     end

@@ -116,7 +116,10 @@ class RollingStock < Roda
     r.on 'game' do
       r.is method: 'post' do
         r.halt 403 unless current_user
-        game = Game.empty_game current_user
+        settings = {}
+        settings['default_close'] = true if r['default_close']
+        settings['open_deck'] = true if r['open_deck']
+        game = Game.empty_game current_user, settings
         r.redirect path(game)
       end
 

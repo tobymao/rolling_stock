@@ -60,6 +60,7 @@ module Views
         companies: game.companies,
         pending_companies: game.pending_companies,
         company_deck: game.company_deck,
+        open_deck: game.settings['open_deck'],
         tier: tier,
       }
 

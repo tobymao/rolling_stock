@@ -16,7 +16,7 @@ module Views
       div style: inline(default), class: 'wrapper' do
         render_action
 
-        widget Pass, game: game, current_player: current_player unless game.phase == 9
+        widget Pass, game: game, current_player: current_player
       end
     end
   end

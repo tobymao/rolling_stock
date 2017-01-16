@@ -39,6 +39,7 @@ class Game < Base
     :current_bid,
     :offers,
     :passes,
+    :skips,
     :foreign_investor,
     :round,
     :phase,
@@ -47,11 +48,11 @@ class Game < Base
     :check_point,
   )
 
-  def self.empty_game user
+  def self.empty_game user, settings
     Game.create(
       user: user,
       users: [user.id],
-      settings: { 'version' => '1.0' },
+      settings: { 'version' => '1.0' }.merge(settings),
       state: { status: 'new' },
     )
   end
@@ -84,6 +85,7 @@ class Game < Base
     @max_bids = {}
     @offers = []
     @passes = Set.new
+    @skips = Set.new
     @foreign_investor = ForeignInvestor.new @log
     @round = 1
     @phase = 1
@@ -99,6 +101,7 @@ class Game < Base
     setup_deck
     draw_companies
     untap_pending_companies
+    players.each { |player| @skips << [player, 7] } if settings['default_close']
     players.each { |p| p.cash = 25 } if players.size > 5
     step
     process_actions
@@ -118,7 +121,7 @@ class Game < Base
   end
 
   def acting_players
-    players.select { |p| can_act? p }
+    active_entities.map(&:player).uniq
   end
 
   def player_by_user user
@@ -126,7 +129,8 @@ class Game < Base
   end
 
   def player_by_id id
-    players.find { |p| p.id == id.to_i }
+    id = id.to_i
+    players.find { |p| p.id == id }
   end
 
   def phase_name
@@ -135,6 +139,10 @@ class Game < Base
 
   def phase_description
     PHASE_DESCRIPTION[@phase]
+  end
+
+  def owner
+    nil
   end
 
   def sorted_actions
@@ -291,6 +299,9 @@ class Game < Base
       pass_entity entity
     elsif data['action'] == 'autopass'
       @passes.include?(entity) ?  @passes.delete(entity) : @passes << entity
+    elsif data['action'] == 'skip'
+      skip = [entity, data['phase'].to_i]
+      @skips.include?(skip) ? @skips.delete(skip) : @skips << skip
     elsif msg = data['message']
       @log << "#{entity.name}: #{msg}"
     else
@@ -301,9 +312,15 @@ class Game < Base
   end
 
   def pass_entity entity
-    raise GameException, 'Already passed' if entity.passed?
+    raise GameException, "Already passed #{entity.name}" if entity.passed?
     raise GameException, 'Not your turn to pass' unless can_act? entity
-    entity.pass
+
+    if @phase == 9
+      process_phase_9 'corporation' => entity.name, 'amount' => 0
+    else
+      entity.pass
+    end
+
     @log << "#{entity.name} #{@current_bid ? 'leaves auction' : 'passes'}"
   end
 
@@ -571,8 +588,8 @@ class Game < Base
 
   def process_passes
     entity = active_entities.first
-
-    if @passes.include?(entity)
+    no_pass = entity.pending_closure?(ownership_tier) if @phase == 7
+    if @passes.include?(entity) || @skips.include?([entity&.player, @phase]) && !no_pass
       pass_entity(entity)
       step
     end

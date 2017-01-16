@@ -7,11 +7,15 @@ module Views
     needs show_synergies: false
     needs onclick: nil
     needs js_block: nil
+    needs sorted: true
     needs show_owner: false
 
     def content
       div do
-        companies.sort_by(&:value).reverse.each do |c|
+        cs = companies
+        cs = cs.sort_by(&:value).reverse if sorted
+
+        cs.each do |c|
           widget Company, {
             company: c,
             tier: tier,

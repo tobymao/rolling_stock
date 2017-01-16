@@ -7,6 +7,7 @@ module Views
     needs :companies
     needs :pending_companies
     needs :company_deck
+    needs :open_deck
     needs :tier
 
 
@@ -33,7 +34,7 @@ module Views
       div(class: 'heading') { text deck_text }
 
       div class: 'wrapper' do
-        render_deck
+        open_deck ? render_open_deck : render_deck
       end
     end
 
@@ -50,6 +51,14 @@ module Views
           )
         end
       end
+    end
+
+    def render_open_deck
+      widget Companies, {
+        companies: company_deck,
+        tier: tier,
+        sorted: false,
+      }
     end
 
   end
