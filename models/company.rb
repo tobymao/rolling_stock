@@ -206,7 +206,7 @@ class Company
   end
 
   def min_price
-    (@value + 1) / 2
+    owner.is_a?(ForeignInvestor) ? max_price : (@value + 1) / 2
   end
 
   def max_price

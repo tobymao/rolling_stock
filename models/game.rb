@@ -179,21 +179,11 @@ class Game < Base
         active_players.reject { |p| p.cash < min && !p.can_sell_shares? }
       end
     when 6
-      min_player_company = [
-        players.flat_map { |p| p.companies.map &:min_price }.min,
-        @foreign_investor.companies.map(&:min_price).min,
-        99999,
-      ].compact.min
+      purchasable = (held_companies + foreign_investor.companies).select &:can_be_sold?
 
-      corps = corporations.select do |corporation|
-        min_corp_company = @corporations
-          .reject { |c| c.companies.size == 1 && c == corporation }
-          .flat_map { |p| p.companies.map &:min_price }
-          .min
-
-        min_price = [min_player_company, min_corp_company].compact.min
-
-        corporation.active? && corporation.cash >= min_price
+      corps = @corporations.select do |corp|
+        min_price = purchasable.reject { |c| c.owner == corp }.map(&:min_price).min
+        corp.active? && corp.cash >= (min_price || 99999)
       end
 
       (@offers.map { |o| o.company.owner } + corps).uniq

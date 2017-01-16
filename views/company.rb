@@ -16,7 +16,7 @@ module Views
         data: {
           name: company.name,
           value: company.value,
-          min: company.owner.is_a?(::ForeignInvestor) ? company.max_price : company.min_price,
+          min: company.min_price,
           max: company.max_price,
         }
       }
