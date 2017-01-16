@@ -446,13 +446,10 @@ class Game < Base
           c.owner.cash >= price
       end if owner.is_a? ForeignInvestor
 
-      if suitors && suitors.empty?
-        raise GameException, 'Foreign Investor purchase must be max price' if price != company.max_price
+      if (suitors && suitors.empty?) || corporation.owned_by?(owner)
         corporation.buy_company company, price
-      elsif !corporation.owned_by? owner
-        @offers << Offer.new(corporation, company, price, suitors, @log)
       else
-        corporation.buy_company company, price
+        @offers << Offer.new(corporation, company, price, suitors, @log)
       end
     end
   end
