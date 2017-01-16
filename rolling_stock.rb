@@ -64,10 +64,17 @@ class RollingStock < Roda
 
   route do |r|
     r.root do
-      games = Game.eager([:user, :actions]).where(state: ['new', 'active']).order(:id).all
+      query = Sequel.pg_jsonb_op(:state).contains('status' => 'active') |
+        Sequel.pg_jsonb_op(:state).contains('status' => 'new')
+
+      if current_user
+        query |= Sequel.pg_array_op(:users).contains(Array(current_user.id)) &
+          Sequel.pg_jsonb_op(:state).contains('status' => 'finished')
+      end
+
+      games = Game.eager(:user).where(query).order(:id).all
       users = User.where(id: games.flat_map(&:users).uniq).all
       games.each { |game| game.players users }
-      games.select(&:active?).each &:load
 
       data = {
         new_games: games.select(&:new_game?),
@@ -179,8 +186,8 @@ class RollingStock < Roda
                 actions.each { |action_data| game.process_action_data action_data }
                 actions.each { |action_data| action.append_turn action_data }
 
+                update_game_state game
                 notify_game game, contains_message
-                game.touch
               else
                 raise GameException, "Round and phase don't match"
               end
@@ -194,8 +201,9 @@ class RollingStock < Roda
           r.halt 403 unless game.user == current_user
 
           r.is 'start' do
-            game.update state: 'active', users: game.users.shuffle
+            game.update users: game.users.shuffle
             game.start_game
+            update_game_state game, 'status' => 'active'
             notify_game game
             r.redirect path(game)
           end
@@ -276,6 +284,16 @@ class RollingStock < Roda
       session[:return_to] = path
       request.redirect '/login'
     end
+  end
+
+  def update_game_state game, hash = {}
+    state = {
+      'round'  => game.round,
+      'phase'  => game.phase,
+      'acting' => game.acting_players.map(&:name),
+    }.merge(hash)
+
+    game.update_state state
   end
 
   def notify_game o_game, contains_message = false

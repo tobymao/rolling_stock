@@ -87,9 +87,8 @@ module Views
         end
 
         if game.active?
-          div "Round: #{game.round} Phase: #{game.phase}"
-          acting = game.players.select { |p| game.can_act? p }
-          div "Acting: #{acting.map(&:name).join(', ')}"
+          div "Round: #{game.state['round']} Phase: #{game.state['phase']}"
+          div "Acting: #{game.state['acting'].join(', ')}"
         end
       end
     end

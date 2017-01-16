@@ -51,11 +51,25 @@ class Game < Base
     Game.create(
       user: user,
       users: [user.id],
-      version: '1.0',
-      settings: '',
-      state: 'new',
-      deck: [],
+      settings: { 'version' => '1.0' },
+      state: { status: 'new' },
     )
+  end
+
+  def update_state hash
+    update state: state.merge(hash)
+  end
+
+  def new_game?
+    state['status'] == 'new'
+  end
+
+  def active?
+    state['status'] == 'active'
+  end
+
+  def finished?
+    state['status'] == 'finished'
   end
 
   def load round = nil, phase = nil
@@ -90,15 +104,21 @@ class Game < Base
     process_actions
   end
 
-  def players all_users = nil
+  def players preloaded = nil
     @_players ||=
       begin
-        user_ids = users.to_a
-        (all_users&.select { |u| user_ids.include? u.id } || User.where(id: user_ids))
+        ids = users.to_a
+        user_models = preloaded.select { |u| ids.include? u.id } if preloaded
+        user_models = User.where(id: ids) unless user_models
+        user_models
           .map { |user| Player.new(user.id, user.name, @log) }
-          .each{ |player| player.order = user_ids.find_index(player.id) + 1 }
+          .each{ |player| player.order = ids.find_index(player.id) + 1 }
           .sort_by(&:order)
       end
+  end
+
+  def acting_players
+    players.select { |p| can_act? p }
   end
 
   def player_by_user user
@@ -107,18 +127,6 @@ class Game < Base
 
   def player_by_id id
     players.find { |p| p.id == id.to_i }
-  end
-
-  def new_game?
-    state == 'new'
-  end
-
-  def active?
-    state == 'active'
-  end
-
-  def finished?
-    state == 'finished'
   end
 
   def phase_name
@@ -229,7 +237,7 @@ class Game < Base
 
   def can_act? entity
     if entity.is_a? Player
-      acting.any? { |e| e.owned_by? entity } || @offers.find { |o| o.company.owned_by? entity }
+      acting.any? { |e| e.owned_by? entity } || @offers&.find { |o| o.company.owned_by? entity }
     else
       acting.include? entity
     end
@@ -501,7 +509,7 @@ class Game < Base
   private
 
   def setup_deck
-    if deck.size.zero?
+    unless state['deck']
       groups = Company.all.values.group_by &:tier
       new_deck = []
 
@@ -521,10 +529,10 @@ class Game < Base
         new_deck.concat group.shuffle!
       end
 
-      update deck: new_deck.map(&:name)
+      update_state 'deck' => new_deck.map(&:name)
     end
 
-    @company_deck = deck.map { |sym| Company.new self, sym, *Company::COMPANIES[sym], @log }
+    @company_deck = state['deck'].map { |sym| Company.new self, sym, *Company::COMPANIES[sym], @log }
   end
 
   def draw_companies
@@ -612,7 +620,11 @@ class Game < Base
     @ended = true
     scores = players.sort_by(&:value).reverse.map { |p| "#{p.name} ($#{p.value})" }
     @log << "Game over. #{scores.join ', '}"
-    update state: :finished
+
+    if active?
+      result = players.map { |p| [p.id, p.value] }.to_h
+      update_state 'status' => 'finished', 'result' => result
+    end
   end
 
   def change_phase

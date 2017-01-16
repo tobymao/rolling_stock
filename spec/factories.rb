@@ -9,11 +9,7 @@ FactoryGirl.define do
 
   factory :game do
     sequence :id
-    version '1.0'
     users []
-    deck []
-    settings ''
-    state :new
     association :user
   end
 

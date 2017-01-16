@@ -7,9 +7,9 @@ Sequel::Model.plugin :timestamps, update_on_create: true
 Sequel::Model.plugin :touch
 Sequel.default_timezone = :utc
 Sequel.extension :migration
-Sequel.extension :pg_array_ops
-DB.extension :pg_array
-DB.extension :pg_enum # This needs to be loaded after migration
+Sequel.extension :pg_array_ops, :pg_json_ops
+# This needs to be loaded after migration
+DB.extension :pg_array, :pg_json, :pg_enum
 
 if ENV['RACK_ENV'] == 'development'
   require 'logger'
