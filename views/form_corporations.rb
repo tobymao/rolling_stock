@@ -55,7 +55,7 @@ module Views
 
           div style: inline(display: 'table-row') do
             render_column "$#{share_price.price}"
-            render_column "#{info[:num_shares]}"
+            render_column "#{info[:num_shares] * 2}"
             render_column "$#{info[:seed]}"
             render_column "$#{info[:cash]}"
           end

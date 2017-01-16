@@ -70,7 +70,7 @@ module Views
             input entity_props
 
             label style: inline(margin_left: '5px') do
-              text "#{entity.name}#{autopassed ? ' (autopassed)' : ''}"
+              text "#{entity.name}#{autopassed ? ' (passing)' : ''}"
             end
           end
         end

@@ -203,7 +203,7 @@ class Corporation < Purchaser
     @president.shares.concat @shares.shift(num_shares)
     @shares_count[@president] += num_shares
     @bank_shares.concat @shares.shift(num_shares)
-    @log << "#{owner.name} forms corporation #{name} with #{company.name} at $#{price} - #{num_shares} shares issued."
+    @log << "#{owner.name} forms corporation #{name} with #{company.name} at $#{price} - #{num_shares * 2} shares issued."
   end
 
   def swap_share_price new_price
