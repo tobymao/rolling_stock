@@ -69,7 +69,7 @@ class Game < Base
     @current_bid = nil
     @max_bids = {}
     @offers = []
-    @passes = []
+    @passes = Set.new
     @foreign_investor = ForeignInvestor.new @log
     @round = 1
     @phase = 1
@@ -195,6 +195,8 @@ class Game < Base
         .select { |c| c.active? || c.pending_closure?(ownership_tier) }
     when 9
       active_corporations
+    else
+      []
     end
   end
 
@@ -227,8 +229,7 @@ class Game < Base
 
   def can_act? entity
     if entity.is_a? Player
-      acting.any? { |e| e.owned_by? entity } ||
-        @offers.find { |o| o.company.owned_by? entity }
+      acting.any? { |e| e.owned_by? entity } || @offers.find { |o| o.company.owned_by? entity }
     else
       acting.include? entity
     end
@@ -266,6 +267,7 @@ class Game < Base
       process_phase_10
     end
 
+    process_passes
     step if @phase != current_phase
   end
 
@@ -278,40 +280,31 @@ class Game < Base
   end
 
   def process_action_data data
-    if data['action'] == 'pass'
-      entities = [
-        active_companies.select { |c| data['company'] == c.name },
-        player_by_id(data['player']),
-        @corporations.select { |c| data['corporation'] ==  c.name },
-      ].flatten.compact
-
-      raise GameException, 'No one to pass' if entities.empty?
-
-      entities.each do |entity|
-        if can_act? entity.owner
-          pass_entity entity
-        else
-          @passes << entity
-        end
+    entity =
+      if id = data['player']
+        player_by_id id
+      elsif id = data['corporation']
+        @corporations.find { |c| id == c.name }
+      elsif id = data['company']
+        held_companies.find { |c| id == c.name }
       end
+
+    if data['action'] == 'pass'
+      pass_entity entity
+    elsif data['action'] == 'autopass'
+      @passes.include?(entity) ?  @passes.delete(entity) : @passes << entity
     elsif msg = data['message']
-      player = player_by_id data['player'].to_i
-      @log << "#{player.name}: #{msg}"
+      @log << "#{entity.name}: #{msg}"
     else
       send "process_phase_#{@phase}", data
     end
-
-    @passes.each do |entity|
-      pass_entity(entity) if can_act? entity
-    end
-
-    @passes.reject! &:passed?
 
     step
   end
 
   def pass_entity entity
     raise GameException, 'Already passed' if entity.passed?
+    raise GameException, 'Not your turn to pass' unless can_act? entity
     entity.pass
     @log << "#{entity.name} #{@current_bid ? 'leaves auction' : 'passes'}"
   end
@@ -415,11 +408,11 @@ class Game < Base
     corporation = @corporations.find { |c| c.name == data['corporation'] }
     companies = held_companies + @foreign_investor.companies
     company = companies.find { |c| c.name == data['company'] }
+    owner = company.owner
     offer = @offers.find do |o|
       (o.corporation == corporation && o.company == company) ||
         (o.company == company && o.foreign_purchase?)
     end
-    owner = company.owner
 
     case data['action']
     when 'accept'
@@ -440,14 +433,14 @@ class Game < Base
           offer.corporation.buy_company(company, offer.price)
         end
       else
-        @log << "#{company.owner.name} declines to sell #{company.name} to #{corporation.name} for $#{offer.price}"
+        @log << "#{owner.name} declines to sell #{company.name} to #{corporation.name} for $#{offer.price}"
         @offers.delete offer
       end
     else
       price = data['price'].to_i
       raise GameException, 'Not a valid price' unless company.valid_price? price
       raise GameException, 'Already have an offer' if @offers.any? { |o| o.corporation == corporation && o.company == company}
-      raise GameException, 'Cannot buy own company' if corporation == company.owner
+      raise GameException, 'Cannot buy own company' if corporation == owner
 
       suitors = @corporations.select do |c|
         c.price > corporation.price &&
@@ -579,6 +572,15 @@ class Game < Base
     end
   end
 
+  def process_passes
+    entity = active_entities.first
+
+    if @passes.include?(entity)
+      pass_entity(entity)
+      step
+    end
+  end
+
   def check_no_player_purchases
     if @current_bid && active_entities.reject { |p| p == @current_bid.player }.empty?
       @current_bid.player.buy_company @current_bid.company, @current_bid.price
@@ -626,6 +628,8 @@ class Game < Base
       @phase = 1
       @round += 1
     end
+
+    @passes.clear
 
     @log << "-- Round: #{@round} Phase: #{@phase} (#{phase_name}) --"
   end

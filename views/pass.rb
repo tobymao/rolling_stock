@@ -6,15 +6,17 @@ module Views
     needs :current_player
 
     def content
-      entities = game.active_entities.select do |entity|
-        entity.owned_by?(current_player) && !game.passes.include?(entity)
-      end
+      entities = game.active_entities
+      entities << current_player if game.phase == 3
+      entities.select! { |entity| entity.owned_by? current_player }
+      entities.uniq!
 
       entities.reject! do |entity|
         entity.respond_to?(:pending_closure?) && entity.pending_closure?(game.ownership_tier)
       end if game.phase == 7
 
       return if entities.empty?
+
       solo = entities.size == 1
       can_act = game.can_act? current_player
 
@@ -26,57 +28,70 @@ module Views
             'Select entities to pass'
           end
         else
-          solo ? 'Pass your turn early' : 'Select entities to pass early'
+          'Auto Pass (checked entities will pass this phase)'
         end
 
       div pass_text
 
-      render_js
-
       game_form do
         entities.each do |entity|
-          entity_active = game.can_act? entity
+          active = game.can_act? entity
+          autopassed = game.passes.include? entity
 
-          pass_props = {
-            name: data(entity.type),
-            value: entity.id,
+          checkbox_props = {
+            type: 'checkbox',
+            checked: (active || autopassed),
             onclick: 'Pass.onClick(this)',
+            disabled: (solo && active),
+            data: {
+              autopassed: autopassed,
+            }
           }
 
-          if solo
-            pass_props[:type] = 'hidden'
-          else
-            pass_props[:type] = 'checkbox'
-            pass_props[:checked] = 'true' if entity_active
-          end
+          pass_type_props = {
+            name: data('action'),
+            value: (active ? 'pass' : 'autopass'),
+            type: 'hidden',
+            class: 'pass_input',
+            disabled: !active,
+          }
+
+          entity_props = {
+            name: data(entity.type),
+            value: entity.id,
+            type: 'hidden',
+            class: 'pass_input',
+            disabled: !active,
+          }
 
           div do
-            input pass_props
-            input type: 'hidden', name: data('action'), value: 'pass', disabled: !(solo || entity_active)
-            label(style: inline(margin_right: '5px')) { text entity.name } unless solo
+            input checkbox_props
+            input pass_type_props
+            input entity_props
+
+            label style: inline(margin_left: '5px') do
+              text "#{entity.name}#{autopassed ? ' (autopassed)' : ''}"
+            end
           end
         end
 
-        submit_props = {
-          type: 'submit',
-          value: can_act ? 'Pass' : 'Pass Out Of Order',
-        }
-
-        div do
-          input submit_props
-        end
+        input type: 'submit', value: (can_act ? 'Pass' : 'Save Pass Setting')
       end
+
+      render_js
     end
 
     def render_js
       script <<~JS
         var Pass = {
           onClick: function(el) {
-            $(el).next().attr('disabled', !el.checked);
+            $(el).siblings('.pass_input').attr('disabled', function(_, attr) {
+              return !attr
+            });
           }
         }
       JS
     end
-  end
 
+  end
 end
