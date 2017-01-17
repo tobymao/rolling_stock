@@ -3,6 +3,7 @@ class Offer
   attr_reader :suitors
 
   def initialize corporation, company, price, suitors, log = nil
+    raise GameException, 'Cannot offer more cash than you have' if price > corporation.cash
     @corporation = corporation
     @company     = company
     @price       = price

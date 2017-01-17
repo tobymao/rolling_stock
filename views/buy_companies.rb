@@ -108,7 +108,8 @@ module Views
         var BuyCompanies = {
           onClick: function(el) {
             var data = el.dataset;
-            $('#bid_price').attr({ 'min': data.min, 'max': data.max, 'value': data.max });
+            var max = Math.min(this.cash, data.max);
+            $('#bid_price').attr({ 'min': data.min, 'max': max, 'value': max });
             $('#bid_company').attr('value', data.name);
             $('#bid_submit').attr('disabled', false);
             $('.selected').removeClass('selected');
@@ -119,12 +120,13 @@ module Views
             var data = $('#corp_selector option:selected').data();
             if (!data) { return; }
 
-            var cash = data['cash'];
+            this.cash = data['cash'];
+
             var companies = data['companies'];
             $('#companies .company').each(function(index, company) {
               var cData = company.dataset;
 
-              if (cash < cData.min || $.inArray(cData.name, companies) > -1) {
+              if (BuyCompanies.cash < cData.min || $.inArray(cData.name, companies) > -1) {
                 $(company).hide();
               } else {
                 $(company).show();
