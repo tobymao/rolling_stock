@@ -37,7 +37,8 @@ module Views
 
     def render_how_to_play
       render_segment do
-        text 'To play, first join a game. You can play live or receive email notifications and play asynchronously.'
+        text 'To play, first create an account and then join a game.'
+        text ' You can play live or receive email notifications and play asynchronously.'
         text ' Each game consists of many rounds. Each round consists of phases.'
         text ' Phases are sequential, but in the early stages of the game, some'
         text ' phases will be skipped because there is nothing to do.'
