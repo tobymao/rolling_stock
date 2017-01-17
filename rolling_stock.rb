@@ -75,14 +75,7 @@ class RollingStock < Roda
       games = Game.eager(:user).where(query).order(:id).all
       users = User.where(id: games.flat_map(&:users).uniq).all
       games.each { |game| game.players users }
-
-      data = {
-        new_games: games.select(&:new_game?),
-        active_games: games.select(&:active?),
-        messages: sync { MESSAGES.dup },
-      }
-
-      widget Views::Index, data
+      widget Views::Index, games: games, messages: sync { MESSAGES.dup }
     end
 
     r.on 'chat' do

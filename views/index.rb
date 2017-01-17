@@ -2,12 +2,14 @@ require './views/page'
 
 module Views
   class Index < Page
-    needs :new_games
-    needs :active_games
+    needs :games
     needs :messages
 
     def render_main
       @current_user = app.current_user
+      new_games      = games.select &:new_game?
+      active_games   = games.select &:active?
+      finished_games = games.select &:finished?
 
       div class: 'wrapper' do
         div style: inline(font_size: '20px') do
@@ -37,6 +39,10 @@ module Views
         div style: block_style do
           render_games 'New Games', new_games
         end unless new_games.empty?
+
+        div style: block_style do
+          render_games 'Finished Games', finished_games
+        end unless finished_games.empty?
 
         div style: block_style do
           render_games 'Active Games', active
@@ -82,13 +88,29 @@ module Views
         div "Owner: #{game.user.name}"
         div "Created At: #{game.created_at} "
         div "Last Move: #{game.updated_at}"
-        div style: inline(white_space: 'nowrap', overflow: 'hidden', text_overflow: 'ellipsis') do
+        div "Variants: Open Deck" if game.settings['open_deck']
+        overflow_style = inline(
+          white_space: 'nowrap',
+          overflow: 'hidden',
+          text_overflow: 'ellipsis',
+        )
+        div style: overflow_style do
           text "Players: #{game.players.map(&:name).join(', ')}"
         end
 
         if game.active?
           div "Round: #{game.state['round']} Phase: #{game.state['phase']}"
           div "Acting: #{game.state['acting'].join(', ')}"
+        elsif game.finished?
+          result = game
+            .state['result']
+            .to_a
+            .sort_by! { |_, v| -v }
+            .map! { |id, value| "#{game.player_by_id(id).name} ($#{value})"}
+
+          div style: overflow_style do
+            text "Result: #{result.join(', ')}"
+          end
         end
       end
     end
