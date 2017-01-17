@@ -8,15 +8,7 @@ module Views
     def render_main
       render_js unless game.check_point
 
-      error_style = inline(
-        background_color: 'lightsalmon',
-        text_align: 'center',
-        font_weight: 'bold',
-        font_size: '18px',
-        padding: '5px',
-      )
-
-      div style: error_style do
+      div class: 'error' do
         text error
       end if error
 

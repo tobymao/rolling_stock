@@ -63,6 +63,14 @@ module Views
         .selected {
           background-color: lightblue;
         }
+
+        .error {
+          background-color: lightsalmon;
+          text-align: center;
+          font-weight: bold;
+          font-size: 18px;
+          padding: 5px;
+        }
       CSS
     end
     static :render_style

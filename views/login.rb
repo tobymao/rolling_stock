@@ -3,8 +3,13 @@ require './views/page'
 module Views
   class Login < Page
     needs create: nil
+    needs error: nil
 
     def render_main
+      div class: 'error' do
+        text error
+      end if error
+
       path = create ? '/user' : '/login'
 
       form class: 'wrapper', action: path, method: 'post' do

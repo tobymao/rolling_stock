@@ -218,13 +218,18 @@ class RollingStock < Roda
 
     r.on 'login' do
       r.get do
-        widget Views::Login
+        widget Views::Login, error: flash[:login_error]
       end
 
       r.post do
         user = User[Sequel.function(:lower, :email) => r['email'].downcase]
-        r.redirect '/login' unless user
-        login_user user
+
+        if user && user.password == r['password']
+          login_user user
+        else
+          flash[:login_error] = 'Wrong email or password'
+          r.redirect '/login'
+        end
       end
     end
 
