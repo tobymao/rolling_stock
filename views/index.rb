@@ -12,12 +12,6 @@ module Views
       finished_games = games.select &:finished?
 
       div class: 'wrapper' do
-        div style: inline(font_size: '20px') do
-          div "I'm going to reset the database after I finish game 2"
-          div "All games will be lost after that... sorry!"
-          br
-        end
-
         widget Chat, current_user: @current_user, messages: messages
 
         block_style = inline(
