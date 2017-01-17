@@ -151,9 +151,14 @@ class RollingStock < Roda
           authenticate r.path unless current_user
 
           r.is 'join' do
-            game.users << current_user.id
-            game.save
-            notify_game game
+            if game.users.size < 6
+               game.users << current_user.id
+               game.save
+               notify_game game
+             else
+               flash[:error] = 'Game can only have 6 people'
+             end
+            
             r.redirect path(game)
           end
 
