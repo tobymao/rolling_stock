@@ -300,7 +300,7 @@ class RollingStock < Roda
     state = {
       'round'  => game.round,
       'phase'  => game.phase,
-      'acting' => game.acting_players.map(&:name),
+      'acting' => game.acting_players.map(&:id),
     }.merge(hash)
 
     game.update_state state
