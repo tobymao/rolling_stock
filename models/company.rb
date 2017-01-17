@@ -81,7 +81,7 @@ class Company
 
   def self.all
     @@all ||= Company::COMPANIES.map do |sym, params|
-      [sym, Company.new(self, sym, *params).freeze]
+      [sym, Company.new(nil, sym, *params).freeze]
     end.to_h.freeze
   end
 

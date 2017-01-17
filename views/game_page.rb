@@ -3,14 +3,9 @@ require './views/page'
 module Views
   class GamePage < Page
     needs :game
-    needs error: nil
 
     def render_main
       render_js unless game.check_point
-
-      div class: 'error' do
-        text error
-      end if error
 
       update_style = inline(
         background_color: 'lightgreen',

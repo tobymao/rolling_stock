@@ -78,6 +78,10 @@ class RollingStock < Roda
       widget Views::Index, games: games, messages: sync { MESSAGES.dup }
     end
 
+    r.on 'tutorial' do
+      widget Views::Tutorial
+    end
+
     r.on 'chat' do
       room = sync { ROOMS['main'] }
 
@@ -140,7 +144,7 @@ class RollingStock < Roda
         game.load r['round'], r['phase']
 
         r.get do
-          widget Views::GamePage, game: game, error: flash[:game_error]
+          widget Views::GamePage, game: game
         end
 
         r.post do
@@ -188,7 +192,7 @@ class RollingStock < Roda
                 raise GameException, "Round and phase don't match"
               end
             rescue GameException => error
-              flash[:game_error] = error.message
+              flash[:error] = error.message
             end
 
             r.redirect path(game)
@@ -218,7 +222,7 @@ class RollingStock < Roda
 
     r.on 'login' do
       r.get do
-        widget Views::Login, error: flash[:login_error]
+        widget Views::Login
       end
 
       r.post do
@@ -227,7 +231,7 @@ class RollingStock < Roda
         if user && user.password == r['password']
           login_user user
         else
-          flash[:login_error] = 'Wrong email or password'
+          flash[:error] = 'Wrong email or password'
           r.redirect '/login'
         end
       end

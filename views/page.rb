@@ -21,6 +21,7 @@ module Views
 
         div style: inline(min_height: '95%') do
           render_nav
+          div(class: 'error') { text app.flash[:error] } if app.flash[:error]
           render_main
         end
 
@@ -146,6 +147,7 @@ module Views
     def render_nav
       links = [
         ['Home', '/'],
+        ['Tutorial', '/tutorial'],
       ]
 
       if app.current_user

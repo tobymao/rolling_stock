@@ -4,7 +4,7 @@ describe RollingStock do
   let(:app) { RollingStock.freeze.app }
 
   describe 'get requests' do
-    %w[/ signup login].each do |path|
+    %w[/ signup login tutorial].each do |path|
       it "#{path} should return 200" do
         get path
         expect(last_response).to be_ok
