@@ -72,7 +72,7 @@ module Views
         vertical_align: 'top',
       }
 
-      if game.can_act? game.player_by_user(@current_user)
+      if game.state['acting'].include? @current_user.id
         game_style[:background_color] = 'lightsalmon'
       end if game.active? && @current_user
 
@@ -94,7 +94,8 @@ module Views
 
         if game.active?
           div "Round: #{game.state['round']} Phase: #{game.state['phase']}"
-          div "Acting: #{game.state['acting'].join(', ')}"
+          names = game.state['acting'].map { |id| game.player_by_id(id).name }
+          div "Acting: #{names.join(', ')}"
         elsif game.finished?
           result = game
             .state['result']
