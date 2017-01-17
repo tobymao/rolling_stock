@@ -6,6 +6,8 @@ module Views
     needs :current_player
 
     def content
+      return unless current_player
+
       div do
         render_passes
       end unless game.phase == 9
