@@ -11,6 +11,21 @@ module Views
         rawtext app.csrf_tag
 
         label do
+          num_players_props = {
+            type: 'number',
+            name: 'max_players',
+            min: 1,
+            max: 6,
+            value: 5,
+            style: inline(margin_right: '5px'),
+          }
+          input num_players_props
+          text 'Max players'
+        end
+
+        br
+
+        label do
           input type: 'checkbox', name: 'open_deck'
           text 'Open Deck'
         end

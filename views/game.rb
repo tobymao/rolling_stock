@@ -14,14 +14,43 @@ module Views
       div class: 'wrapper' do
         div(class: 'heading') { text "Game #{game.id} Waiting for players..." }
 
-        div style: inline(margin: '5px') do
-          game.players.each { |player| div player.name }
+        render_players
+
+        if !game.players.include?(@current_player) &&
+            game.new_game? &&
+            game.users.size < game.max_players
+          render_join_button
         end
 
-        render_join_button if !game.players.include?(@current_player) && game.new_game?
         if game.user == current_user
           render_start_button
           render_delete_button
+        elsif game.users.include? current_user&.id
+          render_leave_button
+        end
+      end
+    end
+
+    def render_players
+      remove_props = {
+        action: app.path(game, 'remove'),
+        style: inline(display: 'inline-block', margin_left: '5px'),
+        method: 'post',
+      }
+
+      div style: inline(margin: '5px') do
+        game.players.each do |player|
+          div do
+            div style: inline(display: 'inline-block') do
+              text player.name
+            end
+
+            form remove_props do
+              rawtext app.csrf_tag
+              input type: 'hidden', name: 'player', value: player.id
+              input type: 'submit', value: 'Remove'
+            end if game.user == current_user && player != @current_player
+          end
         end
       end
     end
@@ -105,6 +134,13 @@ module Views
       form action: app.path(game, 'delete'), method: 'post' do
         rawtext app.csrf_tag
         input type: 'submit', value: 'Delete Game'
+      end
+    end
+
+    def render_leave_button
+      form action: app.path(game, 'leave'), method: 'post' do
+        rawtext app.csrf_tag
+        input type: 'submit', value: 'Leave Game'
       end
     end
 

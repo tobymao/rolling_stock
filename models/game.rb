@@ -29,6 +29,8 @@ class Game < Base
     9 => 'Select the amount of dividends to pay each share',
   }.freeze
 
+  DEFAULT_MAX_PLAYERS = 5.freeze
+
   attr_reader(
     :share_prices,
     :available_corporations,
@@ -71,6 +73,10 @@ class Game < Base
 
   def finished?
     state['status'] == 'finished'
+  end
+
+  def max_players
+    settings['max_players'] || DEFAULT_MAX_PLAYERS
   end
 
   def load round = nil, phase = nil

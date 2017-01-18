@@ -96,6 +96,8 @@ module Views
           div "Round: #{game.state['round']} Phase: #{game.state['phase']}"
           names = game.state['acting'].map { |id| game.player_by_id(id).name }
           div "Acting: #{names.join(', ')}"
+        elsif game.new_game?
+          div "Max Players: #{game.max_players}"
         elsif game.finished?
           result = game
             .state['result']

@@ -75,11 +75,11 @@ module Views
     end
 
     def render_skips
-      div onclick: 'Pass.expand(this)', style: inline(cursor: 'pointer') do
-        text 'Automatically skip checked phases [+]'
+      div onclick: 'Pass.expand(this)', style: inline(display: 'inline-block', cursor: 'pointer') do
+        text 'Automatically skip checked phases (click to expand)'
       end
 
-      game_form id: 'skip_form' do
+      game_form id: 'skip_form', style: inline(display: 'block') do
         ::Game::PHASE_DESCRIPTION.keys.sort.each do |phase|
           skipped = game.skips.include? [current_player, phase]
 

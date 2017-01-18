@@ -116,6 +116,10 @@ class RollingStock < Roda
         settings = {}
         settings['default_close'] = true if r['default_close']
         settings['open_deck'] = true if r['open_deck']
+
+        max = r['max_players'].to_i
+        settings['max_players'] = max.between?(1, 6) ? max : Game::DEFAULT_MAX_PLAYERS
+
         game = Game.empty_game current_user, settings
         r.redirect path(game)
       end
@@ -151,14 +155,12 @@ class RollingStock < Roda
           authenticate r.path unless current_user
 
           r.is 'join' do
-            if game.users.size < 6
+            if game.users.size < game.max_players
                game.users << current_user.id
                game.save
                notify_game game
-             else
-               flash[:error] = 'Game can only have 6 people'
              end
-            
+
             r.redirect path(game)
           end
 
@@ -203,12 +205,27 @@ class RollingStock < Roda
             r.redirect path(game)
           end
 
+          r.is 'leave' do
+            r.halt 403 if !game.new_game? || game.user == current_user
+            game.users.delete current_user.id
+            game.save
+            notify_game game
+            r.redirect path(game)
+          end
+
           r.halt 403 unless game.user == current_user
 
           r.is 'start' do
             game.update users: game.users.shuffle
             game.start_game
             update_game_state game, 'status' => 'active'
+            notify_game game
+            r.redirect path(game)
+          end
+
+          r.is 'remove' do
+            game.users.delete r['player'].to_i
+            game.save
             notify_game game
             r.redirect path(game)
           end
