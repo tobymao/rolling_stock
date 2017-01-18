@@ -4,12 +4,14 @@ module Views
   class Index < Page
     needs :games
     needs :messages
+    needs :limit
 
     def render_main
-      @current_user = app.current_user
-      new_games      = games.select &:new_game?
-      active_games   = games.select &:active?
-      finished_games = games.select &:finished?
+      @current_user             = app.current_user
+      new_games                 = games.select &:new_game?
+      finished_games            = games.select &:finished?
+      active                    = games.select &:active?
+      your_games, active_games  = active.partition { |g| g.users.include? @current_user&.id }
 
       div class: 'wrapper' do
         widget Chat, current_user: @current_user, messages: messages
@@ -24,23 +26,21 @@ module Views
           render_new_game
         end if @current_user
 
-        yours, active = active_games.partition { |g| g.users.include? @current_user&.id }
+        div style: block_style do
+          render_games 'Your Games', your_games, 'yours'
+        end unless your_games.empty?
 
         div style: block_style do
-          render_games 'Your Games', yours
-        end unless yours.empty?
-
-        div style: block_style do
-          render_games 'New Games', new_games
+          render_games 'New Games', new_games, 'new'
         end unless new_games.empty?
 
         div style: block_style do
-          render_games 'Finished Games', finished_games
-        end unless finished_games.empty?
+          render_games 'Active Games', active_games, 'active'
+        end unless active_games.empty?
 
         div style: block_style do
-          render_games 'Active Games', active
-        end unless active.empty?
+          render_games 'Finished Games', finished_games, 'finished'
+        end unless finished_games.empty?
       end
     end
 
@@ -52,12 +52,14 @@ module Views
       widget NewGame
     end
 
-    def render_games heading, games
+    def render_games heading, games, page_name
       div class: 'heading' do
         text heading
       end
 
-      games.each do |game|
+      widget Pager, more: games.size > limit, page_name: page_name
+
+      games.take(limit).each do |game|
         render_game game
       end
     end

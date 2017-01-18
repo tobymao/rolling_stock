@@ -58,24 +58,37 @@ class RollingStock < Roda
   MESSAGES = []
   NOTIFIED = {}
 
+  PAGE_LIMIT = 10
+
   def sync
     MUTEX.synchronize { yield }
   end
 
   route do |r|
     r.root do
-      query = Sequel.pg_jsonb_op(:state).contains('status' => 'active') |
-        Sequel.pg_jsonb_op(:state).contains('status' => 'new')
+      games = []
+
+      new_query = Sequel.pg_jsonb_op(:state).contains('status' => 'new')
+      active_query = Sequel.pg_jsonb_op(:state).contains('status' => 'active') &
+        (Sequel.pg_array_op(:users).length(1) > 2)
 
       if current_user
-        query |= Sequel.pg_array_op(:users).contains(Array(current_user.id)) &
+        active_query &= Sequel.~(Sequel.pg_array_op(:users).contains([current_user.id]))
+        finished_query = Sequel.pg_array_op(:users).contains([current_user.id]) &
           Sequel.pg_jsonb_op(:state).contains('status' => 'finished')
+        your_query = Sequel.pg_jsonb_op(:state).contains('status' => 'active') &
+          Sequel.pg_array_op(:users).contains([current_user.id])
+
+        games.concat(query_games 'finished', finished_query)
+        games.concat(query_games 'yours', your_query)
       end
 
-      games = Game.eager(:user).where(query).order(:id).all
+      games.concat(query_games 'new', new_query)
+      games.concat(query_games 'active', active_query)
+
       users = User.where(id: games.flat_map(&:users).uniq).all
       games.each { |game| game.players users }
-      widget Views::Index, games: games, messages: sync { MESSAGES.dup }
+      widget Views::Index, games: games, limit: PAGE_LIMIT, messages: sync { MESSAGES.dup }
     end
 
     r.on 'tutorial' do
@@ -352,6 +365,19 @@ class RollingStock < Roda
   def widget klass, needs = {}
     needs[:app] = self
     klass.new(**needs).to_html
+  end
+
+  def query_games page, query
+    p = request[page].to_i
+    p = p <= 0 ? 1 : p
+
+    Game
+      .eager(:user)
+      .reverse_order(:id)
+      .limit(PAGE_LIMIT + 1)
+      .offset((p - 1) * PAGE_LIMIT)
+      .where(query)
+      .all
   end
 
   def send_mail game, user, msg
