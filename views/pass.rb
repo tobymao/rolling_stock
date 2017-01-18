@@ -79,6 +79,16 @@ module Views
         text 'Automatically skip checked phases (click to expand)'
       end
 
+      negative_count = game
+        .held_companies
+        .select { |c| c.player == current_player }
+        .count { |c| c.income - c.cost_of_ownership(game.ownership_tier) < 0 }
+
+      div style: inline(color: 'salmon') do
+        text 'WARNING: You have negative income companies and phase 7 skip on.'
+        text 'If you wish to close companies, uncheck phase 7 skip.'
+      end if game.skips.include?([current_player, 7]) && negative_count > 0
+
       game_form id: 'skip_form', style: inline(display: 'block') do
         ::Game::PHASE_DESCRIPTION.keys.sort.each do |phase|
           skipped = game.skips.include? [current_player, phase]
