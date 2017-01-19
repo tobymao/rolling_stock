@@ -57,7 +57,7 @@ module Views
           },
 
           watch: function() {
-            $('form').change(function() { GamePage.changed = true; });
+            $('form').on('input change', function() { GamePage.changed = true; });
           },
         }
 
