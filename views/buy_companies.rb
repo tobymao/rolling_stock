@@ -107,6 +107,7 @@ module Views
       <<~JS
         var BuyCompanies = {
           onClick: function(el) {
+            GamePage.changed = true;
             var data = el.dataset;
             var max = Math.min(this.cash, data.max);
             $('#bid_price').attr({ 'min': data.min, 'max': max, 'value': max });
