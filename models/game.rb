@@ -40,7 +40,7 @@ class Game < Base
     :company_deck,
     :current_bid,
     :offers,
-    :passes,
+    :autopasses,
     :skips,
     :foreign_investor,
     :round,
@@ -90,8 +90,10 @@ class Game < Base
     @current_bid = nil
     @max_bids = {}
     @offers = []
-    @passes = Set.new
+    @autopasses = Set.new
     @skips = Set.new
+    # when a user autopasses in an auction, it's only to leave the auction
+    @leaves = Set.new
     @foreign_investor = ForeignInvestor.new @log
     @round = 1
     @phase = 1
@@ -279,7 +281,7 @@ class Game < Base
       process_phase_10
     end
 
-    process_passes
+    process_autopasses
     step if @phase != current_phase
   end
 
@@ -304,7 +306,7 @@ class Game < Base
     if data['action'] == 'pass'
       pass_entity entity
     elsif data['action'] == 'autopass'
-      @passes.include?(entity) ?  @passes.delete(entity) : @passes << entity
+      autopass entity
     elsif data['action'] == 'skip'
       skip = [entity, data['phase'].to_i]
       @skips.include?(skip) ? @skips.delete(skip) : @skips << skip
@@ -315,6 +317,16 @@ class Game < Base
     end
 
     step
+  end
+
+  def autopass entity
+    if @autopasses.include? entity
+      @autopasses.delete entity
+      @leaves.delete entity if @current_bid
+    else
+      @autopasses << entity
+      @leaves << entity if @current_bid
+    end
   end
 
   def pass_entity entity
@@ -592,10 +604,10 @@ class Game < Base
     end
   end
 
-  def process_passes
+  def process_autopasses
     entity = active_entities.first
     no_pass = entity.pending_closure?(ownership_tier) if @phase == 7
-    if @passes.include?(entity) || @skips.include?([entity&.player, @phase]) && !no_pass
+    if @autopasses.include?(entity) || @skips.include?([entity&.player, @phase]) && !no_pass
       pass_entity(entity)
       step
     end
@@ -610,6 +622,9 @@ class Game < Base
       @max_bids.clear
       @auction_starter = nil
       @current_bid = nil
+
+      @autopasses -= @leaves
+      @leaves.clear
     end
 
     check_phase_change
@@ -653,7 +668,7 @@ class Game < Base
       @round += 1
     end
 
-    @passes.clear
+    @autopasses.clear
 
     @log << "-- Round: #{@round} Phase: #{@phase} (#{phase_name}) --"
   end

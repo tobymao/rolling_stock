@@ -13,7 +13,7 @@ module Views
         tier: game.ownership_tier,
       }
 
-      unless game.current_bid
+      if !game.current_bid && game.can_act?(current_player)
         company_props[:js_block] = js_block
         company_props[:onclick] = 'CompanyAuction.onClick(this)'
       end
@@ -35,7 +35,6 @@ module Views
     def render_js
       name = game.current_bid.company.name
       script <<~JS
-        GamePage.changed = true;
         $('[data-name="#{name}"]').addClass('selected');
         $('#bid_company').attr('value', '#{name}');
         $('#bid_submit').attr('disabled', false);
@@ -46,6 +45,7 @@ module Views
       <<~JS
         var CompanyAuction = {
           onClick: function(el) {
+            GamePage.changed = true;
             var data = el.dataset;
             $('#bid_price').attr({'min': data.value, 'value': data.value});
             $('#bid_company').attr('value', data.name);

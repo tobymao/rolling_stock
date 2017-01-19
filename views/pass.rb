@@ -21,7 +21,6 @@ module Views
 
     def render_passes
       entities = game.active_entities
-      entities << current_player if game.phase == 3
       entities.select! { |entity| entity.owned_by? current_player }
       entities.uniq!
 
@@ -33,30 +32,28 @@ module Views
 
       solo = entities.size == 1
       can_act = game.can_act? current_player
+      bidding = !!game.current_bid
 
-      pass_text =
-        if can_act
-          if solo
-            game.current_bid ? 'Leave auction' : 'Pass your turn'
-          else
-            'Select entities to pass'
-          end
-        else
-          'Auto Pass (checked entities will pass this phase)'
-        end
+      pass_text = 'Auto Pass (checked entities will pass this phase)'
+
+      if bidding
+        pass_text = can_act ? 'Leave auction' : 'Leave auction early'
+      elsif can_act
+        pass_text = solo ? 'Pass your turn' : 'Select entities to pass'
+      end
 
       div pass_text
 
       game_form do
         entities.each do |entity|
           active = game.can_act? entity
-          autopassed = game.passes.include? entity
+          autopassed = game.autopasses.include? entity
 
           checkbox_props = {
             type: 'checkbox',
-            checked: (active || autopassed),
+            checked: active || autopassed,
             onclick: 'Pass.onClick(this)',
-            disabled: (solo && active),
+            disabled: solo && active,
           }
 
           div do
