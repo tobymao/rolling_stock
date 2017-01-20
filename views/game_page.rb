@@ -48,12 +48,14 @@ module Views
         var GamePage = {
           html: "",
           changed: false,
+          scrolled: false,
 
           update: function() {
             $('#game_container').html(this.html);
             $("[name='_csrf']").attr('value', '#{app.csrf_token}');
             $('#update').hide();
             this.changed = false;
+            this.scrolled = false;
             this.html = "";
             this.watch();
           },
@@ -69,7 +71,7 @@ module Views
 
         connection.handler = function(msg) {
           GamePage.html = msg;
-          GamePage.changed ? $('#update').show() : GamePage.update();
+          GamePage.changed || GamePage.scrolled ? $('#update').show() : GamePage.update();
         };
       JS
     end

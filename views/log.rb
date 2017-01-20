@@ -26,6 +26,14 @@ module Views
 
       script <<~JS
         $('#log').scrollTop($('#log')[0].scrollHeight);
+
+        $("#log").scroll(function() {
+          if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+            GamePage.scrolled = false;
+          } else {
+            GamePage.scrolled = true;
+          }
+        });
       JS
     end
 
