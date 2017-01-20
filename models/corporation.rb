@@ -90,7 +90,9 @@ class Corporation < Purchaser
     raise GameException, 'Cannot sell share' unless can_sell_share? player
     swap_share_price prev_share_price
     player.cash += price
-    @bank_shares << player.shares.delete(player.corporation_shares(self).last)
+    share = player.corporation_shares(self).last
+    share.president = false
+    @bank_shares << player.shares.delete(share)
     @shares_count[player] -= 1
     @log << "#{player.name} sells share of #{name} for $#{price}"
     change_president
