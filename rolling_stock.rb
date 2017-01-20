@@ -189,11 +189,12 @@ class RollingStock < Roda
             )
 
             data = r['data']
+            actions = data['actions']
 
             begin
-              if game.round == data['round'].to_i && game.phase == data['phase'].to_i
-                actions = data['actions']
-                raise GameException, "Can't process empty actions" unless actions
+              if game.round == data['round'].to_i &&
+                  game.phase == data['phase'].to_i &&
+                  actions.present?
                 contains_message = false
 
                 actions.each do |action|
@@ -208,8 +209,6 @@ class RollingStock < Roda
 
                 update_game_state game
                 notify_game game, contains_message
-              else
-                raise GameException, "Round and phase don't match"
               end
             rescue GameException => error
               flash[:error] = error.message
@@ -354,7 +353,7 @@ class RollingStock < Roda
 
         if contains_message
           send_mail game, user, 'Received Message'
-        elsif game.can_act?(game.player_by_user(user)) && !last_notified
+        elsif game.state['acting'].include?(user.id) && !last_notified
           sync { NOTIFIED[key] = Time.now }
           send_mail game, user, 'Your Turn'
         end
