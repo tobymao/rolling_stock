@@ -31,6 +31,8 @@ module Views
         var init = function() {
           GamePage.watch();
 
+          $('#log_chat_input').focus();
+
           // prevents double taps and also submits the value
           $('form :submit').click(function() {
             $(this).prop("disabled", true).closest('form').append($('<input/>', {
