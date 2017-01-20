@@ -30,6 +30,8 @@ module Views
       script <<~JS
         var init = function() {
           GamePage.watch();
+          
+          $('#log_chat_input').focus();
 
           // prevents double taps and also submits the value
           $('form :submit').click(function() {
@@ -59,8 +61,6 @@ module Views
           },
 
           watch: function() {
-            $('#log_chat_input').focus();
-
             $('form').on('input change', function() {
               GamePage.changed = true;
             });
