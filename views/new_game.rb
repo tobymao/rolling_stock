@@ -8,6 +8,14 @@ module Views
         margin: '10px 0 10px 0'
       )
       form style: form_style, action: '/game', method: 'post' do
+
+        label do
+          input type: 'text', name: 'description', style: inline(margin_right: '5px')
+          text 'Game Description'
+        end
+
+        br
+
         rawtext app.csrf_tag
 
         label do

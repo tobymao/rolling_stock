@@ -100,6 +100,8 @@ module Views
           div "Acting: #{names.join(', ')}"
         elsif game.new_game?
           div "Max Players: #{game.max_players}"
+          description = game.settings['description']
+          div "Description: #{description}" if description.present?
         elsif game.finished?
           result = game
             .state['result']
