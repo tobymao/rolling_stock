@@ -52,7 +52,9 @@ class Purchaser
   end
 
   def base_income
-    @companies.map { |c| c.income }.reduce(&:+) || 0
+    total = 0
+    @companies.each { |c| total += c.income }
+    total
   end
 
   def negative_income? tier
@@ -60,7 +62,9 @@ class Purchaser
   end
 
   def cost_of_ownership tier
-    @companies.map { |c| c.cost_of_ownership tier }.reduce(&:+) || 0
+    total = 0
+    @companies.each { |c| total += c.cost_of_ownership tier }
+    total
   end
 
   def finalize_purchases
