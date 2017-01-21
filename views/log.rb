@@ -25,7 +25,9 @@ module Views
       end
 
       script <<~JS
-        $('#log').scrollTop($('#log')[0].scrollHeight);
+        setTimeout(function() {
+          $('#log').scrollTop(function() { return this.scrollHeight; });
+        }, 10);
 
         $("#log").scroll(function() {
           if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
