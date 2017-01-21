@@ -420,7 +420,7 @@ class RollingStock < Roda
   end
 
   def send_mail user, subject, html
-    #return unless PRODUCTION
+    return unless PRODUCTION
 
     uri = URI.parse("https://api.sparkpost.com/api/v1/transmissions")
     req = Net::HTTP::Post.new uri
