@@ -31,6 +31,8 @@ module Views
         else
           a 'Sign up', href: '/signup'
         end
+
+        a 'Forgot Password', href: '/forgot', style: inline(margin_left: '5px')
       end
     end
   end

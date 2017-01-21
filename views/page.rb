@@ -21,6 +21,7 @@ module Views
 
         div style: inline(min_height: '95%') do
           render_nav
+          div(class: 'flash') { text app.flash[:flash] } if app.flash[:flash]
           div(class: 'error') { text app.flash[:error] } if app.flash[:error]
           render_main
         end
@@ -67,6 +68,14 @@ module Views
 
         .error {
           background-color: lightsalmon;
+          text-align: center;
+          font-weight: bold;
+          font-size: 18px;
+          padding: 5px;
+        }
+
+        .flash {
+          background-color: lightgreen;
           text-align: center;
           font-weight: bold;
           font-size: 18px;

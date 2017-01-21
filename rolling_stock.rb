@@ -260,7 +260,7 @@ class RollingStock < Roda
       end
 
       r.post do
-        user = User[Sequel.function(:lower, :email) => r['email'].downcase]
+        user = User.by_email r['email']
 
         if user && user.password == r['password']
           login_user user
@@ -276,6 +276,44 @@ class RollingStock < Roda
       r.redirect '/'
     end
 
+    r.on 'forgot' do
+      r.get do
+        widget Views::Forgot
+      end
+
+      r.post do
+        user = User.by_email r['email']
+        if user
+          flash[:flash] = 'Password reset sent'
+          html = widget Views::ResetMail, user: user, hash: user.reset_hashes.first
+          send_mail user, 'RollingStock.net Password Reset', html
+          r.redirect '/'
+        else
+          flash[:error] = 'Invalid email address'
+          r.redirect '/forgot'
+        end
+      end
+    end
+
+    r.on 'reset' do
+      r.get do
+        widget Views::Reset, user_id: r['id']
+      end
+
+      r.post do
+        user = User[r['id']]
+
+        if user.reset_hashes.include? r['hash']
+          user.update password: r['password']
+          flash[:flash] = 'Password Reset'
+          login_user user
+        else
+          flash[:error] = 'Invalid code'
+          r.redirect '/'
+        end
+      end
+    end
+
     r.on 'user' do
       r.post do
         params = {
@@ -283,6 +321,8 @@ class RollingStock < Roda
           email: r['email'],
           password: r['password'],
         }
+
+        flash[:flash] = "Welcome #{r['name']}"
 
         login_user User.create(params)
       end
@@ -350,12 +390,12 @@ class RollingStock < Roda
       User.where(id: unnotified).all.each do |user|
         key = [game.id, user.id]
         last_notified = sync { NOTIFIED[key] }
-
+        html = widget Views::GameMail, game: game, current_user: user
         if contains_message
-          send_mail game, user, 'Received Message'
+          send_mail user, game_subject(game, 'New Message'), html
         elsif game.state['acting'].include?(user.id) && !last_notified
           sync { NOTIFIED[key] = Time.now }
-          send_mail game, user, 'Your Turn'
+          send_mail user, game_subject(game,'Your Turn'), html
         end
       end
     end
@@ -379,8 +419,8 @@ class RollingStock < Roda
       .all
   end
 
-  def send_mail game, user, msg
-    return unless PRODUCTION
+  def send_mail user, subject, html
+    #return unless PRODUCTION
 
     uri = URI.parse("https://api.sparkpost.com/api/v1/transmissions")
     req = Net::HTTP::Post.new uri
@@ -389,8 +429,8 @@ class RollingStock < Roda
     req.body = JSON.dump(
       'content' => {
         'from' => 'no-reply@rollingstock.net',
-        'subject' => "Rolling Stock Game #{game.id} - Round #{game.round} - Phase #{game.phase} - #{msg}",
-        'html' => widget(Views::GameMail, game: game, current_user: user),
+        'subject' => subject,
+        'html' => html,
       },
       'recipients' => [
         { address: user.email }
@@ -400,6 +440,10 @@ class RollingStock < Roda
     Net::HTTP.start uri.hostname, uri.port, use_ssl: true do |http|
       http.request req
     end
+  end
+
+  def game_subject game, msg
+    "Rolling Stock Game #{game.id} - Round #{game.round} - Phase #{game.phase} - #{msg}"
   end
 
 end
