@@ -94,6 +94,8 @@ module Views
       }
 
       widget SharePrices, share_prices: game.share_prices
+
+      render_email_settings
     end
 
     def render_check_point
@@ -163,6 +165,17 @@ module Views
 
     def render_action klass
       widget klass, game: game, current_player: @current_player
+    end
+
+    def render_email_settings
+      return unless @current_player
+      blocked = game.settings['blocks']&.include? @current_player.id
+      btn_text = String.new 'Turn Email Notifications '
+      btn_text << (blocked ? 'On' : 'Off')
+      form class: 'wrapper', action: app.path(game, 'block'), method: 'post' do
+        rawtext app.csrf_tag
+        input type: 'submit', value: btn_text
+      end
     end
 
     def flash_title

@@ -226,6 +226,19 @@ class RollingStock < Roda
             r.redirect path(game)
           end
 
+          r.is 'block' do
+            blocks = game.settings['blocks'] ||= []
+
+            if blocks.include? current_user.id
+              blocks.delete current_user.id
+            else
+              blocks << current_user.id
+            end
+
+            game.update_settings 'blocks' => blocks
+            r.redirect path(game)
+          end
+
           r.halt 403 unless game.user == current_user
 
           r.is 'start' do
@@ -379,14 +392,18 @@ class RollingStock < Roda
   def notify_game o_game, contains_message = false
     Thread.new o_game do |game|
       games = {}
+      notified = [current_user.id]
       room = sync { ROOMS[game.id].dup }
+
       room.each do |connection, user|
         next if user&.id == current_user.id
+        notified << user&.id
         html = games[user&.id || 0] ||= widget(Views::Game, game: game, current_user: user)
         connection.send html
       end
 
-      unnotified = game.users - room.map { |_, user| user.id }
+      blocks = game.settings['blocks'] || []
+      unnotified = game.users - notified - blocks
 
       User.where(id: unnotified).all.each do |user|
         key = [game.id, user.id]

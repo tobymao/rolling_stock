@@ -59,8 +59,15 @@ class Game < Base
     )
   end
 
+  # if sequel converts the dataset to a result, update doesn't save
+  def update_settings hash
+    update settings: settings.merge(hash)
+    save
+  end
+
   def update_state hash
     update state: state.merge(hash)
+    save
   end
 
   def new_game?
@@ -606,8 +613,9 @@ class Game < Base
 
   def process_autopasses
     entity = active_entities.first
+    return unless entity
     no_pass = entity.pending_closure?(ownership_tier) if @phase == 7
-    if @autopasses.include?(entity) || @skips.include?([entity&.player, @phase]) && !no_pass
+    if @autopasses.include?(entity) || @skips.include?([entity.player, @phase]) && !no_pass
       pass_entity(entity)
       step
     end
