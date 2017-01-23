@@ -26,7 +26,7 @@ module Views
         position: 'relative',
       )
 
-      div style: share_style do
+      div style: share_style, title: "$#{share_price.max_dividend} max dividend" do
         span share_price.price
         if corporation = share_price.corporation
           img style: inline(position: 'absolute', right: '2px'), src: corporation.image_url

@@ -35,4 +35,8 @@ class SharePrice
     !corporation
   end
 
+  def max_dividend
+    @price / 3
+  end
+
 end

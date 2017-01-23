@@ -22,7 +22,7 @@ module Views
         render_header "$#{corporation.book_value}", 'Value', 'Total value of the corporation (company values + cash)'
         title = "$#{corporation.base_income} (Base) + $#{corporation.synergy_income} (Synergies) - $#{corporation.cost_of_ownership tier} (Cost of ownership)"
         render_header "$#{corporation.income tier}", 'Income', title
-        render_header "$#{corporation.share_price.price}", 'Price', 'Current share price of the corporation'
+        render_header "$#{corporation.price}", 'Price', "Current share price of the corporation. $#{corporation.max_dividend} max dividend"
       end
     end
 

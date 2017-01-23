@@ -160,7 +160,7 @@ class Corporation < Purchaser
   end
 
   def max_dividend
-    [price / 3, @cash / shares_issued].min
+    [@share_price.max_dividend, @cash / shares_issued].min
   end
 
   def book_value
