@@ -4,6 +4,10 @@ module Views
   class GamePage < Page
     needs :game
 
+    def page_title
+      "Game #{game.id}"
+    end
+
     def render_main
       render_js unless game.check_point
 
@@ -30,7 +34,7 @@ module Views
       script <<~JS
         var init = function() {
           GamePage.watch();
-          
+
           $('#log_chat_input').focus();
 
           // prevents double taps and also submits the value

@@ -48,6 +48,7 @@ class Game < Base
     :log,
     :name,
     :check_point,
+    :stats,
   )
 
   def self.empty_game user, settings
@@ -108,6 +109,7 @@ class Game < Base
     @name = 'the bank'
     @check_point = [round.to_i, phase.to_i] if round && phase
     @ended = false
+    @stats = []
 
     start_game unless new_game?
   end
@@ -668,6 +670,8 @@ class Game < Base
       @corporations.each { |c| check_bankruptcy c }
       sort_corporations
     end
+
+    @stats << ["#{@round}.#{@phase}"].concat(players.sort_by(&:name).map(&:value))
 
     @phase += 1
 

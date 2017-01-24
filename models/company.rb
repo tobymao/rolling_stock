@@ -114,7 +114,7 @@ class Company
     when :orange
       'orange'
     when :yellow
-      ' #FFFF33'
+      '#FFFF33'
     when :green
       'lightgreen'
     when :blue

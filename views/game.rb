@@ -111,6 +111,8 @@ module Views
         if game.check_point
           check_point_link 'Current Phase', app.path(game)
         end
+
+        check_point_link 'Stats', app.path(game, 'stats')
       end
     end
 

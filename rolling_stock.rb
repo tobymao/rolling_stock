@@ -50,7 +50,9 @@ class RollingStock < Roda
   end
 
   path Game do |game, *paths|
-    "/game/#{game.id}/#{paths.join('/')}"
+    base = String.new "/game/#{game.id}"
+    base << "/#{paths.join('/')}" unless paths.empty?
+    base
   end
 
   MUTEX    = Mutex.new
@@ -162,7 +164,13 @@ class RollingStock < Roda
         game.load r['round'], r['phase']
 
         r.get do
-          widget Views::GamePage, game: game
+          r.is do
+            widget Views::GamePage, game: game
+          end
+
+          r.is 'stats' do
+            widget Views::Stats, game: game
+          end
         end
 
         r.post do
