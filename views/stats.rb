@@ -55,7 +55,12 @@ module Views
             responsive: true,
             elements: { point: { radius: 0 } },
             scales: {
-              type: 'logarithmic',
+              yAxes: [{
+                type: 'logarithmic',
+                ticks: {
+                  callback: function(value, index, values) { return "$" + value; },
+                },
+              }],
               xAxes: [{
                 ticks: {
                   autoSkip: true,
