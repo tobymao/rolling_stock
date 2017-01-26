@@ -107,7 +107,7 @@ module Views
             .state['result']
             .to_a
             .sort_by! { |_, v| -v }
-            .map! { |id, value| "#{game.player_by_id(id).name} ($#{value})"}
+            .map! { |id, value| "#{game.player_by_id(id).name} $#{value}"}
 
           div style: overflow_style do
             text "Result: #{result.join(', ')}"

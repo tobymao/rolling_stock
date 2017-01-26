@@ -71,22 +71,20 @@ class RollingStock < Roda
       games = []
 
       new_query = Sequel.pg_jsonb_op(:state).contains('status' => 'new')
-      active_query = Sequel.pg_jsonb_op(:state).contains('status' => 'active') &
-        (Sequel.pg_array_op(:users).length(1) > 2)
+      real_query = (Sequel.pg_array_op(:users).length(1) > 2)
+      active_query = Sequel.pg_jsonb_op(:state).contains('status' => 'active') & real_query
+      finished_query = Sequel.pg_jsonb_op(:state).contains('status' => 'finished')
 
       if current_user
-        active_query &= Sequel.~(Sequel.pg_array_op(:users).contains([current_user.id]))
-        finished_query = Sequel.pg_array_op(:users).contains([current_user.id]) &
-          Sequel.pg_jsonb_op(:state).contains('status' => 'finished')
-        your_query = Sequel.pg_jsonb_op(:state).contains('status' => 'active') &
-          Sequel.pg_array_op(:users).contains([current_user.id])
-
-        games.concat(query_games 'finished', finished_query)
+        user_query = Sequel.pg_array_op(:users).contains([current_user.id])
+        active_query &= Sequel.~(user_query)
+        your_query = Sequel.pg_jsonb_op(:state).contains('status' => 'active') & user_query
         games.concat(query_games 'yours', your_query)
       end
 
       games.concat(query_games 'new', new_query)
       games.concat(query_games 'active', active_query)
+      games.concat(query_games 'finished', finished_query)
 
       users = User.where(id: games.flat_map(&:users).uniq).all
       games.each { |game| game.players users }
