@@ -103,7 +103,7 @@ module Views
         text ' When the last yellow company is drawn, red companies cost $1. The last green causes '
         text ' reds and oranges to cost $3 to own. Blue - adds yellow at $6. Purple - green at $10.'
         text ' Last turn of the game red, orange, yellow, green will all cost $16. Although you are'
-        text ' Although you are never forced to close a company, they become prohibitevly expensive maintain.'
+        text ' never forced to close a company, they become prohibitevly expensive maintain.'
         text " You can close them in this phase by checking the companies you don't want anymore."
       end
     end
