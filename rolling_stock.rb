@@ -79,7 +79,10 @@ class RollingStock < Roda
         user_query = Sequel.pg_array_op(:users).contains([current_user.id])
         active_query &= Sequel.~(user_query)
         your_query = Sequel.pg_jsonb_op(:state).contains('status' => 'active') & user_query
+        finished_query &= (real_query | user_query)
         games.concat(query_games 'yours', your_query)
+      else
+        finished_query &= real_query
       end
 
       games.concat(query_games 'new', new_query)
