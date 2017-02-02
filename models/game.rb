@@ -211,7 +211,8 @@ class Game < Base
         corp.active? && corp.cash >= (min_price || 99999)
       end
 
-      (@offers.map { |o| o.company.owner } + corps).uniq
+      players = @offers.map { |o| o.company.owner }.reject { |o| o.is_a? ForeignInvestor }
+      (players + corps).uniq
     when 7
       held_companies
         .reject { |c| c.auto_close? ownership_tier }
@@ -487,7 +488,7 @@ class Game < Base
       suitors = @corporations.select do |c|
         c.price > corporation.price &&
           c.owner != corporation.owner &&
-          c.owner.cash >= price
+          c.cash >= price
       end if owner.is_a? ForeignInvestor
 
       if (suitors && suitors.empty?) || corporation.owned_by?(owner)
