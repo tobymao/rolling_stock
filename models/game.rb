@@ -424,12 +424,7 @@ class Game < Base
   # phase 4
   # new player order
   def process_phase_4
-    index = 0
-
-    players.sort_by! do |player|
-      index += 1
-      [-player.cash, index]
-    end
+    players.sort_by! { |player| [-player.cash, player.order] }
 
     players.each_with_index { |p, i| p.order = i + 1 }
     @log << "New player order: #{players.map(&:name).join(', ')}"
