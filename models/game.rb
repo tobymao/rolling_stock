@@ -211,8 +211,15 @@ class Game < Base
         corp.active? && corp.cash >= (min_price || 99999)
       end
 
-      players = @offers.map { |o| o.company.owner }.reject { |o| o.is_a? ForeignInvestor }
-      (players + corps).uniq
+      offers = @offers.flat_map do |offer|
+        owner = offer.company.owner
+        arr = []
+        arr << owner unless owner.is_a? ForeignInvestor
+        arr.concat offer.suitors if offer.suitors
+        arr
+      end
+
+      (offers + corps).uniq
     when 7
       held_companies
         .reject { |c| c.auto_close? ownership_tier }
@@ -253,7 +260,7 @@ class Game < Base
 
   def can_act? entity
     if entity.is_a? Player
-      acting.any? { |e| e.owned_by? entity } || @offers&.find { |o| o.company.owned_by? entity }
+      acting.any? { |e| e.owned_by? entity }
     else
       acting.include? entity
     end
