@@ -348,7 +348,7 @@ class Game < Base
 
   def pass_entity entity
     raise GameException, "Already passed #{entity.name}" if entity.passed?
-    raise GameException, 'Not your turn to pass' unless can_act? entity
+    raise GameException, "Not your turn to pass #{entity.name}" unless can_act? entity
 
     if @phase == 9
       process_phase_9 'corporation' => entity.name, 'amount' => 0
@@ -617,13 +617,19 @@ class Game < Base
   end
 
   def process_autopasses
-    entity = active_entities.first
-    return unless entity
-    no_pass = entity.pending_closure?(ownership_tier) if @phase == 7
-    if @autopasses.include?(entity) || @skips.include?([entity.player, @phase]) && !no_pass
-      pass_entity(entity)
-      step
+    did_pass = false
+    acting.each do |entity|
+      no_pass = entity.pending_closure?(ownership_tier) if @phase == 7
+      if @autopasses.include?(entity) || skipped?(entity) && !no_pass
+        pass_entity(entity)
+        did_pass = true
+      end
     end
+    step if did_pass
+  end
+
+  def skipped? entity
+    @skips.include? [entity.player, @phase]
   end
 
   def check_no_player_purchases
