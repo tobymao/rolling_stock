@@ -464,7 +464,7 @@ class Game < Base
       offer.suitors.delete corporation
 
       if !offer.foreign_purchase? || offer.suitors.empty?
-        @offers.delete offer
+        @offers.reject! { |o| o.company == company }
         corporation.buy_company company, offer.price
       end
     when 'decline'
