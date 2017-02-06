@@ -79,7 +79,14 @@ module Views
       end if game.active? && @current_user
 
       div style: inline(game_style) do
-        join_text = game.active? ? 'Enter Game' : 'Join Game'
+        join_text =
+          if game.active?
+            'Enter Game'
+          elsif game.finished?
+            'Review Game'
+          else
+            'Join Game'
+          end
         a "#{join_text} #{game.id}", href: app.path(game)
         div "Owner: #{game.user.name}"
         div "Created At: #{game.created_at} "

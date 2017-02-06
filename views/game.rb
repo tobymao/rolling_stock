@@ -100,6 +100,10 @@ module Views
 
     def render_check_point
       div class: 'wrapper' do
+        if !(game.round == 1 && game.phase == 3)
+          check_point_link 'Beginning', "#{app.path(game)}?round=1&phase=3"
+        end
+
         if p = game.prev
           check_point_link 'Prev Phase', "#{app.path(game)}?round=#{p[0]}&phase=#{p[1]}"
         end
@@ -109,7 +113,7 @@ module Views
         end
 
         if game.check_point
-          check_point_link 'Current Phase', app.path(game)
+          check_point_link 'Current', app.path(game)
         end
 
         check_point_link 'Stats', app.path(game, 'stats')
