@@ -10,7 +10,7 @@ module Views
 
       corporation = game.acting.first
 
-      widget Corporations, corporations: [corporation], tier: game.ownership_tier
+      widget Corporations, corporations: [corporation]
 
       div do
         game_form do

@@ -1,11 +1,14 @@
 class Purchaser
-  attr_reader :companies
+  attr_reader :companies, :income, :base_income, :cost_of_ownership
   attr_accessor :cash, :pending_cash
 
   def initialize cash
     @cash = cash
     @pending_cash = 0
     @companies = []
+    @income = 0
+    @base_income = 0
+    @cost_of_ownership = 0
   end
 
   def pp_cash
@@ -23,10 +26,13 @@ class Purchaser
     @cash -= price
     owner.pending_cash += price if owner.respond_to? :pending_cash
     owner.companies.delete company
-
     company.recently_sold = true
     company.owner = self
     @companies << company
+
+    owner.set_income unless owner.is_a? Game
+    set_income
+
     @log << "#{name} buys #{company.name} for $#{price} from #{owner&.name}"
   end
 
@@ -41,30 +47,19 @@ class Purchaser
     @log << "#{name} closes #{company.name}"
   end
 
-  def collect_income tier
-    amount = income(tier)
-    @cash += amount
-    @log << "#{name} collects $#{amount} income"
+  def set_income
+    @base_income = @companies.map(&:income).reduce(&:+) || 0
+    @cost_of_ownership = @companies.map { |c| c.cost_of_ownership }.reduce(&:+) || 0
+    @income = @base_income - @cost_of_ownership
   end
 
-  def income tier
-    base_income - cost_of_ownership(tier)
+  def collect_income
+    @cash += income
+    @log << "#{name} collects $#{@amount} income"
   end
 
-  def base_income
-    total = 0
-    @companies.each { |c| total += c.income }
-    total
-  end
-
-  def negative_income? tier
-    (@cash + income(tier)) < 0
-  end
-
-  def cost_of_ownership tier
-    total = 0
-    @companies.each { |c| total += c.cost_of_ownership tier }
-    total
+  def negative_income?
+    (@cash + @income) < 0
   end
 
   def finalize_purchases

@@ -20,7 +20,7 @@ module Views
       div style: inline(headers_style.merge(background_color: 'lightgreen')) do
         render_header 'Foreign Investor', 'Automated Player'
         render_header "$#{investor.cash}", 'Cash'
-        render_header "$#{investor.income tier}", 'Income'
+        render_header "$#{investor.income}", 'Income'
       end
     end
   end

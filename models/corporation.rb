@@ -8,7 +8,7 @@ class Corporation < Purchaser
 
   CORPORATIONS = %w(Android Bear Eagle Horse Jupiter Orion Saturn Ship Star Wheel).freeze
 
-  attr_reader :name, :president, :share_price, :shares, :bank_shares
+  attr_reader :name, :president, :share_price, :shares, :bank_shares, :synergy_income
 
   def self.initial_shares_info company, share_price
     value = company.value
@@ -40,6 +40,7 @@ class Corporation < Purchaser
 
     company.owner.companies.delete company
     company.owner = self
+    @president.set_income
 
     issue_initial_shares
   end
@@ -123,21 +124,11 @@ class Corporation < Purchaser
     @bank_shares << @shares.shift
   end
 
-  def income tier
-    super + synergy_income
-  end
-
-  def synergy_income
-    keys = @companies.map(&:name).sort!
-
-    if @cached_keys != keys
-      @cached_keys = keys
-      @total = 0
-      synergies = @companies.map { |c| [c.name, c] }.to_h
-      @companies.each { |company| @total += company.synergy_income synergies }
-    end
-
-    @total
+  def set_income
+    super
+    synergies = @companies.map { |c| [c.name, c] }.to_h
+    @synergy_income = @companies.map { |company| company.synergy_income synergies }.reduce(&:+)
+    @income += @synergy_income
   end
 
   def pay_dividend amount, players

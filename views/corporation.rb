@@ -4,7 +4,6 @@ require './views/purchaser'
 module Views
   class Corporation < Purchaser
     needs :corporation
-    needs :tier
 
     def content
       div style: inline(container_style) do
@@ -20,8 +19,8 @@ module Views
         render_header corporation.name, 'Corporation', 'The name of the corporation'
         render_header corporation.pp_cash, 'Cash', 'Amount of cash the company has'
         render_header "$#{corporation.book_value}", 'Value', 'Total value of the corporation (company values + cash)'
-        title = "$#{corporation.base_income} (Base) + $#{corporation.synergy_income} (Synergies) - $#{corporation.cost_of_ownership tier} (Cost of ownership)"
-        render_header "$#{corporation.income tier}", 'Income', title
+        title = "$#{corporation.base_income} (Base) + $#{corporation.synergy_income} (Synergies) - $#{corporation.cost_of_ownership} (Cost of ownership)"
+        render_header "$#{corporation.income}", 'Income', title
         render_header "$#{corporation.price}", 'Price', "Current share price of the corporation. $#{corporation.max_dividend} max dividend"
       end
     end

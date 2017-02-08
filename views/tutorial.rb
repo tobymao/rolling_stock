@@ -126,7 +126,7 @@ module Views
         text ' at $11, then you need to pay $3 of your own money to make up for the difference. You receive'
         text ' 1 share of the company. The corporation then sells 1 share to the bank for $11. In total, the'
         text ' corporation receive $11 + $3 = $14 with 2 shares issued.'
-        div { widget Corporation, corporation: corporation, tier: :red }
+        div { widget Corporation, corporation: corporation }
       end
     end
 
