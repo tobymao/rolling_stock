@@ -25,6 +25,11 @@ module Views
 
         select name: data('price') do
           share_prices.each do |share_price|
+            next if ::Corporation.initial_shares_info(
+              company,
+              share_price.price
+            )[:seed] > current_player.cash
+
             option(value: share_price.price) { text "$#{share_price.price}" }
           end
         end
