@@ -9,7 +9,7 @@ module Views
       h3 "Current Bid"
       div "High Bidder - #{bid.player.name}"
       div "Price - #{bid.price}"
-      widget Company, company: bid.company, tier: tier
+      widget Company, company: bid.company
     end
   end
 end

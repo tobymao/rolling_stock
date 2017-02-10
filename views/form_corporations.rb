@@ -8,7 +8,7 @@ module Views
     def render_action
       company = game.acting.first
       widget EntityOrder, game: game, entities: game.player_companies
-      widget Companies, companies: game.acting, tier: game.ownership_tier
+      widget Companies, companies: game.acting
 
       share_prices = game.share_prices.reject do |share_price|
         share_price.corporation || !company.valid_share_price?(share_price)

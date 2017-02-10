@@ -7,7 +7,6 @@ module Views
 
     def content
       current_player = game.player_by_id current_user.id
-      tier = game.ownership_tier
 
       a "Go To Game #{game.id}", href: "#{app.request.base_url}#{app.path(game)}"
 
@@ -21,7 +20,7 @@ module Views
         widget Log, game: game, current_player: current_player, email: true
       end
 
-      widget Players, players: game.players, tier: tier, current_player: current_player
+      widget Players, players: game.players, current_player: current_player
     end
 
   end

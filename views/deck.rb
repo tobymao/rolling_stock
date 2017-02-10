@@ -14,12 +14,12 @@ module Views
     def content
       div(class: 'heading') { text 'Available Companies' }
       div class: 'wrapper' do
-        widget Companies, companies: companies, tier: tier
+        widget Companies, companies: companies
       end
 
       div(class: 'heading') { text 'Pending Companies' }
       div class: 'wrapper' do
-        widget Companies, companies: pending_companies, tier: tier
+        widget Companies, companies: pending_companies
       end
 
       deck_text = String.new 'Deck'
@@ -54,11 +54,7 @@ module Views
     end
 
     def render_open_deck
-      widget Companies, {
-        companies: company_deck,
-        tier: tier,
-        sorted: false,
-      }
+      widget Companies, companies: company_deck, sorted: false
     end
 
   end

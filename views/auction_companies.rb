@@ -8,10 +8,7 @@ module Views
     def render_action
       widget EntityOrder, game: game, entities: game.players.sort_by(&:order)
 
-      company_props = {
-        companies: game.companies,
-        tier: game.ownership_tier,
-      }
+      company_props = { companies: game.companies }
 
       if !game.current_bid && game.can_act?(current_player)
         company_props[:js_block] = js_block

@@ -69,7 +69,7 @@ module Views
       render_segment do
         text 'The game always starts in phase 3. Each player starts with $30 ($25 in a 6 player game)'
         text ' and takes turn auctioning off companies and/or buying and selling shares of public corporations.'
-        widget Company, company: company, tier: :red
+        widget Company, company: company
         br
         text 'A company has a symbol, value, range, and income. You can hover over for more information.'
         text ' The value is the minimum price you must bid for the company in phase 3.'

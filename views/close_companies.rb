@@ -14,6 +14,7 @@ module Views
       div do
         companies = game
           .active_entities
+          .sort_by(&:value)
           .select { |c| c.owned_by? current_player }
 
         return if companies.empty?
@@ -28,7 +29,7 @@ module Views
     def render_check_box company
       div style: inline(margin_right: '5px') do
         input type: 'checkbox', name: data('company'), value: company.name
-        text "#{company.name} (#{company.owner.name})"
+        text "#{company.name} $#{company.income} (#{company.owner.name})"
       end
     end
 
