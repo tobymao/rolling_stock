@@ -31,7 +31,7 @@ class Purchaser
     @companies << company
     set_income old_owner
 
-    @log << "#{name} buys #{company.name} for $#{price} from #{owner&.name}"
+    @log << "#{name} buys #{company.name} for $#{price} from #{old_owner.name}"
   end
 
   def close_company company
