@@ -40,7 +40,7 @@ class Corporation < Purchaser
 
     company.owner.companies.delete company
     company.owner = self
-    @president.set_income
+    set_income
 
     issue_initial_shares
   end
@@ -124,7 +124,7 @@ class Corporation < Purchaser
     @bank_shares << @shares.shift
   end
 
-  def set_income
+  def set_income old_owner = nil
     super
     synergies = @companies.map { |c| [c.name, c] }.to_h
     @synergy_income = @companies.map { |company| company.synergy_income synergies }.reduce(&:+)

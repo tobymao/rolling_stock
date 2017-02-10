@@ -141,12 +141,12 @@ class Company
   end
 
   def synergy_income companies
-    @total = 0
+    total = 0
     @synergies.each do |synergy|
       sc = companies[synergy]
-      @total += synergy_by_tier sc.tier if sc && sc.value < @value
+      total += synergy_by_tier sc.tier if sc && sc.value < @value
     end
-    @total
+    total
   end
 
   def synergy_by_tier other_tier
@@ -178,7 +178,6 @@ class Company
 
   def close
     owner.close_company self
-    owner.set_income
   end
 
   def can_be_sold?

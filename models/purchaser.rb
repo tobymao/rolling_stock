@@ -18,20 +18,18 @@ class Purchaser
   end
 
   def buy_company company, price
-    owner = company.owner
-    raise GameException, "Can't buy own company" if owner == self
+    old_owner = company.owner
+    raise GameException, "Can't buy own company" if old_owner == self
     raise GameException, "You don't have enough money to buy at that price" if @cash < price
     raise GameException, "Company can't be sold. Last company or just sold" unless company.can_be_sold?
 
     @cash -= price
-    owner.pending_cash += price if owner.respond_to? :pending_cash
-    owner.companies.delete company
+    old_owner.pending_cash += price if old_owner.respond_to? :pending_cash
+    old_owner.companies.delete company
     company.recently_sold = true
     company.owner = self
     @companies << company
-
-    owner.set_income unless owner.is_a? Game
-    set_income
+    set_income old_owner
 
     @log << "#{name} buys #{company.name} for $#{price} from #{owner&.name}"
   end
@@ -44,10 +42,13 @@ class Purchaser
     end
 
     @companies.delete company
+    set_income
     @log << "#{name} closes #{company.name}"
   end
 
-  def set_income
+  def set_income old_owner = nil
+    oo = old_owner || owner
+    oo.set_income if oo != self && oo.respond_to?(:set_income)
     @base_income = @companies.map(&:income).reduce(&:+) || 0
     @cost_of_ownership = @companies.map { |c| c.cost_of_ownership }.reduce(&:+) || 0
     @income = @base_income - @cost_of_ownership
@@ -55,7 +56,7 @@ class Purchaser
 
   def collect_income
     @cash += income
-    @log << "#{name} collects $#{@amount} income"
+    @log << "#{name} collects $#{income} income"
   end
 
   def negative_income?

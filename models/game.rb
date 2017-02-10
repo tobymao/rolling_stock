@@ -514,8 +514,6 @@ class Game < Base
   # phase 8
   # collect income
   def process_phase_8
-    @foreign_investor.close_companies
-    player_companies.each { |c| c.close if c.auto_close? }
     (@corporations + players + [@foreign_investor]).each &:collect_income
     change_phase
   end
@@ -539,7 +537,10 @@ class Game < Base
       change_phase
     end
 
-    @end_game_card = :last_turn if (ownership_tier == :penultimate && @companies.empty?)
+    if (ownership_tier == :penultimate && @companies.empty?)
+      @end_game_card = :last_turn
+      set_income
+    end
   end
 
   private
@@ -575,6 +576,13 @@ class Game < Base
     num = players.size - @companies.size - @pending_companies.size
     @pending_companies.concat @company_deck.shift(num)
 
+    if @last_tier != ownership_tier
+      @last_tier = ownership_tier
+      set_income
+    end
+  end
+
+  def set_income
     all_companies
       .each { |c| c.ownership_tier = ownership_tier }
       .map(&:owner)
@@ -687,6 +695,11 @@ class Game < Base
     when 7, 8, 9
       @corporations.each { |c| check_bankruptcy c }
       sort_corporations
+    end
+
+    if @phase == 7
+      @foreign_investor.close_companies
+      player_companies.each { |c| c.close if c.auto_close? }
     end
 
     @stats << ["#{@round}.#{@phase}"].concat(players.sort_by(&:name).map(&:value))
