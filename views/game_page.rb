@@ -72,7 +72,8 @@ module Views
         }
       JS
 
-      return unless game.check_point
+      return if game.check_point
+
       script <<~JS
         var connection = new Connection(BaseSocketURL + '/game/#{game.id}/ws');
 
