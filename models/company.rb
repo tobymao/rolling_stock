@@ -77,7 +77,7 @@ class Company
   }.freeze
 
   attr_reader :name, :full_name, :tier, :value, :income, :synergies
-  attr_accessor :owner, :recently_sold
+  attr_accessor :owner, :recently_sold, :ownership_tier
 
   def self.all
     @@all ||= Company::COMPANIES.map do |sym, params|
@@ -141,17 +141,12 @@ class Company
   end
 
   def synergy_income companies
-    keys = companies.keys.sort!
-
-    if @cached_keys != keys
-      @cached_keys = keys
-      @total = 0
-      @synergies.each do |synergy|
-        sc = companies[synergy]
-        @total += synergy_by_tier sc.tier if sc && sc.value < @value
-      end
+    total = 0
+    @synergies.each do |synergy|
+      sc = companies[synergy]
+      total += synergy_by_tier sc.tier if sc && sc.value < @value
     end
-    @total
+    total
   end
 
   def synergy_by_tier other_tier
@@ -173,12 +168,12 @@ class Company
     end
   end
 
-  def pending_closure? ownership_tier
-    owner.negative_income?(ownership_tier) && owner.companies.size > 1
+  def pending_closure?
+    owner.negative_income? && owner.companies.size > 1
   end
 
-  def auto_close? ownership_tier
-    owner.negative_income?(ownership_tier) && owner.companies.size == 1
+  def auto_close?
+    owner.negative_income? && owner.companies.size == 1
   end
 
   def close
@@ -197,9 +192,9 @@ class Company
     price.between? min_price, max_price
   end
 
-  def cost_of_ownership for_tier
-    if OWNERSHIP_TIERS[for_tier]&.include? @tier
-      OWNERSHIP_COSTS[for_tier]
+  def cost_of_ownership
+    if OWNERSHIP_TIERS[@ownership_tier]&.include? @tier
+      OWNERSHIP_COSTS[@ownership_tier]
     else
       0
     end

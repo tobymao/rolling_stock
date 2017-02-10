@@ -58,8 +58,6 @@ module Views
     def render_game
       flash_title if game.can_act? @current_player
 
-      tier = game.ownership_tier
-
       render_check_point
 
       div class: 'heading' do
@@ -74,23 +72,23 @@ module Views
       div(class: 'heading') { text 'Players' }
 
       div class: 'wrapper' do
-        widget Players, players: game.players, tier: tier, current_player: @current_player
+        widget Players, players: game.players, current_player: @current_player
       end
 
       div(class: 'heading') { text 'Corporations' }
 
       div class: 'wrapper' do
-        widget Corporations, corporations: game.corporations, tier: tier
+        widget Corporations, corporations: game.corporations
       end
 
-      widget ForeignInvestor, investor: game.foreign_investor, tier: tier
+      widget ForeignInvestor, investor: game.foreign_investor
 
       widget Deck, {
         companies: game.companies,
         pending_companies: game.pending_companies,
         company_deck: game.company_deck,
         open_deck: game.settings['open_deck'],
-        tier: tier,
+        tier: game.ownership_tier,
       }
 
       widget SharePrices, share_prices: game.share_prices

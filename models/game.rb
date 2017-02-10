@@ -204,7 +204,7 @@ class Game < Base
         active_players.reject { |p| p.cash < min && !p.can_sell_shares? }
       end
     when 6
-      purchasable = (held_companies + foreign_investor.companies).select &:can_be_sold?
+      purchasable = all_companies.select &:can_be_sold?
 
       corps = @corporations.select do |corp|
         min_price = purchasable.reject { |c| c.owner == corp }.map(&:min_price).min
@@ -222,8 +222,8 @@ class Game < Base
       (offers + corps).uniq
     when 7
       held_companies
-        .reject { |c| c.auto_close? ownership_tier }
-        .select { |c| c.active? || c.pending_closure?(ownership_tier) }
+        .reject { |c| c.auto_close? } #c.owner.companies.size == 1 }
+        .select { |c| c.active? || c.pending_closure? }
     when 9
       active_corporations
     else
@@ -268,6 +268,10 @@ class Game < Base
 
   def held_companies
     @corporations.flat_map(&:companies) + players.flat_map(&:companies)
+  end
+
+  def all_companies
+    held_companies.concat @foreign_investor.companies
   end
 
   def ownership_tier
@@ -451,8 +455,7 @@ class Game < Base
   # corporations buy companies
   def process_phase_6 data
     corporation = @corporations.find { |c| c.name == data['corporation'] }
-    companies = held_companies + @foreign_investor.companies
-    company = companies.find { |c| c.name == data['company'] }
+    company = all_companies.find { |c| c.name == data['company'] }
     owner = company.owner
     offer = @offers.find do |o|
       (o.corporation == corporation && o.company == company) ||
@@ -475,7 +478,7 @@ class Game < Base
 
         if offer.suitors.empty?
           @offers.delete offer
-          offer.corporation.buy_company(company, offer.price)
+          offer.corporation.buy_company company, offer.price
         end
       else
         @log << "#{owner.name} declines to sell #{company.name} to #{corporation.name} for $#{offer.price}"
@@ -511,10 +514,7 @@ class Game < Base
   # phase 8
   # collect income
   def process_phase_8
-    @foreign_investor.close_companies ownership_tier
-    player_companies.each { |c| c.close if c.auto_close?(ownership_tier) }
-    entities = @corporations + players + [@foreign_investor]
-    entities.each { |entity| entity.collect_income ownership_tier }
+    (@corporations + players + [@foreign_investor]).each &:collect_income
     change_phase
   end
 
@@ -537,7 +537,10 @@ class Game < Base
       change_phase
     end
 
-    @end_game_card = :last_turn if (ownership_tier == :penultimate && @companies.empty?)
+    if (ownership_tier == :penultimate && @companies.empty?)
+      @end_game_card = :last_turn
+      set_income
+    end
   end
 
   private
@@ -572,6 +575,20 @@ class Game < Base
   def draw_companies
     num = players.size - @companies.size - @pending_companies.size
     @pending_companies.concat @company_deck.shift(num)
+
+    if @last_tier != ownership_tier
+      @last_tier = ownership_tier
+      set_income
+    end
+  end
+
+  def set_income
+    all_companies
+      .each { |c| c.ownership_tier = ownership_tier }
+      .map(&:owner)
+      .uniq
+      .reject { |owner| owner == self }
+      .each { |owner| owner.set_income }
   end
 
   def untap_pending_companies
@@ -619,7 +636,7 @@ class Game < Base
   def process_autopasses
     did_pass = false
     acting.each do |entity|
-      no_pass = entity.pending_closure?(ownership_tier) if @phase == 7
+      no_pass = entity.pending_closure? if @phase == 7
       if @autopasses.include?(entity) || skipped?(entity) && !no_pass
         pass_entity(entity)
         did_pass = true
@@ -678,6 +695,11 @@ class Game < Base
     when 7, 8, 9
       @corporations.each { |c| check_bankruptcy c }
       sort_corporations
+    end
+
+    if @phase == 7
+      @foreign_investor.close_companies
+      player_companies.each { |c| c.close if c.auto_close? }
     end
 
     @stats << ["#{@round}.#{@phase}"].concat(players.sort_by(&:name).map(&:value))

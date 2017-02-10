@@ -2,8 +2,6 @@ require './views/base'
 
 module Views
   class Purchaser < Base
-    needs :tier
-
     def container_style
       {
         display: 'inline-block',
@@ -49,7 +47,7 @@ module Views
     end
 
     def render_companies entity, show_synergies = false
-      widget Companies, companies: entity.companies, tier: tier, show_synergies: show_synergies
+      widget Companies, companies: entity.companies, show_synergies: show_synergies
     end
 
   end

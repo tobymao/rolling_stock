@@ -5,7 +5,6 @@ require './models/corporation'
 module Views
   class Company < Purchaser
     needs :company
-    needs :tier
     needs show_synergies: false
     needs onclick: false
     needs show_owner: false
@@ -44,7 +43,7 @@ module Views
       header_style = inline(headers_style.merge(background_color: company.color))
 
       income = company.income
-      coo = company.cost_of_ownership tier
+      coo = company.cost_of_ownership
       income_title = "$#{income} (Base) - $#{coo} (Cost of ownership)"
 
       div style: header_style do

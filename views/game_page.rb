@@ -9,7 +9,7 @@ module Views
     end
 
     def render_main
-      render_js unless game.check_point
+      render_js
 
       update_style = inline(
         background_color: 'lightgreen',
@@ -70,7 +70,11 @@ module Views
             });
           },
         }
+      JS
 
+      return if game.check_point
+
+      script <<~JS
         var connection = new Connection(BaseSocketURL + '/game/#{game.id}/ws');
 
         connection.handler = function(msg) {

@@ -17,7 +17,7 @@ module Views
     end
 
     def render_corporations
-      widget Corporations, corporations: @corporations, tier: game.ownership_tier
+      widget Corporations, corporations: @corporations
     end
 
     def render_offers
@@ -61,7 +61,6 @@ module Views
       div id: 'companies' do
         widget Companies, {
           companies: companies,
-          tier: game.ownership_tier,
           onclick: 'BuyCompanies.onClick(this)',
           js_block: js_block,
           show_owner: true,

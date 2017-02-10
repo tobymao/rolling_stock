@@ -25,7 +25,7 @@ module Views
       entities.uniq!
 
       entities.reject! do |entity|
-        entity.respond_to?(:pending_closure?) && entity.pending_closure?(game.ownership_tier)
+        entity.respond_to?(:pending_closure?) && entity.pending_closure?
       end if game.phase == 7
 
       return if entities.empty?
@@ -79,7 +79,7 @@ module Views
       negative_count = game
         .held_companies
         .select { |c| c.player == current_player }
-        .count { |c| c.income - c.cost_of_ownership(game.ownership_tier) < 0 }
+        .count { |c| c.income - c.cost_of_ownership < 0 }
 
       div style: inline(color: 'salmon') do
         text 'WARNING: You have negative income companies and phase 7 skip on.'

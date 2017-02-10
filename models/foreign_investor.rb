@@ -16,13 +16,13 @@ class ForeignInvestor < Purchaser
     'Foreign Investor'
   end
 
-  def close_companies tier
+  def close_companies
     @companies.each do |company|
-      close_company(company) if company.income < company.cost_of_ownership(tier)
+      close_company(company) if company.income < company.cost_of_ownership
     end
   end
 
-  def income tier
+  def income
     super + 5
   end
 
