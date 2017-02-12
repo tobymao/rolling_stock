@@ -17,7 +17,7 @@ module Views
       div style: inline(headers_style.merge(background_color: 'lightblue')) do
         img style: inline(vertical_align: 'top'), src: corporation.image_url
         render_header corporation.name, 'Corporation', 'The name of the corporation'
-        render_header corporation.pp_cash, 'Cash', 'Amount of cash the company has'
+        render_header corporation.pp_cash, 'Cash', 'Amount of cash the corporation has'
         render_header "$#{corporation.book_value}", 'Value', 'Total value of the corporation (company values + cash)'
         title = "$#{corporation.base_income} (Base) + $#{corporation.synergy_income} (Synergies) - $#{corporation.cost_of_ownership} (Cost of ownership)"
         render_header "$#{corporation.income}", 'Income', title

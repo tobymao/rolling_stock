@@ -693,7 +693,7 @@ class Game < Base
     when 3, 5, 6
       finalize_purchases
     when 7, 8, 9
-      @corporations.each { |c| check_bankruptcy c }
+      @corporations.dup.each { |c| check_bankruptcy c }
       sort_corporations
     end
 
