@@ -401,7 +401,7 @@ class Game < Base
 
       if @current_bid
         raise GameException, 'Must bid on same company' if @current_bid.company != company
-        raise GameException, 'Bid must be greater than previous' if price < @current_bid.price
+        raise GameException, 'Bid must be greater than previous' if price <= @current_bid.price
       else
         raise GameException, 'Bid must be face value or higher' if price < company.value
         @auction_starter = player
