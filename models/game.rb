@@ -222,7 +222,7 @@ class Game < Base
       (offers + corps).uniq
     when 7
       held_companies
-        .reject { |c| c.auto_close? } #c.owner.companies.size == 1 }
+        .reject { |c| c.auto_close? || (c.orphan? && c.owner.is_a?(Corporation)) }
         .select { |c| c.active? || c.pending_closure? }
     when 9
       active_corporations

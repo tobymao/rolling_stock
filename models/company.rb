@@ -169,11 +169,15 @@ class Company
   end
 
   def pending_closure?
-    owner.negative_income? && owner.companies.size > 1
+    !orphan? && owner.negative_income?
   end
 
   def auto_close?
-    owner.negative_income? && owner.companies.size == 1
+    orphan? && owner.negative_income?
+  end
+
+  def orphan?
+    owner.companies.size == 1
   end
 
   def close
