@@ -91,6 +91,7 @@ describe Game do
     describe '#process_phase_8' do
       it 'should increase cash for corporations and players' do
         player.companies << company
+        player.set_income
         allow(subject).to receive(:players).and_return([player])
         expect { subject.process_phase_8 }.to change { player.cash }.by 1
       end

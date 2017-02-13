@@ -73,7 +73,7 @@ describe Corporation do
   describe '#collect income' do
     it 'increases cash' do
       expect(subject.companies.size).to eq(1)
-      expect { subject.collect_income :red }.to change { subject.cash }.by(1)
+      expect { subject.collect_income }.to change { subject.cash }.by(1)
     end
   end
 
