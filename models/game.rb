@@ -290,7 +290,7 @@ class Game < Base
       check_phase_change
     when 3
       check_no_player_purchases
-      end_game if @share_prices.last.corporation
+      end_game if @share_prices.last.corporation && !@ended
       process_max_bids
     when 4
       process_phase_4
@@ -679,6 +679,7 @@ class Game < Base
 
   def end_game
     @ended = true
+    @phase = 10
     scores = players.sort_by(&:value).reverse.map { |p| "#{p.name} ($#{p.value})" }
     @log << "Game over. #{scores.join ', '}"
 
