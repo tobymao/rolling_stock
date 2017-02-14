@@ -6,7 +6,7 @@ class Player < Purchaser
   include Ownable
 
   attr_reader :id, :name, :shares
-  attr_accessor :order
+  attr_accessor :order, :log
 
   def initialize id, name, log = nil
     super 30
@@ -33,5 +33,9 @@ class Player < Purchaser
 
   def corporation_shares corporation
     @shares.select { |s| s.corporation == corporation }
+  end
+
+  def type
+    'player'
   end
 end

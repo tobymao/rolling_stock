@@ -91,14 +91,14 @@ module Views
         tier: game.ownership_tier,
       }
 
-      widget SharePrices, share_prices: game.share_prices
+      widget SharePrices, share_prices: game.share_prices, company_class: game.company_class
 
       render_email_settings
     end
 
     def render_check_point
       div class: 'wrapper' do
-        if !(game.round == 1 && game.phase == 3)
+        if !(game.round == 1 && game.phase == :investment)
           check_point_link 'Beginning', "#{app.path(game)}?round=1&phase=3"
         end
 
@@ -151,18 +151,18 @@ module Views
     end
 
     def render_action_widget
-      case game.phase
-      when 1
+      case game.phase_sym
+      when :issue
         render_action IssueShares
-      when 2
+      when :ipo
         render_action FormCorporations
-      when 3
+      when :investment
         render_action AuctionCompanies
-      when 6
+      when :acquisition
         render_action BuyCompanies
-      when 7
+      when :closing
         render_action CloseCompanies
-      when 9
+      when :dividend
         render_action PayDividends
       end
     end

@@ -19,7 +19,7 @@ class SharePrice
   attr_accessor :corporation
 
   def self.initial_market
-    PRICES.map.with_index { |p, i| new p, i }
+    self::PRICES.map.with_index { |p, i| new p, i }
   end
 
   def initialize price, index
@@ -27,8 +27,8 @@ class SharePrice
     @index = index
   end
 
-  def valid_range? company
-    @index.between? *RANGES[company.tier]
+  def valid_range? tier
+    @index.between? *self.class::RANGES[tier]
   end
 
   def unowned?

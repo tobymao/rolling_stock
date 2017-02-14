@@ -80,31 +80,9 @@ class Company
   attr_accessor :owner, :recently_sold, :ownership_tier
 
   def self.all
-    @@all ||= Company::COMPANIES.map do |sym, params|
-      [sym, Company.new(nil, sym, *params).freeze]
+    @@all ||= self::COMPANIES.map do |sym, params|
+      [sym, new(nil, sym, *params).freeze]
     end.to_h.freeze
-  end
-
-  def self.valid_share_price_for_tier? share_price, tier
-    range =
-      case tier
-      when :red
-        [10, 14]
-      when :orange
-        [10, 20]
-      when :yellow
-        [10, 26]
-      when :green
-        [15, 34]
-      when :blue
-        [22, 45]
-      when :purple
-        [28, 45]
-      else
-        raise GameException, "Invalid tier #{tier} - for share price $#{share_price.price}"
-      end
-
-    share_price.price.between? range[0], range[1]
   end
 
   def self.color_for_tier tier
@@ -162,7 +140,7 @@ class Company
     when :green
       4
     when :blue
-      [:green, :yellow].include?(other_tier) ? 4 : 8
+      other_tier == :green || other_tier == :yellow ? 4 : 8
     when :purple
       other_tier == :blue ? 8 : 16
     end
@@ -189,7 +167,7 @@ class Company
   end
 
   def valid_share_price? share_price
-    self.class.valid_share_price_for_tier? share_price, @tier
+    share_price.valid_range? @tier
   end
 
   def valid_price? price
@@ -227,5 +205,9 @@ class Company
 
   def color
     self.class.color_for_tier @tier
+  end
+
+  def type
+    'company'
   end
 end

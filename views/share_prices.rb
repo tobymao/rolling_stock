@@ -3,6 +3,7 @@ require './views/base'
 module Views
   class SharePrices < Base
     needs :share_prices
+    needs :company_class
 
     def content
       div(class: 'heading') { text 'Share Prices' }
@@ -34,10 +35,10 @@ module Views
         end
 
         div style: inline(position: 'absolute', bottom: 0, vertical_align: 'bottom') do
-          ::Company::TIERS.each do |tier|
-            if ::Company.valid_share_price_for_tier? share_price, tier
+          company_class::TIERS.each do |tier|
+            if share_price.valid_range? tier
               range_style = inline(
-                background_color: ::Company::color_for_tier(tier),
+                background_color: company_class::color_for_tier(tier),
                 width: '80px',
                 height: '5px',
                 margin_bottom: '1px',

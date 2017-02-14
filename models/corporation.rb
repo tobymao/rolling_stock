@@ -25,7 +25,7 @@ class Corporation < Purchaser
   def initialize name, company, share_price, share_prices, log = nil
     super 0
     raise GameException, "Share price #{share_price.price} taken by #{share_price.corporation.name}" if share_price.corporation
-    raise GameException, "Share price #{share_price.price} not valid" unless share_price.valid_range? company
+    raise GameException, "Share price #{share_price.price} not valid" unless share_price.valid_range? company.tier
 
     @name = name
     @president = company.owner
@@ -33,7 +33,8 @@ class Corporation < Purchaser
     @share_price = share_price
     @share_price.corporation = self
     @share_prices = share_prices
-    @shares = [Share.president(self)].concat 9.times.map { Share.normal(self) }
+    other_shares = (starting_shares - 1).times.map { Share.normal(self) }
+    @shares = [Share.president(self)].concat other_shares
     @bank_shares = []
     @shares_count = Hash.new { |k, v| k[v] = 0 }
     @log = log || []
@@ -103,9 +104,9 @@ class Corporation < Purchaser
     max = @shares_count.values.max
     holders = @shares_count.select { |_, count| count == max }.keys.sort_by &:order
 
-    unless holders.include? @president
-      @president.corporation_shares(self).each { |s| s.president = false }
-      player = holders.find { |p| @president.order < p.order } || holders.first
+    if !holders.include?(@president)
+      @president.corporation_shares(self).each { |s| s.president = false } if @president
+      player = holders.find { |p| @president && @president.order < p.order } || holders.first
       player.corporation_shares(self).first.president = true
       @president = player
       @log << "#{@president.name} becomes president of #{name}"
@@ -118,10 +119,15 @@ class Corporation < Purchaser
 
   def issue_share
     raise GameException, 'Cannot issue share' unless can_issue_share?
-    @log << "#{name} issues a share and receives $#{prev_share_price.price}"
-    swap_share_price prev_share_price
+    new_share_price = issue_share_price
+    @log << "#{name} issues a share and receives $#{new_share_price.price}"
+    swap_share_price new_share_price if new_share_price != @share_price
     @cash += price
     @bank_shares << @shares.shift
+  end
+
+  def issue_share_price
+    prev_share_price
   end
 
   def set_income old_owner = nil
@@ -163,24 +169,32 @@ class Corporation < Purchaser
   end
 
   def shares_issued
-    10 - @shares.size
+    starting_shares - @shares.size
   end
 
-  def prev_share_price
+  def prev_share_price interval = 1
     return nil if index == 0
-    @share_prices.slice(0..(index - 1)).reverse.find &:unowned?
+    @share_prices.slice(0..(index - interval)).reverse.find &:unowned?
   end
 
-  def next_share_price
+  def next_share_price interval = 1
     return nil if index >= @share_prices.size - 1
-    @share_prices.slice((index + 1)..-1).find &:unowned?
+    @share_prices.slice((index + interval)..-1).find &:unowned?
   end
 
   def image_url
     "/images/#{name.downcase}-20.png"
   end
 
+  def type
+    'corporation'
+  end
+
   private
+  def starting_shares
+    10
+  end
+
   def issue_initial_shares
     company = @companies.first
     info = self.class.initial_shares_info company, price

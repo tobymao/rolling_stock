@@ -16,8 +16,4 @@ module Passer
   def unpass
     @passed = false
   end
-
-  def type
-    self.class.to_s.downcase
-  end
 end

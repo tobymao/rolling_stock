@@ -87,7 +87,7 @@ module Views
           else
             'Join Game'
           end
-        a "#{join_text} #{game.id}", href: app.path(game)
+        a "#{join_text} #{game.id} - V#{game.settings['version']}", href: app.path(game)
         div "Owner: #{game.user.name}"
         div "Created At: #{game.created_at} "
         div "Last Move: #{game.updated_at}"

@@ -50,8 +50,12 @@ class Purchaser
     oo = old_owner || owner
     oo.set_income if oo != self && oo.respond_to?(:set_income)
     @base_income = @companies.map(&:income).reduce(&:+) || 0
-    @cost_of_ownership = @companies.map { |c| c.cost_of_ownership }.reduce(&:+) || 0
+    @cost_of_ownership = calculate_cost_of_ownership
     @income = @base_income - @cost_of_ownership
+  end
+
+  def calculate_cost_of_ownership
+    @companies.map { |c| c.cost_of_ownership }.reduce(&:+) || 0
   end
 
   def collect_income

@@ -1,8 +1,6 @@
 require './spec/spec_helper'
 
 describe SharePrice do
-  let(:player) { Player.new 1, 'Test' }
-  let(:company) { Company.all['BME'].dup }
   subject { SharePrice.initial_market[1] }
 
   it 'should init' do
@@ -18,7 +16,7 @@ describe SharePrice do
 
   describe '#valid_range?' do
     it 'should not be a valid range.' do
-      expect(subject.valid_range? company).to eq(false)
+      expect(subject.valid_range? :red).to eq(false)
     end
   end
 

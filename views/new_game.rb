@@ -41,6 +41,13 @@ module Views
         br
 
         label do
+          input type: 'checkbox', name: 'v2', disabled: true
+          text 'V2'
+        end
+
+        br
+
+        label do
           input type: 'checkbox', name: 'default_close', checked: true
           text 'Default auto skip phase 7 (close companies)'
         end

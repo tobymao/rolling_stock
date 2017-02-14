@@ -10,6 +10,8 @@ module Views
         label(style: inline(margin_right: '5px')) { text 'Buy or Sell Shares:' }
 
         select name: data('corporation') do
+          option ''
+
           game.corporations.each do |corporation|
             next if !corporation.can_buy_share? &&
               current_player.shares.none? { |s| s.corporation == corporation }

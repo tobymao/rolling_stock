@@ -10,7 +10,7 @@ module Views
 
       div do
         render_passes
-      end unless game.phase == 9
+      end unless game.phase == :dividend
 
       div do
         render_skips
@@ -26,7 +26,7 @@ module Views
 
       entities.reject! do |entity|
         entity.respond_to?(:pending_closure?) && entity.pending_closure?
-      end if game.phase == 7
+      end if game.phase == :closing
 
       return if entities.empty?
 
@@ -87,7 +87,7 @@ module Views
       end if game.skips.include?([current_player, 7]) && negative_count > 0
 
       game_form id: 'skip_form', style: inline(display: 'block') do
-        ::Game::PHASE_DESCRIPTION.keys.sort.each do |phase|
+        game.phase_descriptions.keys.sort.each do |phase|
           skipped = game.skips.include? [current_player, phase]
 
           div class: 'skip_row', style: (skipped ? '' : inline(display: 'none')) do
@@ -103,7 +103,7 @@ module Views
             render_input current_player.type, current_player.id, true
 
             label style: inline(margin_left: '5px') do
-              text "Phase #{phase} - #{::Game::PHASE_NAME[phase]}#{skipped ? ' (skipped)' : ''}"
+              text "Phase #{phase} - #{game.phase_names[phase]}#{skipped ? ' (skipped)' : ''}"
             end
           end
         end
