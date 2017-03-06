@@ -196,7 +196,7 @@ class Game < Base
         active_players.reject { |p| p.cash <= @current_bid.price }
       else
         min = [
-          @corporations.select(&:can_buy_share?).map { |c| c.next_share_price.price }.min,
+          @corporations.select(&:can_buy_share?).map { |c| c.next_share_price&.price }.compact.min,
           @companies.map(&:value).min,
           99999,
         ].compact.min
