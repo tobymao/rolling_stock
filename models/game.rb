@@ -478,7 +478,8 @@ class Game < Base
 
         if offer.suitors.empty?
           @offers.delete offer
-          offer.corporation.buy_company company, offer.price
+          offer_corp = offer.corporation
+          offer_corp.buy_company company, offer.price if offer_corp.cash >= offer.price
         end
       else
         @log << "#{owner.name} declines to sell #{company.name} to #{corporation.name} for $#{offer.price}"
