@@ -55,10 +55,11 @@ class RollingStock < Roda
     base
   end
 
-  MUTEX    = Mutex.new
-  ROOMS    = Hash.new { |h, k| h[k] = [] }
-  MESSAGES = []
-  NOTIFIED = {}
+  MUTEX         = Mutex.new
+  ROOMS         = Hash.new { |h, k| h[k] = [] }
+  MESSAGES      = []
+  NOTIFIED      = {}
+  MESSAGE_LIMIT = 100
 
   PAGE_LIMIT = 10
 
@@ -111,7 +112,7 @@ class RollingStock < Roda
             message = data['payload']
             sync do
               MESSAGES << [current_user, message]
-              MESSAGES.shift(MESSAGES.size - 20) if MESSAGES.size > 20
+              MESSAGES.shift(MESSAGES.size - MESSAGE_LIMIT) if MESSAGES.size > MESSAGE_LIMIT
             end
             html = widget Views::ChatLine, user: current_user, message: message
             sync { room.dup }.each { |socket| socket.send html }
