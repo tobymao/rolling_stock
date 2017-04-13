@@ -17,7 +17,7 @@ class ForeignInvestor < Purchaser
   end
 
   def close_companies
-    @companies.each do |company|
+    @companies.dup.each do |company|
       close_company(company) if company.income < company.cost_of_ownership
     end
   end
