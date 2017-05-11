@@ -57,7 +57,7 @@ module Views
     def render_synergies
       groups = company
         .synergies
-        .map { |sym| ::Company.all[sym] }
+        .map { |sym| company.class.all[sym] }
         .group_by { |c| company.synergy_by_tier c.tier }
 
       set = show_synergies ? company.owner.companies.map(&:name) : []

@@ -4,6 +4,7 @@ require './models/company'
 
 module Views
   class Deck < Base
+    needs :company_class
     needs :companies
     needs :pending_companies
     needs :company_deck
@@ -23,10 +24,10 @@ module Views
       end
 
       deck_text = String.new 'Deck'
-      tiers = ::Company::OWNERSHIP_TIERS[tier]
+      tiers = company_class::OWNERSHIP_TIERS[tier]
 
       if tiers
-        deck_text << " (Cost of Ownership for #{tiers.join ', '} $#{::Company::OWNERSHIP_COSTS[tier]})"
+        deck_text << " (Cost of Ownership for #{tiers.join ', '} $#{company_class::OWNERSHIP_COSTS[tier]})"
       else
         deck_text << ' (No Cost Of Ownership)'
       end

@@ -84,6 +84,7 @@ module Views
       widget ForeignInvestor, investor: game.foreign_investor
 
       widget Deck, {
+        company_class: game.company_class,
         companies: game.companies,
         pending_companies: game.pending_companies,
         company_deck: game.company_deck,
