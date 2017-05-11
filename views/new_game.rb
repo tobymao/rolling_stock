@@ -41,8 +41,8 @@ module Views
         br
 
         label do
-          input type: 'checkbox', name: 'v2', disabled: true
-          text 'V2'
+          input type: 'checkbox', name: 'v2'
+          text 'V2 - Experimental - Probably broken - May be deleted as I fix things - Thanks for testing!'
         end
 
         br
