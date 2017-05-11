@@ -27,11 +27,12 @@ module Views
       rounds = []
       players = {}
 
+      company_class = game.company_class
       game.players.sort_by(&:name).each_with_index do |player, index|
         players[index] = {
           label: player.name,
           data: [],
-          borderColor: ::Company.color_for_tier(::Company::TIERS[index]),
+          borderColor: company_class.color_for_tier(company_class::TIERS[index]),
           fill: false,
           lineTension: 0,
         }
