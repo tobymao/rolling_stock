@@ -80,7 +80,7 @@ class Company
   attr_accessor :owner, :recently_sold, :ownership_tier
 
   def self.all
-    @@all ||= self::COMPANIES.map do |sym, params|
+    @all ||= self::COMPANIES.map do |sym, params|
       [sym, new(nil, sym, *params).freeze]
     end.to_h.freeze
   end

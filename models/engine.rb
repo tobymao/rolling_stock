@@ -542,7 +542,6 @@ class Engine
 
   def setup_deck
     unless @game.state['deck']
-      puts "** #{company_class} - #{company_class.all.values.map &:name}"
       groups = company_class.all.values.group_by &:tier
       new_deck = []
 
