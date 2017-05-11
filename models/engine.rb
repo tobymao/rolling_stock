@@ -639,12 +639,34 @@ class Engine
   def process_autopasses
     did_pass = false
     acting.each do |entity|
-      no_pass = entity.pending_closure? if phase_sym == :closing
-      if @autopasses.include?(entity) || skipped?(entity) && !no_pass
-        pass_entity(entity)
-        did_pass = true
-      end
+      next if !@autopasses.include?(entity) && !skipped?(entity)
+
+      no_pass =
+        case phase_sym
+        when :closing
+          entity.pending_closure?
+        when :acquisition
+          # if they are already passed, it means they have an action to respond to
+          # foreign investor purchase or an offer on the table
+          @offers.dup.each do |offer|
+            if entity.passed? && (offer.company.owner == entity || offer.suitor?(entity))
+              process_buy(
+                'corporation' => entity.name,
+                'company' => offer.company.name,
+                'action' => 'decline',
+              )
+            end
+          end
+
+          entity.passed?
+        end
+
+      next if no_pass
+
+      pass_entity(entity)
+      did_pass = true
     end
+
     step if did_pass
   end
 
