@@ -109,6 +109,10 @@ class CompanyV2 < Company
     end
   end
 
+  def can_be_sold?
+    super && !(owner.is_a?(Corporation) && owner.receivership?)
+  end
+
   def min_price
     owner.is_a?(ForeignInvestor) ? max_price : (@value / 2.0).ceil
   end

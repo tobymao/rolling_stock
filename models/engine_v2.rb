@@ -125,26 +125,18 @@ class EngineV2 < Engine
         price = corporation == orion ? company.value : company.max_price
 
         if cash >= price
+          offer = @offers.any? { |o| o.company == company && (corporation.price > o.corporation.price) }
+          #accepttheoffer --if offer
           cash -= price
           try_to_buy corporation, @foreign_investor, company, price
           companies.delete company
         end
       end
     end
+  end
 
-    corporations.each do |corporation|
-      cash = corporation.cash
-
-      companies.dup.each do |company|
-        price = corporation == orion ? company.value : company.max_price
-
-        if cash >= price
-          cash -= price
-          try_to_buy corporation, @foreign_investor, company, price
-          companies.delete company
-        end
-      end
-    end
+  def reject_suitors offer, corporation
+    corporation.name == 'Horse' ? offer.suitors.clear : super
   end
 
   def acting_receivership

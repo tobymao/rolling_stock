@@ -451,7 +451,7 @@ class Engine
 
     case data['action']
     when 'accept'
-      offer.suitors.reject! { |s| corporation.price >= s.price }
+      reject_suitors offer, corporation
 
       if !offer.foreign_purchase? || offer.suitors.empty?
         @offers.reject! { |o| o.company == company }
@@ -481,6 +481,10 @@ class Engine
       raise GameException, 'Cannot buy own company' if corporation == owner
       try_to_buy corporation, owner, company, price
     end
+  end
+
+  def reject_suitors offer, corporation
+    offer.suitors.reject! { |s| corporation.price >= s.price }
   end
 
   def try_to_buy corporation, owner, company, price
