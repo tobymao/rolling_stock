@@ -31,6 +31,12 @@ class Game < Base
     save
   end
 
+
+  def users= new_users
+    @_players = nil
+    super new_users
+  end
+
   def new_game?
     state['status'] == 'new'
   end
@@ -65,7 +71,7 @@ class Game < Base
         user_models = User.where(id: ids) unless user_models
         user_models
           .map { |user| Player.new(user.id, user.name) }
-          .each{ |player| player.order = ids.find_index(player.id) + 1 }
+          .each { |player| player.order = ids.find_index(player.id) + 1 }
           .sort_by(&:order)
       end
   end
