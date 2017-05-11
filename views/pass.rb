@@ -87,7 +87,13 @@ module Views
       end if game.skips.include?([current_player, 7]) && negative_count > 0
 
       game_form id: 'skip_form', style: inline(display: 'block') do
-        game.phase_descriptions.keys.sort.each do |phase|
+        phases = game
+          .phase_descriptions
+          .keys
+          .map { |phase| [phase, game.map_phase(phase)] }
+          .sort_by { |_, phase_id| phase_id }
+
+        phases.each do |phase, phase_id|
           skipped = game.skips.include? [current_player, phase]
 
           div class: 'skip_row', style: (skipped ? '' : inline(display: 'none')) do
@@ -99,11 +105,11 @@ module Views
 
             input checkbox_props
             render_input 'action', 'skip', true
-            render_input 'phase', phase, true
+            render_input 'phase', phase_id, true
             render_input current_player.type, current_player.id, true
 
             label style: inline(margin_left: '5px') do
-              text "Phase #{phase} - #{game.phase_names[phase]}#{skipped ? ' (skipped)' : ''}"
+              text "Phase #{phase_id} - #{game.phase_names[phase]}#{skipped ? ' (skipped)' : ''}"
             end
           end
         end
