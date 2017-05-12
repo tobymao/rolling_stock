@@ -18,7 +18,7 @@ module Views
 
         div style: inline(s) do
           str = String.new entity.name
-          str << " (#{entity.owner.name})" unless entity.is_a? Player
+          str << " (#{entity.owner.name})" if !entity.is_a?(Player) && entity.owner
           text str
         end
       end

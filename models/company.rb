@@ -175,8 +175,8 @@ class Company
   end
 
   def cost_of_ownership
-    if OWNERSHIP_TIERS[@ownership_tier]&.include? @tier
-      OWNERSHIP_COSTS[@ownership_tier]
+    if self.class::OWNERSHIP_TIERS[@ownership_tier]&.include? @tier
+      self.class::OWNERSHIP_COSTS[@ownership_tier]
     else
       0
     end
