@@ -44,7 +44,7 @@ module Views
         div style: inline(display: 'table-row', font_weight: 'bold') do
           render_column 'Dividend'
           render_column 'Cash'
-          render_column 'Value'
+          render_column(game.v2? ? 'Stars' : 'Value')
         end
 
         (0..corporation.max_dividend).each do |dividend|
@@ -52,7 +52,11 @@ module Views
             total = dividend * corporation.shares_issued
             render_column "$#{dividend}"
             render_column "$#{corporation.cash - total}"
-            render_column "$#{corporation.book_value - total}"
+            if game.v2?
+              render_column "#{corporation.stars(total)} ★ "
+            else
+              render_column "$#{corporation.book_value - total}"
+            end
           end
         end
       end

@@ -37,15 +37,11 @@ module Views
         input id: 'form_company', type: 'hidden', name: data('company'), value: company.name
         input id: 'form_submit', type: 'submit', value: 'Form Corporation'
       end if game.can_act? current_player
+
+      render_company_descriptions if game.v2?
     end
 
     def render_info_table company, share_prices
-      table_style = inline(
-        display: 'table',
-        width: '320px',
-        margin: '5px 0 5px',
-      )
-
       div style: table_style do
         div style: inline(display: 'table-row', font_weight: 'bold') do
           render_column 'Price'
@@ -68,6 +64,29 @@ module Views
       end
     end
 
+    def render_company_descriptions
+      div style: table_style do
+        div style: inline(display: 'table-row', font_weight: 'bold') do
+          render_column 'Company'
+          render_column 'Shares'
+          render_column 'Super Power'
+        end
+
+        klass = ::CorporationV2
+        corporations =  klass::CORPORATIONS
+          .map { |name| [name, klass.starting_shares(name), klass.super_power(name)] }
+          .sort_by { |name, shares| [shares, name] }
+
+        corporations.each do |name, shares, super_power|
+          div style: inline(display: 'table-row') do
+            render_column name
+            render_column shares
+            render_column super_power
+          end
+        end
+      end
+    end
+
     def render_column data
       col_style = inline(
         margin: '5px',
@@ -75,6 +94,14 @@ module Views
         text_align: 'right',
       )
       div(style: col_style) { text data }
+    end
+
+    def table_style
+      table_style = inline(
+        display: 'table',
+        width: '320px',
+        margin: '5px 0 5px',
+      )
     end
 
   end

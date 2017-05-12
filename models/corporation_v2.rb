@@ -3,6 +3,40 @@ require './models/corporation'
 class CorporationV2 < Corporation
   CORPORATIONS = %w(Bear Eagle Horse Jupiter Orion Saturn Ship Star).freeze
 
+  def self.starting_shares name
+    case name
+    when 'Jupiter', 'Saturn'
+      4
+    when 'Horse', 'Bear'
+      5
+    when 'Eagle', 'Orion'
+      6
+    when 'Ship', 'Star'
+      7
+    end
+  end
+
+  def self.super_power name
+    case name
+    when 'Jupiter'
+      '+$1 income per company'
+    when 'Saturn'
+      'Double income for best company'
+    when 'Horse'
+      '+$1 income for ever two synergy markers'
+    when 'Bear'
+      'Total cost of ownership reduced by up to $10 (min $0)'
+    when 'Eagle'
+      'Issue share: no price change, get current share price'
+    when 'Orion'
+      'Buys from foreign investor for face value and with 1st priority'
+    when 'Ship'
+      'Close company: receive 2x income for closing company'
+    when 'Star'
+      '★ ★'
+    end
+  end
+
   def initial_share_deck
     [Share.president(self)].concat 9.times.map { Share.normal(self) }
   end
@@ -58,28 +92,21 @@ class CorporationV2 < Corporation
     count / 2
   end
 
-  def stars
-    @companies.map(&:stars).reduce(&:+) + @cash / 10
+  def stars offset = 0
+    total = @companies.map(&:stars).reduce(&:+) + (@cash - offset) / 10
+    total += 2 if @name == 'Star'
+    total
   end
 
   def calculate_cost_of_ownership
     @name == 'Bear' ?  [super - 10, 0].max : super
   end
 
-  private
   def starting_shares
-    case @name
-    when 'Jupiter', 'Saturn'
-      4
-    when 'Horse', 'Bear'
-      5
-    when 'Eagle', 'Orion'
-      6
-    when 'Ship', 'Star'
-      7
-    end
+    self.class.starting_shares @name
   end
 
+  private
   def adjust_share_price
     old_index = index
 
