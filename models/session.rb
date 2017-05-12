@@ -3,7 +3,7 @@ require './models/base'
 class Session < Base
   many_to_one :user
 
-  EXPIRE_TIME = 30.days
+  EXPIRE_TIME = 90.days
 
   def validate
     super
