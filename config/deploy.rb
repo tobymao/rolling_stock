@@ -1,5 +1,5 @@
 set :application, 'rolling_tock'
-set :rvm1_ruby_version, 'ruby-2.3.1'
+set :rvm1_ruby_version, 'ruby-2.4.1'
 set :repo_url, 'git@github.com:tobymao/rolling_stock.git'
 set :deploy_to, '/home/deploy/apps/rolling_stock'
 set :current_dir, "#{fetch(:deploy_to)}/current"
