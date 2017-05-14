@@ -1,5 +1,6 @@
 PRODUCTION = ENV['RACK_ENV'] == 'production'
 
+require 'net/http'
 require 'roda'
 require 'fortitude'
 require './models.rb'
