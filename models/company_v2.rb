@@ -15,7 +15,7 @@ class CompanyV2 < Company
     green: 2,
     blue: 4,
     penultimate: 7,
-    last_turn: 16,
+    last_turn: 10,
   }.freeze
 
   COMPANIES = {
