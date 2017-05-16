@@ -54,11 +54,12 @@ module Views
         end
 
         index = corporation.share_price.index
-        double_drop = SharePrice::PRICES[index - 2] if index > 1
-        single_drop = SharePrice::PRICES[index - 1]
-        current_price = SharePrice::PRICES[index]
-        single_jump = SharePrice::PRICES[index + 1]
-        double_jump = SharePrice::PRICES[index + 2]
+        klass = corporation.share_price.class
+        double_drop = klass::PRICES[index - 2] if index > 1
+        single_drop = klass::PRICES[index - 1]
+        current_price = klass::PRICES[index]
+        single_jump = klass::PRICES[index + 1]
+        double_jump = klass::PRICES[index + 2]
         num = corporation.shares_issued
 
         div style: block_style do
