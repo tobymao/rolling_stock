@@ -8,27 +8,27 @@ module Views
         render_intro
         div(class: 'heading') { text 'How To Play' }
         render_how_to_play
-        div(class: 'heading') { text "Phase 3 (#{::Game::PHASE_NAME[3]})" }
+        div(class: 'heading') { text "Phase 3 (#{::Engine::PHASE_NAME[:investment]})" }
         render_phase_3
-        div(class: 'heading') { text "Phase 4 (#{::Game::PHASE_NAME[4]})" }
+        div(class: 'heading') { text "Phase 4 (#{::Engine::PHASE_NAME[:foreign]})" }
         render_phase_4
-        div(class: 'heading') { text "Phase 5 (#{::Game::PHASE_NAME[5]})" }
+        div(class: 'heading') { text "Phase 5 (#{::Engine::PHASE_NAME[:order]})" }
         render_phase_5
-        div(class: 'heading') { text "Phase 7 (#{::Game::PHASE_NAME[7]})" }
+        div(class: 'heading') { text "Phase 7 (#{::Engine::PHASE_NAME[:closing]})" }
         render_phase_7
-        div(class: 'heading') { text "Phase 8 (#{::Game::PHASE_NAME[8]})" }
+        div(class: 'heading') { text "Phase 8 (#{::Engine::PHASE_NAME[:income]})" }
         render_phase_8
-        div(class: 'heading') { text "Phase 2 (#{::Game::PHASE_NAME[2]})" }
+        div(class: 'heading') { text "Phase 2 (#{::Engine::PHASE_NAME[:ipo]})" }
         render_phase_2
-        div(class: 'heading') { text "Phase 3 (#{::Game::PHASE_NAME[2]}) - continued" }
+        div(class: 'heading') { text "Phase 3 (#{::Engine::PHASE_NAME[:ipo]}) - continued" }
         render_phase_3_2
-        div(class: 'heading') { text "Phase 6 (#{::Game::PHASE_NAME[6]})" }
+        div(class: 'heading') { text "Phase 6 (#{::Engine::PHASE_NAME[:acquisition]})" }
         render_phase_6
-        div(class: 'heading') { text "Phase 8 (#{::Game::PHASE_NAME[8]}) - continued" }
+        div(class: 'heading') { text "Phase 8 (#{::Engine::PHASE_NAME[:income]}) - continued" }
         render_phase_8_2
-        div(class: 'heading') { text "Phase 9 (#{::Game::PHASE_NAME[9]})" }
+        div(class: 'heading') { text "Phase 9 (#{::Engine::PHASE_NAME[:dividend]})" }
         render_phase_9
-        div(class: 'heading') { text "Phase 10 (#{::Game::PHASE_NAME[10]})" }
+        div(class: 'heading') { text "Phase 10 (#{::Engine::PHASE_NAME[:end]})" }
         render_phase_10
       end
     end
