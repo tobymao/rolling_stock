@@ -106,6 +106,14 @@ class CorporationV2 < Corporation
     self.class.starting_shares @name
   end
 
+  def buy_company company, price
+    if @name == 'Orion' && company.owner.is_a?(ForeignInvestor)
+      price = company.value
+    end
+
+    super company, price
+  end
+
   private
   def adjust_share_price
     old_index = index

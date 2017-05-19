@@ -60,7 +60,7 @@ class EngineV2 < Engine
 
   def check_price corporation, company, price
     valid =
-      if corporation.name == 'Orion'
+      if corporation.name == 'Orion' && company.owner.is_a?(ForeignInvestor)
         price == company.value
       else
         company.valid_price? price
