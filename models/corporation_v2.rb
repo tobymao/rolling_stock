@@ -84,7 +84,7 @@ class CorporationV2 < Corporation
     synergies = @companies.map(&:name).to_set
 
     @companies.each do |company|
-      @company.synergies.each do |synergy|
+      company.synergies.each do |synergy|
         count += 1 if synergies.include? synergy
       end
     end
