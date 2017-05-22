@@ -95,7 +95,11 @@ class EngineV2 < Engine
         when :blue
           corporation.companies.dup.each { |c| corporation.close_company(c) if c.tier == :red && c.cost_of_ownership >= 4 }
         when :penultimate, :last_turn
-          corporation.companies.dup.each { |c| corporation.close_company(c) if [:red, :orange].include?(c.tier) && c.cost_of_ownership >= 7 }
+          corporation.companies.dup.each do |c|
+            if [:red, :orange].include?(c.tier) && c.cost_of_ownership >= 7 && corporation.companies.size > 1
+              corporation.close_company(c)
+            end
+          end
         end
 
       end
