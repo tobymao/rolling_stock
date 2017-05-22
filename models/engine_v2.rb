@@ -93,15 +93,10 @@ class EngineV2 < Engine
       active_receivership.each do |corporation|
         case ownership_tier
         when :blue
-          corporation.companies.dup.each { |c| corporation.close_company(c) if c.tier == :red && c.cost_of_ownership >= 4 }
+          receivership_close corporation, [:red], 4
         when :penultimate, :last_turn
-          corporation.companies.dup.each do |c|
-            if [:red, :orange].include?(c.tier) && c.cost_of_ownership >= 7 && corporation.companies.size > 1
-              corporation.close_company(c)
-            end
-          end
+          receivership_close corporation, [:red, :orange], 7
         end
-
       end
     when :dividends
       if entity = acting_receivership
@@ -110,6 +105,14 @@ class EngineV2 < Engine
     end
 
     super
+  end
+
+  def receivership_close corporation, tiers, cost
+    corporation.companies.sort_by(&:value).each do |c|
+      if corporation.companies.size > 1 && c.cost_of_ownership >= cost && tiers.include?(c.tier)
+        corporation.close_company(c)
+      end
+    end
   end
 
   def receivership_buy corporations
