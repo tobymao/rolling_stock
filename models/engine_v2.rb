@@ -70,7 +70,7 @@ class EngineV2 < Engine
   end
 
   def get_suitors corporation, owner, company, price
-    return nil if corporation.name == 'Orion' || !owner.is_a?(ForeignInvestor)
+    return [] if corporation.name == 'Orion' || !owner.is_a?(ForeignInvestor)
 
     @corporations.select do |c|
       (c.name == 'Orion' && c.cash >= company.value) ||

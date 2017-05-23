@@ -121,12 +121,17 @@ module Views
             if (!data) { return; }
 
             this.cash = data['cash'];
+            this.name = data['value'];
 
             var companies = data['companies'];
             $('#companies .company').each(function(index, company) {
               var cData = company.dataset;
+              var minPrice = cData.min;
+              if (#{game.v2?} && BuyCompanies.name == 'Orion' && cData.min == cData.max) {
+                minPrice = cData.value;
+              }
 
-              if (BuyCompanies.cash < cData.min || $.inArray(cData.name, companies) > -1) {
+              if (BuyCompanies.cash < minPrice || $.inArray(cData.name, companies) > -1) {
                 $(company).hide();
               } else {
                 $(company).show();
