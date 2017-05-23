@@ -133,7 +133,6 @@ class EngineV2 < Engine
 
         if cash >= price
           offer = @offers.any? { |o| o.company == company && (corporation.price > o.corporation.price) }
-          #accepttheoffer --if offer
           cash -= price
           try_to_buy corporation, @foreign_investor, company, price
           companies.delete company

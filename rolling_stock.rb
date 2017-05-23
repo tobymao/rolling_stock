@@ -165,6 +165,7 @@ class RollingStock < Roda
         end
 
         game = Game[id]
+        r.halt 404 unless game
         game.load r['round'], r['phase']
 
         r.get do
