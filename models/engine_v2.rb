@@ -54,10 +54,6 @@ class EngineV2 < Engine
   end
 
   private
-  def process_buy data
-    super
-  end
-
   def check_price corporation, company, price
     valid =
       if corporation.name == 'Orion' && company.owner.is_a?(ForeignInvestor)
@@ -70,7 +66,8 @@ class EngineV2 < Engine
   end
 
   def get_suitors corporation, owner, company, price
-    return [] if corporation.name == 'Orion' || !owner.is_a?(ForeignInvestor)
+    return nil if !owner.is_a?(ForeignInvestor)
+    return [] if corporation.name == 'Orion'
 
     @corporations.select do |c|
       (c.name == 'Orion' && c.cash >= company.value) ||
@@ -132,7 +129,7 @@ class EngineV2 < Engine
         price = corporation == orion ? company.value : company.max_price
 
         if cash >= price
-          offer = @offers.any? { |o| o.company == company && (corporation.price > o.corporation.price) }
+          next if @offers.any? { |o| o.company == company && o.corporation == corporation }
           cash -= price
           try_to_buy corporation, @foreign_investor, company, price
           companies.delete company
