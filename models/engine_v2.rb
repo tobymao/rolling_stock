@@ -95,7 +95,7 @@ class EngineV2 < Engine
           receivership_close corporation, [:red, :orange], 7
         end
       end
-    when :dividends
+    when :dividend
       if entity = acting_receivership
         pass_entity entity
       end
