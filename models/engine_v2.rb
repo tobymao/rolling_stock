@@ -41,7 +41,7 @@ class EngineV2 < Engine
   end
 
   def active_entities
-    entites = super
+    entities = super
     entities.reject! { |e| e.player.nil? } unless phase_sym == :dividend
 
     orion = @corporations.find { |c| c.name == 'Orion' } if phase_sym == :acquisition
