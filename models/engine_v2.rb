@@ -85,8 +85,7 @@ class EngineV2 < Engine
         process_issue('corporation' => entity.name) if entity.can_issue_share?
       end
     when :acquisition
-      corporations = active_receivership
-      receivership_buy corporations unless corporations.empty?
+      receivership_buy
     when :closing
       active_receivership.each do |corporation|
         case ownership_tier
@@ -98,6 +97,7 @@ class EngineV2 < Engine
       end
     when :dividend
       while entity = acting_receivership
+        break if entity != active_entities.first
         pass_entity entity
       end
     end
@@ -113,7 +113,9 @@ class EngineV2 < Engine
     end
   end
 
-  def receivership_buy corporations
+  def receivership_buy
+    corporations = active_receivership
+    return if corporations.empty?
     companies = @foreign_investor.companies.sort_by(&:value).reverse
 
     orion = corporations.find { |c| c.name == 'Orion' }
