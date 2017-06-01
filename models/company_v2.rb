@@ -118,6 +118,15 @@ class CompanyV2 < Company
   end
 
   def max_price
-    (@value * 4.0 / 3).floor
+    case @name
+    when 'BME'
+      2
+    when 'BSE'
+      3
+    when 'KME'
+      7
+    else
+      (@value * 4.0 / 3).floor
+    end
   end
 end
