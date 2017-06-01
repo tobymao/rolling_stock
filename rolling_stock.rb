@@ -31,6 +31,7 @@ class RollingStock < Roda
     'X-Frame-Options' => 'sameorigin',
     'X-Content-Type-Options' => 'nosniff',
     'X-XSS-Protection' => '1; mode=block',
+    'Cache-Control' => 'no-store',
   }
 
   plugin :csrf
