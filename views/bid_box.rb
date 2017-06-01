@@ -28,7 +28,7 @@ module Views
         input type: 'hidden', id: 'bid_company', name: data('company')
         input type: 'hidden', name: data('player'), value: current_player.id
         input type: 'hidden', name: data('action'), value: 'bid'
-        label(title: 'Automatically increments bid until max price is reached') { text 'Max Bid' }
+        label(title: 'Automatically increments bid until max price is reached') { text 'Auto increment until max' }
         input type: 'checkbox', name: data('max')
         input id: 'bid_submit', type: 'submit', value: 'Make Bid', disabled: true
       end
