@@ -132,7 +132,7 @@ class EngineV2 < Engine
         price = corporation == orion ? company.value : company.max_price
 
         if cash >= price
-          next if @offers.any? { |o| o.company == company && o.corporation == corporation }
+          next if @offers.any? { |o| o.company == company && o.corporation.receivership? }
           cash -= price
           try_to_buy corporation, @foreign_investor, company, price
           companies.delete company
