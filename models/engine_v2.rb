@@ -132,7 +132,7 @@ class EngineV2 < Engine
         price = corporation == orion ? company.value : company.max_price
 
         if cash >= price
-          next if @offers.any? { |o| o.company == company && o.corporation.receivership? }
+          next if @offers.any? { |o| (o.company == company && o.corporation.receivership?) || o.corporation.price > corporation.price }
           cash -= price
           try_to_buy corporation, @foreign_investor, company, price
           companies.delete company
@@ -142,7 +142,7 @@ class EngineV2 < Engine
   end
 
   def reject_suitors offer, corporation
-    corporation.name == 'Horse' ? offer.suitors.clear : super
+    corporation.name == 'Orion' ? offer.suitors.clear : super
   end
 
   def acting_receivership

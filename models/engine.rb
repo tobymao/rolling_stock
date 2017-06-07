@@ -451,12 +451,14 @@ class Engine
 
     case data['action']
     when 'accept'
+      raise GameException, "#{corporation.name} has a lower share price than #{offer.corporation.name}" if corporation.price < offer.corporation.price
       reject_suitors offer, corporation
 
       if !offer.foreign_purchase? || offer.suitors.empty?
         @offers.reject! { |o| o.company == company }
         corporation.buy_company company, offer.price
       else
+        @log << "#{corporation.name} offers to buy #{company.name} from the Foreign Investor for $#{offer.price}"
         offer.corporation = corporation
       end
     when 'decline'

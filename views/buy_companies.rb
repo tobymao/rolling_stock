@@ -41,7 +41,12 @@ module Views
           div 'Click Accept to make the purchase and Decline to pass on the purchase.'
 
           select name: data('corporation') do
-            @corporations.select { |c| offer.suitor? current_player }.each do |corporation|
+            eligible_corps = @corporations.select do |c|
+              offer.suitor?(current_player) &&
+                (c.price > offer.corporation.price || (game.v2? && c.name == 'Orion'))
+            end
+
+            eligible_corps.each do |corporation|
               option(value: corporation.name) { text corporation.name }
             end
           end
