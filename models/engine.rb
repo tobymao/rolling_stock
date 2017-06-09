@@ -451,7 +451,7 @@ class Engine
 
     case data['action']
     when 'accept'
-      raise GameException, "#{corporation.name} has a lower share price than #{offer.corporation.name}" if corporation.price < offer.corporation.price
+      #raise GameException, "#{corporation.name} has a lower share price than #{offer.corporation.name}" if corporation.price < offer.corporation.price
       reject_suitors offer, corporation
 
       if !offer.foreign_purchase? || offer.suitors.empty?
