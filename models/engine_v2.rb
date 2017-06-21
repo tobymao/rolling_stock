@@ -42,7 +42,8 @@ class EngineV2 < Engine
 
   def active_entities
     entities = super
-    entities.reject! { |e| e.player.nil? } unless phase_sym == :dividend
+
+    entities.reject! { |e| e.player.nil? } if phase_sym != :dividend && phase_sym != :issue
 
     orion = @corporations.find { |c| c.name == 'Orion' } if phase_sym == :acquisition
 
@@ -81,8 +82,8 @@ class EngineV2 < Engine
   def step
     case phase_sym
     when :issue
-      if entity = acting_receivership
-        process_issue('corporation' => entity.name) if entity.can_issue_share?
+      while entity = acting_receivership
+        process_issue('corporation' => entity.name)
       end
     when :acquisition
       receivership_buy
@@ -97,7 +98,6 @@ class EngineV2 < Engine
       end
     when :dividend
       while entity = acting_receivership
-        break if entity != active_entities.first
         pass_entity entity
       end
     end
@@ -147,12 +147,16 @@ class EngineV2 < Engine
 
   def acting_receivership
     entity = active_receivership.first
-    entity if entity.is_a?(Corporation) && entity.receivership?
+    return nil unless entity
+    return nil unless entity == active_entities.first
+    return nil unless entity.is_a? Corporation
+    return nil unless entity.receivership?
+    entity
   end
 
   def active_receivership
     @corporations
-      .select { |c| c.active? && c.is_a?(Corporation) && c.receivership? }
+      .select { |c| c.active? && c.receivership? }
       .sort_by(&:price)
       .reverse
   end
