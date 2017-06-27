@@ -146,12 +146,8 @@ class EngineV2 < Engine
   end
 
   def acting_receivership
-    entity = active_receivership.first
-    return nil unless entity
-    return nil unless entity == active_entities.first
-    return nil unless entity.is_a? Corporation
-    return nil unless entity.receivership?
-    entity
+    entity = active_entities.first
+    (!entity || !active_receivership.include?(entity)) ? nil : entity
   end
 
   def active_receivership
