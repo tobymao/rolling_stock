@@ -74,7 +74,7 @@ module Views
 
         klass = ::CorporationV2
         corporations =  klass::CORPORATIONS
-          .map { |name| [name, klass.starting_shares(name), klass.super_power(name)] }
+          .map { |name| [name, klass.starting_shares(name, game.minor_version), klass.super_power(name)] }
           .sort_by { |name, shares| [shares, name] }
 
         corporations.each do |name, shares, super_power|

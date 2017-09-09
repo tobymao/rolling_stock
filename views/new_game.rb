@@ -42,7 +42,7 @@ module Views
 
         label do
           input type: 'checkbox', name: 'v2'
-          text 'V2 - Experimental - Probably broken - May be deleted as I fix things - Thanks for testing! '
+          text 'V2.1 - Horse and Star rebalanced '
           a 'V2 Rules', href: 'https://github.com/beorn7/rolling_stock/blob/master/rules.pdf', target: '_blank'
         end
 

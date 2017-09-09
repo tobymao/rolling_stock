@@ -53,6 +53,10 @@ class Game < Base
     settings['version'].to_f >= 2.0
   end
 
+  def minor_version
+    settings['version'].split('.').last.to_i
+  end
+
   def max_players
     settings['max_players'] || DEFAULT_MAX_PLAYERS
   end

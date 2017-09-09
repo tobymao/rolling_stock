@@ -8,7 +8,7 @@ class Corporation < Purchaser
 
   CORPORATIONS = %w(Android Bear Eagle Horse Jupiter Orion Saturn Ship Star Wheel).freeze
 
-  attr_reader :name, :president, :share_price, :shares, :bank_shares, :synergy_income
+  attr_reader :name, :president, :share_price, :shares, :bank_shares, :synergy_income, :minor_version
 
   def self.initial_shares_info company, share_price
     value = company.value
@@ -22,11 +22,12 @@ class Corporation < Purchaser
     }
   end
 
-  def initialize name, company, share_price, share_prices, log = nil
+  def initialize name, company, share_price, share_prices, minor_version = nil, log = nil
     super 0
     raise GameException, "Share price #{share_price.price} taken by #{share_price.corporation.name}" if share_price.corporation
     raise GameException, "Share price #{share_price.price} not valid" unless share_price.valid_range? company.tier
 
+    @minor_version = minor_version || 0
     @name = name
     @president = company.owner
     @companies << company

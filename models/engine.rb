@@ -379,7 +379,14 @@ class Engine
     raise GameException, "Corporation #{name} not available" unless @available_corporations.include? name
     company.pass
     @available_corporations.delete name
-    @corporations << corporation_class.new(name, company, share_price, @share_prices, @log)
+    @corporations << corporation_class.new(
+      name,
+      company,
+      share_price,
+      @share_prices,
+      @game.minor_version,
+      @log
+    )
   end
 
   def process_auction data

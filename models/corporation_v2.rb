@@ -3,16 +3,30 @@ require './models/corporation'
 class CorporationV2 < Corporation
   CORPORATIONS = %w(Bear Eagle Horse Jupiter Orion Saturn Ship Star).freeze
 
-  def self.starting_shares name
-    case name
-    when 'Jupiter', 'Saturn'
-      4
-    when 'Horse', 'Bear'
-      5
-    when 'Eagle', 'Orion'
-      6
-    when 'Ship', 'Star'
-      7
+  def self.starting_shares name, minor_version
+    case minor_version
+    when 0
+      case name
+      when 'Jupiter', 'Saturn'
+        4
+      when 'Horse', 'Bear'
+        5
+      when 'Eagle', 'Orion'
+        6
+      when 'Ship', 'Star'
+        7
+      end
+    else
+      case name
+      when 'Jupiter', 'Saturn'
+        4
+      when 'Star', 'Bear'
+        5
+      when 'Eagle', 'Orion'
+        6
+      when 'Ship', 'Horse'
+        7
+      end
     end
   end
 
@@ -103,7 +117,7 @@ class CorporationV2 < Corporation
   end
 
   def starting_shares
-    self.class.starting_shares @name
+    self.class.starting_shares @name, @minor_version
   end
 
   def buy_company company, price
