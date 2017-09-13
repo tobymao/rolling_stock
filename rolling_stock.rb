@@ -79,7 +79,7 @@ class RollingStock < Roda
       finished_query = Sequel.pg_jsonb_op(:state).contains('status' => 'finished')
 
       if current_user
-        user_query = Sequel.pg_array_op(:users).contains([current_user.id])
+        user_query = Sequel.pg_array_op(:users).contains([current_user_id])
         active_query &= Sequel.~(user_query)
         your_query = Sequel.pg_jsonb_op(:state).contains('status' => 'active') & user_query
         finished_query &= (real_query | user_query)
@@ -184,7 +184,7 @@ class RollingStock < Roda
 
           r.is 'join' do
             if game.users.size < game.max_players
-               game.users << current_user.id
+               game.users << current_user_id
                game.save
                notify_game game
              end
@@ -192,10 +192,10 @@ class RollingStock < Roda
             r.redirect path(game)
           end
 
-          r.halt 403 unless game.users.to_a.include? current_user.id
+          r.halt 403 unless game.users.to_a.include? current_user_id
 
           r.is 'action' do
-            sync { NOTIFIED.delete [game.id, current_user.id] }
+            sync { NOTIFIED.delete [game.id, current_user_id] }
 
             action = Action.find_or_create(
               game_id: id,
@@ -234,19 +234,20 @@ class RollingStock < Roda
 
           r.is 'leave' do
             r.halt 403 if !game.new_game? || game.user == current_user
-            game.users.delete current_user.id
+            game.users.delete current_user_id
             game.save
             notify_game game
             r.redirect path(game)
           end
 
           r.is 'block' do
-            blocks = game.settings['blocks'] ||= []
+            blocks = game.blocks
+            messages = r['messages']
 
-            if blocks.include? current_user.id
-              blocks.delete current_user.id
+            if blocks[current_user_id] && !messages
+              blocks.delete current_user_id
             else
-              blocks << current_user.id
+              blocks[current_user_id] = messages ? Game::BLOCK_MESSAGES : Game::BLOCK_ALL
             end
 
             game.update_settings 'blocks' => blocks
@@ -374,6 +375,10 @@ class RollingStock < Roda
     @current_user
   end
 
+  def current_user_id
+    current_user&.id
+  end
+
   def login_user user
     s = Session.create token: SecureRandom.hex, user: user
 
@@ -406,24 +411,25 @@ class RollingStock < Roda
   def notify_game o_game, contains_message = false
     Thread.new o_game do |game|
       games = {}
-      notified = [current_user.id]
+      notified = [current_user_id]
       room = sync { ROOMS[game.id].dup }
 
       room.each do |connection, user|
-        next if user&.id == current_user.id
+        next if user&.id == current_user_id
         notified << user&.id
         html = games[user&.id || 0] ||= widget(Views::Game, game: game, current_user: user)
         connection.send html
       end
 
-      blocks = game.settings['blocks'] || []
-      unnotified = game.users - notified - blocks
+      unnotified = game.users - notified
+      unnotified.reject! { |id| game.blocked_all? id }
 
       User.where(id: unnotified).all.each do |user|
         key = [game.id, user.id]
         last_notified = sync { NOTIFIED[key] }
         html = widget Views::GameMail, game: game, current_user: user
         if contains_message
+          next if game.blocked_messages?(user.id)
           send_mail user, game_subject(game, 'New Message'), html
         elsif game.state['acting'].include?(user.id) && !last_notified
           sync { NOTIFIED[key] = Time.now }

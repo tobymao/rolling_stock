@@ -10,6 +10,8 @@ class Game < Base
   one_to_many :actions
 
   DEFAULT_MAX_PLAYERS = 5.freeze
+  BLOCK_ALL      = 'all'.freeze
+  BLOCK_MESSAGES = 'messages'.freeze
 
   def self.empty_game user, settings
     create(
@@ -59,6 +61,18 @@ class Game < Base
 
   def max_players
     settings['max_players'] || DEFAULT_MAX_PLAYERS
+  end
+
+  def blocks
+    (settings['blocks'] || {}).map { |k, v| [k.to_i, v] }.to_h
+  end
+
+  def blocked_messages? user_id
+    blocks[user_id] == BLOCK_MESSAGES
+  end
+
+  def blocked_all? user_id
+    blocks[user_id] == BLOCK_ALL
   end
 
   def load round = nil, phase = nil

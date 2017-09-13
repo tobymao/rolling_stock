@@ -174,12 +174,22 @@ module Views
 
     def render_email_settings
       return unless @current_player
-      blocked = game.settings['blocks']&.include? @current_player.id
+      id = @current_player.id
       btn_text = String.new 'Turn Email Notifications '
-      btn_text << (blocked ? 'On' : 'Off')
+      blocked_messages = game.blocked_messages? id
+
+      if blocked_messages
+        btn_text = 'Currently blocking only messages'
+      else
+        btn_text << (game.blocks[id] ? 'On' : 'Off')
+      end
+
       form class: 'wrapper', action: app.path(game, 'block'), method: 'post' do
         rawtext app.csrf_tag
         input type: 'submit', value: btn_text
+        br
+        label 'Only block messages'
+        input type: 'checkbox', name: 'messages', checked: blocked_messages
       end
     end
 
