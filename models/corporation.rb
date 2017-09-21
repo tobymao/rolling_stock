@@ -175,6 +175,7 @@ class Corporation < Purchaser
 
   def prev_share_price interval = 1
     return nil if index == 0
+    return @share_prices[0] if index - interval <= 0
     @share_prices.slice(0..(index - interval)).reverse.find &:unowned?
   end
 
