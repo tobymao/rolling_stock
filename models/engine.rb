@@ -659,7 +659,7 @@ class Engine
           @offers.dup.each do |offer|
             if entity.passed? && (offer.company.owner == entity || offer.suitor?(entity))
               process_buy(
-                'corporation' => offer.corporation.name,
+                'corporation' => entity.name,
                 'company' => offer.company.name,
                 'action' => 'decline',
               )
