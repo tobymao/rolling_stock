@@ -181,7 +181,9 @@ class Corporation < Purchaser
 
   def next_share_price interval = 1
     return nil if index >= @share_prices.size - 1
-    @share_prices.slice((index + interval)..-1).find &:unowned?
+    max = index + interval
+    max = @share_prices.size - 1 if max >= @share_prices.size
+    @share_prices.slice(max..-1).find &:unowned?
   end
 
   def image_url
