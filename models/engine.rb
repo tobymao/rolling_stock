@@ -458,7 +458,6 @@ class Engine
 
     case data['action']
     when 'accept'
-      #raise GameException, "#{corporation.name} has a lower share price than #{offer.corporation.name}" if corporation.price < offer.corporation.price
       reject_suitors offer, corporation
 
       if !offer.foreign_purchase? || offer.suitors.empty?
@@ -659,7 +658,7 @@ class Engine
           @offers.dup.each do |offer|
             if entity.passed? && (offer.company.owner == entity || offer.suitor?(entity))
               process_buy(
-                'corporation' => entity.name,
+                'corporation' => offer.corporation.name,
                 'company' => offer.company.name,
                 'action' => 'decline',
               )
