@@ -1,4 +1,5 @@
 require './views/base'
+require './views/action'
 
 module Views
   class IssueShares < Action
