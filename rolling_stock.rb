@@ -275,6 +275,19 @@ class RollingStock < Roda
             game.destroy
             r.redirect '/'
           end
+
+          r.is 'rollback' do
+            action = game.actions.sort_by(&:id).last
+
+            if action.turns.empty?
+              action.destroy
+            else
+              action.turns.pop
+              action.save
+            end
+
+            r.redirect path(game)
+          end
         end
       end
     end

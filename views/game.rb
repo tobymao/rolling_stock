@@ -22,7 +22,7 @@ module Views
           render_join_button
         end
 
-        if game.user == current_user
+        if game_owner?
           render_start_button
           render_delete_button
         elsif game.users.include? current_user&.id
@@ -49,7 +49,7 @@ module Views
               rawtext app.csrf_tag
               input type: 'hidden', name: 'player', value: player.id
               input type: 'submit', value: 'Remove'
-            end if game.user == current_user && player != @current_player
+            end if game_owner? && player != @current_player
           end
         end
       end
@@ -95,6 +95,8 @@ module Views
       widget SharePrices, share_prices: game.share_prices, company_class: game.company_class
 
       render_email_settings
+
+      render_rollback
     end
 
     def render_check_point
@@ -191,6 +193,19 @@ module Views
         label 'Only block messages'
         input type: 'checkbox', name: 'messages', checked: blocked_messages
       end
+    end
+
+    def render_rollback
+      return unless game_owner?
+
+      form class: 'wrapper', action: app.path(game, 'rollback'), method: 'post' do
+        rawtext app.csrf_tag
+        input type: 'submit', value: 'Rollback one action. Please only do this if everybody agrees'
+      end
+    end
+
+    def game_owner?
+      game.user == current_user
     end
 
     def flash_title
