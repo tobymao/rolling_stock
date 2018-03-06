@@ -588,7 +588,7 @@ class Engine
   end
 
   def set_income
-    all_companies
+    (all_companies + @pending_companies + @company_deck + @companies)
       .each { |c| c.ownership_tier = ownership_tier }
       .map(&:owner)
       .uniq
