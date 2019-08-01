@@ -473,20 +473,15 @@ class RollingStock < Roda
   def send_mail user, subject, html
     return unless PRODUCTION
 
-    uri = URI.parse("https://api.sparkpost.com/api/v1/transmissions")
+    uri = URI.parse("https://api.mailgun.net/v3/mg.rollingstock.net/messages")
     req = Net::HTTP::Post.new uri
-    req.content_type = 'application/json'
-    req['Authorization'] = ENV['SPARK_POST_KEY']
-    req.body = JSON.dump(
-      'content' => {
-        'from' => 'no-reply@rollingstock.net',
-        'subject' => subject,
-        'html' => html,
-      },
-      'recipients' => [
-        { address: user.email }
-      ]
-    )
+    req.basic_auth('api', ENV['MAIL_GUN_KEY'])
+    req.body = URI.encode_www_form({
+      'from' => 'no-reply@rollingstock.net',
+      'subject' => subject,
+      'html' => html,
+      'to' => user.email,
+    })
 
     Net::HTTP.start uri.hostname, uri.port, use_ssl: true do |http|
       http.request req
