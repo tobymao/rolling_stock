@@ -41,8 +41,8 @@ module Views
         br
 
         label do
-          input type: 'checkbox', name: 'v2'
-          text 'V2.1 - Horse and Star rebalanced '
+          input type: 'checkbox', name: 'v2', checked: true
+          text 'V2.2 - Star and Bear 4 Shares, Jupiter and Saturn 5 Shares '
           a 'V2 Rules', href: 'https://github.com/beorn7/rolling_stock/blob/master/rules.pdf', target: '_blank'
         end
 

@@ -136,7 +136,7 @@ class RollingStock < Roda
         settings['default_close'] = true if r['default_close']
         settings['open_deck'] = true if r['open_deck']
         settings['description'] = r['description'] if r['description'].present?
-        settings['version'] = r['v2'] ? '2.1' : '1.0'
+        settings['version'] = r['v2'] ? '2.2' : '1.0'
 
         max = r['max_players'].to_i
         settings['max_players'] = max.between?(1, 6) ? max : Game::DEFAULT_MAX_PLAYERS

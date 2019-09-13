@@ -16,11 +16,22 @@ class CorporationV2 < Corporation
       when 'Ship', 'Star'
         7
       end
-    else
+    when 1
       case name
       when 'Jupiter', 'Saturn'
         4
       when 'Star', 'Bear'
+        5
+      when 'Eagle', 'Orion'
+        6
+      when 'Ship', 'Horse'
+        7
+      end
+    else
+      case name
+      when 'Star', 'Bear'
+        4
+      when 'Jupiter', 'Saturn'
         5
       when 'Eagle', 'Orion'
         6
