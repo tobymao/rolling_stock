@@ -76,7 +76,7 @@ module Views
         text ' The range represents the minimum and maximum amount the company can be'
         text ' sold to corporations for.'
         text ' The income is how much money the company collects each round in phase 8.'
-        text ' To start an auction, click on the company you wish to purchase and enter the price you want to bid'
+        text ' To start an auction, click on the company you wish to purchase and enter the price you want to bid.'
         text ' If someone leaves the auction, they cannot come back in.'
         text ' If you do not want to purchase anything, simply press pass.'
         text ' If everyone passes in order or there are no companies available for purchase, the round ends.'
