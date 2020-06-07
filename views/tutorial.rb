@@ -87,7 +87,7 @@ module Views
     def render_phase_4
       render_segment do
         text 'The foreign investor will purchase the cheapest company if available for face value.'
-        text 'This keeps the game moving in case no one buys anything.'
+        text ' This keeps the game moving in case no one buys anything.'
       end
     end
 
