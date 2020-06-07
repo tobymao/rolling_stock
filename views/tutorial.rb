@@ -93,7 +93,7 @@ module Views
 
     def render_phase_5
       render_segment do
-        text 'Turn order is determined now by remaining cash. If tied, relative turn order is maintained'
+        text 'Turn order is determined now by remaining cash. If tied, relative turn order is maintained.'
       end
     end
 
