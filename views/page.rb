@@ -133,7 +133,7 @@ module Views
           this.socket.send(JSON.stringify(obj));
         };
 
-        var BaseSocketURL = "ws://" + window.location.hostname;
+        var BaseSocketURL = "wss://" + window.location.hostname;
 
         if (window.location.port > 0) {
           BaseSocketURL += ":" + window.location.port;
