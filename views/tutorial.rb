@@ -86,14 +86,14 @@ module Views
 
     def render_phase_4
       render_segment do
-        text 'Turn order is determined now by remaining cash. If tied, relative turn order is maintained'
+        text 'The foreign investor will purchase the cheapest company if available for face value.'
+        text ' This keeps the game moving in case no one buys anything.'
       end
     end
 
     def render_phase_5
       render_segment do
-        text 'The foreign investor will purchase the cheapest company if available for face value.'
-        text 'This keeps the game moving in case no one buys anything.'
+        text 'Turn order is determined now by remaining cash. If tied, relative turn order is maintained.'
       end
     end
 
